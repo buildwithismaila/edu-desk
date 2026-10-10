@@ -1,0 +1,17 @@
+{
+  // Type-checks tests and tool configs that Nuxt's generated tsconfigs don't cover
+  // (tests/nuxt is already included in .nuxt/tsconfig.app.json)
+  "extends": "./.nuxt/tsconfig.server.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tests.tsbuildinfo"
+  },
+  "include": [
+    "tests/unit/**/*",
+    "tests/integration/**/*",
+    "tests/e2e/**/*",
+    "tests/factories/**/*",
+    "tests/helpers/**/*",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
+}
