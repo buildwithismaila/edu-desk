@@ -12,6 +12,7 @@
     "tests/factories/**/*",
     "tests/helpers/**/*",
     "vitest.config.ts",
+    "drizzle.config.ts",
     "playwright.config.ts"
   ]
 }
