@@ -109,7 +109,7 @@ No input, so no Zod schema; tenant comes only from `requireTenant(event)`.
 - `app/layouts/default.vue` — dashboard: `UDashboardGroup` + `UDashboardSidebar` (collapsible on desktop, slideover on mobile, `data-testid="sidebar-toggle"`) + `UDashboardPanel`/`UDashboardNavbar`. Sidebar header shows `<SchoolBrand>`. Nav: a single "Dashboard" item (role-based nav is Phase 1).
 - `app/layouts/auth.vue` — centred card for login (used from Phase 1).
 - `app/layouts/print.vue` — plain white, A4 `@page` CSS, hides everything with `.no-print`.
-- `app/components/layout/SchoolBrand.vue` — fetches `/api/school` via `useFetch` (key `school`), shows name (`data-testid="school-name"`).
+- `app/components/layout/SchoolBrand.vue` (`<LayoutSchoolBrand>`) — fetches `/api/school` via `useSchool()` (`app/composables/useSchool.ts`: `useFetch` with key `school`, shared with the index page), shows name (`data-testid="school-name"`, hidden when the sidebar is collapsed).
 - `app/pages/index.vue` — placeholder dashboard home ("Welcome to {school name}").
 - `app/error.vue` — 404 → "School not found" (`data-testid="error-not-found"`), 403 suspended → "School suspended" (`data-testid="error-suspended"`), else a generic error. No school name shown (there is no valid tenant).
 
@@ -139,8 +139,8 @@ No input, so no Zod schema; tenant comes only from `requireTenant(event)`.
 - `playwright.config.ts`:
   - Projects: `desktop` (Desktop Chrome) and `mobile` (Chromium, 375×667, touch).
   - `use.baseURL = http://greenfield.lvh.me:3000`; Chromium launched with `--host-resolver-rules=MAP *.lvh.me 127.0.0.1` so E2E doesn't depend on public DNS for `lvh.me`.
-  - `globalSetup`: run migrations + seed against `DATABASE_URL` (a separate `edudesk_test` database locally).
-  - `webServer`: `pnpm build && node .output/server/index.mjs` on port 3000 (prod build, closer to reality); `reuseExistingServer` locally.
+  - `globalSetup`: create (if missing), migrate + seed the E2E database — `E2E_DATABASE_URL`, else `DATABASE_URL` renamed to `edudesk_test`.
+  - `webServer`: `pnpm build && node .output/server/index.mjs` on port 3100 (prod build, closer to reality), env passed explicitly; readiness waits on the port (a bare-IP URL would 404); `reuseExistingServer` locally.
 - `.github/workflows/ci.yml` — on push + PR:
   - **check** job: Node 24, pnpm (via `pnpm/action-setup`), cached store, `pnpm install --frozen-lockfile`, `pnpm check`.
   - **e2e** job: Postgres 18 service container, migrate + seed, `playwright install --with-deps chromium`, `pnpm test:e2e`, upload HTML report on failure.
@@ -187,7 +187,9 @@ Also a small unit test for `SLUG_PATTERN` / `RESERVED_SLUGS` boundaries (3 and 4
 - `tenant-utils.test.ts`: `requireTenant` returns the context school; throws 404 when context is empty.
 
 ### Nuxt component — `tests/nuxt/`
-- `SchoolBrand.test.ts` (tooling sample): `registerEndpoint('/api/school', …)` → renders the school name in `[data-testid=school-name]`.
+- `SchoolBrand.test.ts` (tooling sample): `registerEndpoint('/api/school', …)` → renders the school name in `[data-testid=school-name]`; hidden when collapsed.
+- `index-page.test.ts`: "Welcome to {school name}".
+- `error-page.test.ts`: 404 → not-found, 403 "School suspended" → suspended, other 403/500 → generic.
 - `layouts.test.ts`: default layout renders sidebar + slot content; print layout renders slot content.
 
 ### E2E (Playwright, desktop + mobile projects) — `tests/e2e/`

@@ -1,7 +1,11 @@
+<script setup lang="ts">
+const { data: school } = await useSchool()
+</script>
+
 <template>
-  <div class="p-6">
+  <div>
     <h1 class="text-2xl font-semibold">
-      Edu Desk
+      Welcome to {{ school?.name }}
     </h1>
   </div>
 </template>
