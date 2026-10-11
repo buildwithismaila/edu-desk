@@ -23,3 +23,13 @@ export function fieldError(field: string, message: string) {
 function validationError(error: z.ZodError) {
   return createError({ statusCode: 400, statusMessage: 'Validation Error', data: { fieldErrors: z.flattenError(error).fieldErrors } })
 }
+
+/** Route params `{ id }` as a uuid. */
+export const idParamsSchema = z.object({ id: z.uuid('Invalid id') })
+
+/** Validates an already-assembled value (e.g. a patch merged with the saved row); 400 if invalid. */
+export function assertValid<T extends z.ZodType>(schema: T, value: unknown): z.output<T> {
+  const result = schema.safeParse(value)
+  if (!result.success) throw validationError(result.error)
+  return result.data
+}

@@ -1,4 +1,5 @@
 import { createApp, createRouter, defineEventHandler, send, setResponseStatus, toWebHandler } from 'h3'
+import currentTermHandler from '~~/server/api/academic/current.get'
 import loginHandler from '~~/server/api/auth/login.post'
 import logoutHandler from '~~/server/api/auth/logout.post'
 import passwordHandler from '~~/server/api/auth/password.post'
@@ -8,6 +9,12 @@ import logoGetHandler from '~~/server/api/school/logo.get'
 import logoPutHandler from '~~/server/api/school/logo.put'
 import profileGetHandler from '~~/server/api/school/profile.get'
 import profilePatchHandler from '~~/server/api/school/profile.patch'
+import sessionDeleteHandler from '~~/server/api/sessions/[id].delete'
+import sessionPatchHandler from '~~/server/api/sessions/[id].patch'
+import sessionsGetHandler from '~~/server/api/sessions/index.get'
+import sessionsPostHandler from '~~/server/api/sessions/index.post'
+import termPatchHandler from '~~/server/api/terms/[id].patch'
+import termSetCurrentHandler from '~~/server/api/terms/[id]/set-current.post'
 import resetPasswordHandler from '~~/server/api/users/[id]/reset-password.post'
 import usersHandler from '~~/server/api/users/index.get'
 import tenantMiddleware from '~~/server/middleware/00.tenant'
@@ -59,6 +66,13 @@ export function createTestApp(db: Db) {
     .delete('/api/school/logo', logoDeleteHandler)
     .get('/api/school/profile', profileGetHandler)
     .patch('/api/school/profile', profilePatchHandler)
+    .get('/api/academic/current', currentTermHandler)
+    .get('/api/sessions', sessionsGetHandler)
+    .post('/api/sessions', sessionsPostHandler)
+    .patch('/api/sessions/:id', sessionPatchHandler)
+    .delete('/api/sessions/:id', sessionDeleteHandler)
+    .patch('/api/terms/:id', termPatchHandler)
+    .post('/api/terms/:id/set-current', termSetCurrentHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)
