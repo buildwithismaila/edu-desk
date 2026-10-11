@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 1 — Authentication & roles — all sub-steps done; awaiting push + CI and your manual check
+- **Current phase:** none — Phase 1 done (CI green 2026-10-11); Phase 2 not started (spec first)
 - **Last updated:** 2026-10-11
 
 ## Completed phases
@@ -26,7 +26,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Push Phase 1 and confirm CI; then Phase 2 — School setup (spec first)
+- Phase 2 — School setup (write `docs/features/02-school-setup.md` and wait for approval)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

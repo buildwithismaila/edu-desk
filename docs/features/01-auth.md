@@ -191,7 +191,7 @@ Each ends with `pnpm check` green, a summary, browser checks and a commit messag
 - [x] Seed has a user per role (+ inactive, + Sunrise admin) and stays re-runnable
 - [x] Works at 375px (login, user menu, Users table)
 - [x] `pnpm check` and `pnpm test:e2e` green
-- [ ] CI green (after push)
+- [x] CI green
 
 ## Open questions
 1. **Login identifier.** Email only for now (as the roadmap's `unique(schoolId, email)` implies)? Many Nigerian parents use phone numbers more than email. I recommend email-only in Phase 1 and deciding "email **or** phone" login in Phase 4, when guardians are created. Making `email` nullable then is an easy migration. OK?
