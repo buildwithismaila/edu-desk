@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 0 — Project setup (in progress: sub-steps 1–5 done — scaffold, test tooling, database, tenant resolution, layouts & error page)
+- **Current phase:** Phase 0 — Project setup (in progress: sub-steps 1–6 done — scaffold, test tooling, database, tenant resolution, layouts & error page, CI)
 - **Last updated:** 2026-10-11
 
 ## Completed phases

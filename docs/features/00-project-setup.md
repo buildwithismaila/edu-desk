@@ -143,7 +143,7 @@ No input, so no Zod schema; tenant comes only from `requireTenant(event)`.
   - `webServer`: `pnpm build && node .output/server/index.mjs` on port 3100 (prod build, closer to reality), env passed explicitly; readiness waits on the port (a bare-IP URL would 404); `reuseExistingServer` locally.
 - `.github/workflows/ci.yml` — on push + PR:
   - **check** job: Node 24, pnpm (via `pnpm/action-setup`), cached store, `pnpm install --frozen-lockfile`, `pnpm check`.
-  - **e2e** job: Postgres 18 service container, migrate + seed, `playwright install --with-deps chromium`, `pnpm test:e2e`, upload HTML report on failure.
+  - **e2e** job: Postgres 18 service container, `playwright install --with-deps chromium`, `pnpm test:e2e` (globalSetup creates, migrates and seeds `edudesk_test`), upload HTML report on failure.
 
 ## Test plan
 All tests live in the folders from `docs/testing.md`. Helpers:
