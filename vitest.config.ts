@@ -8,12 +8,18 @@ export default defineConfig({
       {
         // Same root alias Nuxt uses, so tests can import server/ and shared/ code
         resolve: {
-          alias: { '~~': fileURLToPath(new URL('.', import.meta.url)) },
+          alias: {
+            '~~': fileURLToPath(new URL('.', import.meta.url)),
+            // Server code imports useRuntimeConfig from Nitro's virtual module
+            '#imports': fileURLToPath(new URL('tests/helpers/nitro-imports.ts', import.meta.url)),
+          },
         },
         test: {
           name: 'unit',
           include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts'],
           environment: 'node',
+          // Booting PGlite + migrations in beforeAll takes >10s when several files start in parallel
+          hookTimeout: 60_000,
         },
       },
       await defineVitestProject({

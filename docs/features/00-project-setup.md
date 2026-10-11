@@ -81,11 +81,12 @@ export const schools = pgTable('schools', {
 `admin.<APP_DOMAIN>` resolves to `none` (404) until Phase 11.
 
 ### Middleware — `server/middleware/00.tenant.ts`
-- Skips framework/asset paths (`/_nuxt/`, `/__nuxt`, `/_ipx/`, `/favicon.ico`) — exact list verified against Nitro during implementation.
+- Skips framework/asset paths: `/_nuxt/`, `/__nuxt` (incl. `/__nuxt_error`, which Nuxt fetches internally to render `error.vue`), `/_ipx/`, `/_fonts/`, `/api/_nuxt_icon/`, `/favicon.ico`.
 - `none` or unknown slug → `createError({ statusCode: 404, statusMessage: 'School not found' })`.
 - `suspended` → `createError({ statusCode: 403, statusMessage: 'School suspended' })`.
 - `active` → `event.context.school = { id, slug, name, status }` (typed via `H3EventContext` augmentation in `server/types/`).
-- Lookup cached in a module-level `Map` with a 30s TTL; `clearTenantCache()` exported for tests.
+- Lookup via `findTenantSchool(slug)` in `server/utils/tenant.ts`, cached in a module-level `Map` with a 30s TTL (existing schools only, so random subdomains can't grow it); `clearTenantCache()` exported for tests.
+- Reads `runtimeConfig` via `import { useRuntimeConfig } from '#imports'`; Vitest aliases `#imports` to `tests/helpers/nitro-imports.ts`.
 
 ### Helpers — `server/utils/tenant.ts`
 - `requireTenant(event): TenantSchool` — returns `event.context.school` or throws 404. The only sanctioned way to get `schoolId`.
