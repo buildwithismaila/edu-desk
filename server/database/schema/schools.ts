@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const schoolStatus = pgEnum('school_status', ['active', 'suspended'])
 
@@ -8,6 +8,18 @@ export const schools = pgTable('schools', {
   slug: text().notNull().unique(),
   name: text().notNull(),
   status: schoolStatus().notNull().default('active'),
+  // Profile (Phase 2)
+  address: text(),
+  motto: text(),
+  /** Normalised `+234…` (shared/utils/phone.ts). */
+  phone: text(),
+  email: text(),
+  /** Storage key in the `uploads` mount, e.g. `schools/<id>/logo.png`; null = no logo. */
+  logoKey: text(),
+  /** Cache-busting version for the logo URL. */
+  logoUpdatedAt: timestamp({ withTimezone: true }),
+  /** Show "position in class" on report cards (docs/domain.md). */
+  showPositions: boolean().notNull().default(true),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 })
