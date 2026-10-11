@@ -1,7 +1,10 @@
 import { createApp, createRouter, defineEventHandler, send, setResponseStatus, toWebHandler } from 'h3'
 import loginHandler from '~~/server/api/auth/login.post'
 import logoutHandler from '~~/server/api/auth/logout.post'
+import passwordHandler from '~~/server/api/auth/password.post'
 import schoolHandler from '~~/server/api/school.get'
+import resetPasswordHandler from '~~/server/api/users/[id]/reset-password.post'
+import usersHandler from '~~/server/api/users/index.get'
 import tenantMiddleware from '~~/server/middleware/00.tenant'
 import { rejectForeignSession, requireRole, requireUser } from '~~/server/utils/auth'
 import { resetLoginThrottle } from '~~/server/utils/login-throttle'
@@ -48,6 +51,9 @@ export function createTestApp(db: Db) {
     .get('/api/school', schoolHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
+    .post('/api/auth/password', passwordHandler)
+    .get('/api/users', usersHandler)
+    .post('/api/users/:id/reset-password', resetPasswordHandler)
     .get('/api/_auth/session', builtinSessionHandler)
     // Test-only probes for the auth utils; real routes are tested in their own files
     .get('/__test/require-user', defineEventHandler(async event => ({ id: (await requireUser(event)).id })))

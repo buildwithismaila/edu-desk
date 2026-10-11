@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 1 — Authentication & roles (spec approved 2026-10-11; sub-steps 1–3 done — nuxt-auth-utils in the test harness; users table, whereSchool, seeded users; login/logout, session tenant binding, requireUser/requireRole, login throttle)
+- **Current phase:** Phase 1 — Authentication & roles (spec approved 2026-10-11; sub-steps 1–4 done — nuxt-auth-utils in the test harness; users table, whereSchool, seeded users; login/logout, session tenant binding, requireUser/requireRole, login throttle; change password, users list, admin reset)
 - **Last updated:** 2026-10-11
 
 ## Completed phases

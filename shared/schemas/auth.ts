@@ -13,3 +13,17 @@ export const loginSchema = z.object({
 })
 
 export type LoginInput = z.input<typeof loginSchema>
+
+export const newPasswordSchema = z.string()
+  .min(PASSWORD_MIN_LENGTH, `Use at least ${PASSWORD_MIN_LENGTH} characters`)
+  .max(PASSWORD_MAX_LENGTH, `Use at most ${PASSWORD_MAX_LENGTH} characters`)
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Enter your current password').max(PASSWORD_MAX_LENGTH),
+  newPassword: newPasswordSchema,
+  confirmPassword: z.string(),
+})
+  .refine(d => d.confirmPassword === d.newPassword, { path: ['confirmPassword'], message: 'Passwords don\'t match' })
+  .refine(d => d.newPassword !== d.currentPassword, { path: ['newPassword'], message: 'Choose a password different from the current one' })
+
+export type ChangePasswordInput = z.input<typeof changePasswordSchema>
