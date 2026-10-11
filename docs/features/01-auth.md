@@ -50,10 +50,10 @@ export const users = pgTable('users', {
 - `NUXT_SESSION_PASSWORD` (≥ 32 chars): added to `.env.example`. In dev the module writes one to `.env` if missing; Playwright and CI pass a fixed test value.
 
 ### Tenant binding
-- **`server/middleware/01.session.ts`** runs after `00.tenant.ts`. If a session exists and `secure.schoolId !== event.context.school.id`, it clears the session, so the request is unauthenticated from then on. This covers API routes, SSR and the built-in `/api/_auth/session`. (Browsers won't send a host-only cookie to another subdomain anyway; this handles copied or replayed cookies.)
+- **`server/plugins/session-tenant.ts`** registers `rejectForeignSession` on nuxt-auth-utils' `fetch` hook. When `/api/_auth/session` (also used by SSR) sees a session whose `secure.schoolId` isn't the host's school, it clears the session and returns 401. (Browsers won't send a host-only cookie to another subdomain anyway; this handles copied or replayed cookies.) *Changed during implementation:* the spec had a `01.session.ts` middleware, but h3 re-reads the request cookie after `clearSession()`, so middleware can't hide the session from later handlers in the same request.
 - **`requireUser(event)`** (`server/utils/auth.ts`):
   1. Calls `requireTenant`.
-  2. Reads the session; 401 if there's none or the school doesn't match.
+  2. Reads the session; 401 if there's none; 401 + clear the session if the school doesn't match.
   3. Loads the user **from the DB, scoped to the school**; 401 + clear the session if the user is missing or inactive.
   4. Returns the fresh user, so role and active-status changes take effect immediately (one indexed query per request).
 - **`requireRole(event, roles)`**: `requireUser`, then 403 if the role isn't allowed.

@@ -7,6 +7,7 @@ export {
   getUserSession,
   replaceUserSession,
   requireUserSession,
+  sessionHooks,
   setUserSession,
 } from '../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/session.js'
 export { hashPassword, verifyPassword } from '../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/password.js'

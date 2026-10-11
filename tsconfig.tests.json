@@ -11,6 +11,7 @@
     "tests/e2e/**/*",
     "tests/factories/**/*",
     "tests/helpers/**/*",
+    "shared/**/*.d.ts",
     "vitest.config.ts",
     "drizzle.config.ts",
     "playwright.config.ts"

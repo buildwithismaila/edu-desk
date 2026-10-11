@@ -17,6 +17,8 @@ export default defineConfig({
         test: {
           name: 'unit',
           include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts'],
+          // nuxt-auth-utils server utils are Nitro auto-imports (globals) in server code
+          setupFiles: ['tests/helpers/nitro-globals.ts'],
           environment: 'node',
           // Booting PGlite + migrations in beforeAll takes >10s when several files start in parallel
           hookTimeout: 60_000,
