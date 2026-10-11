@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** none — Phase 1 done (CI green 2026-10-11); Phase 2 not started (spec first)
+- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; starting sub-step 1 — validators)
 - **Last updated:** 2026-10-11
 
 ## Completed phases
@@ -26,7 +26,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 2 — School setup (write `docs/features/02-school-setup.md` and wait for approval)
+- Phase 2 sub-step 1 — validators (test-first)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
