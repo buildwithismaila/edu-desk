@@ -2,14 +2,3 @@ allowBuilds:
   esbuild: true
   unrs-resolver: false
   vue-demi: false
-
-# TEMPORARY (added 2026-10-10): nuxt 4.6.1 is < 1 day old but fixes a Windows dev-server
-# 500 ("Either manifest or precomputed data must be provided") present in 4.6.0.
-# Remove this block once 4.6.1 is older than minimumReleaseAge.
-minimumReleaseAgeExclude:
-  - nuxt@4.6.1
-  - '@nuxt/kit@4.6.1'
-  - '@nuxt/nitro-server@4.6.1'
-  - '@nuxt/schema@4.6.1'
-  - '@nuxt/vite-builder@4.6.1'
-  - '@nuxt/vite-server@4.6.1'
