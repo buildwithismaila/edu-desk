@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { createError, type H3Event } from 'h3'
+import { TENANT_ERRORS } from '../../shared/constants/tenant'
 import { type School, schools } from '../database/schema'
 import { useDb } from './db'
 
@@ -34,6 +35,6 @@ export function clearTenantCache() {
 /** The only sanctioned way to get the current school (and its id) in a route. */
 export function requireTenant(event: H3Event): TenantSchool {
   const school = event.context.school
-  if (!school) throw createError({ statusCode: 404, statusMessage: 'School not found' })
+  if (!school) throw createError(TENANT_ERRORS.notFound)
   return school
 }

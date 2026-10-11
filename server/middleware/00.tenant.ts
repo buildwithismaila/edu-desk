@@ -1,5 +1,6 @@
 import { createError, defineEventHandler, getRequestHost } from 'h3'
 import { useRuntimeConfig } from '#imports'
+import { TENANT_ERRORS } from '../../shared/constants/tenant'
 import { findTenantSchool } from '../utils/tenant'
 import { resolveTenantSlug } from '../utils/tenant-host'
 
@@ -15,8 +16,8 @@ export default defineEventHandler(async (event) => {
   const result = resolveTenantSlug(getRequestHost(event), { appDomain, defaultSlug: defaultSchoolSlug })
   const school = result.kind === 'school' ? await findTenantSchool(result.slug) : undefined
 
-  if (!school) throw createError({ statusCode: 404, statusMessage: 'School not found' })
-  if (school.status === 'suspended') throw createError({ statusCode: 403, statusMessage: 'School suspended' })
+  if (!school) throw createError(TENANT_ERRORS.notFound)
+  if (school.status === 'suspended') throw createError(TENANT_ERRORS.suspended)
 
   event.context.school = school
 })

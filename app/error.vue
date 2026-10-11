@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NuxtError } from '#app'
+import { TENANT_ERRORS } from '#shared/constants/tenant'
 
 const props = defineProps<{ error: NuxtError }>()
 
@@ -7,8 +8,9 @@ const props = defineProps<{ error: NuxtError }>()
 const status = computed(() => props.error.status ?? props.error.statusCode)
 const message = computed(() => props.error.statusText ?? props.error.statusMessage)
 const kind = computed(() => {
-  if (status.value === 404) return 'not-found'
-  if (status.value === 403 && message.value === 'School suspended') return 'suspended'
+  if (status.value === TENANT_ERRORS.notFound.statusCode) return 'not-found'
+  const { statusCode, statusMessage } = TENANT_ERRORS.suspended
+  if (status.value === statusCode && message.value === statusMessage) return 'suspended'
   return 'generic'
 })
 
