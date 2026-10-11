@@ -3,6 +3,11 @@ import loginHandler from '~~/server/api/auth/login.post'
 import logoutHandler from '~~/server/api/auth/logout.post'
 import passwordHandler from '~~/server/api/auth/password.post'
 import schoolHandler from '~~/server/api/school.get'
+import logoDeleteHandler from '~~/server/api/school/logo.delete'
+import logoGetHandler from '~~/server/api/school/logo.get'
+import logoPutHandler from '~~/server/api/school/logo.put'
+import profileGetHandler from '~~/server/api/school/profile.get'
+import profilePatchHandler from '~~/server/api/school/profile.patch'
 import resetPasswordHandler from '~~/server/api/users/[id]/reset-password.post'
 import usersHandler from '~~/server/api/users/index.get'
 import tenantMiddleware from '~~/server/middleware/00.tenant'
@@ -49,6 +54,11 @@ export function createTestApp(db: Db) {
   app.use(tenantMiddleware)
   app.use(createRouter()
     .get('/api/school', schoolHandler)
+    .get('/api/school/logo', logoGetHandler)
+    .put('/api/school/logo', logoPutHandler)
+    .delete('/api/school/logo', logoDeleteHandler)
+    .get('/api/school/profile', profileGetHandler)
+    .patch('/api/school/profile', profilePatchHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)

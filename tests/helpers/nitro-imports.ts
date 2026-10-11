@@ -37,3 +37,31 @@ export function resetTestRuntimeConfig() {
 export function useRuntimeConfig() {
   return testRuntimeConfig
 }
+
+// In-memory stand-in for Nitro's useStorage(): only the raw-item calls server code uses.
+// Keys are normalised like unstorage (`/` → `:`) so tests can assert on them.
+const storageItems = new Map<string, unknown>()
+const normaliseKey = (key: string) => key.replace(/[/\\]/g, ':')
+
+export function useStorage(base = '') {
+  const full = (key: string) => normaliseKey(base ? `${base}:${key}` : key)
+  return {
+    getItemRaw: async (key: string) => storageItems.get(full(key)) ?? null,
+    setItemRaw: async (key: string, value: unknown) => {
+      storageItems.set(full(key), value)
+    },
+    hasItem: async (key: string) => storageItems.has(full(key)),
+    removeItem: async (key: string) => {
+      storageItems.delete(full(key))
+    },
+  }
+}
+
+/** Keys currently stored (tests only). */
+export function testStorageKeys() {
+  return [...storageItems.keys()]
+}
+
+export function resetTestStorage() {
+  storageItems.clear()
+}

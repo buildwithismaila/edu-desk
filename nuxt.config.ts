@@ -27,6 +27,13 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2026-10-01',
 
+  nitro: {
+    // School uploads (logos for now), keyed schools/<schoolId>/…; production needs .data on a persistent volume
+    storage: {
+      uploads: { driver: 'fs', base: './.data/uploads' },
+    },
+  },
+
   vite: {
     server: {
       allowedHosts: ['.lvh.me'],

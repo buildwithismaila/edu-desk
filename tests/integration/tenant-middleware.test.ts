@@ -29,19 +29,19 @@ afterEach(() => {
 })
 
 describe('GET /api/school', () => {
-  it('returns the slug and name of the school on the host, and nothing else', async () => {
+  it('returns the slug, name and logo URL of the school on the host, and nothing else', async () => {
     const res = await app.request('/api/school', { host: hostOf(schoolA.slug) })
 
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ slug: schoolA.slug, name: schoolA.name })
+    expect(await res.json()).toEqual({ slug: schoolA.slug, name: schoolA.name, logoUrl: null })
   })
 
   it('serves each school only its own identity', async () => {
     const resA = await app.request('/api/school', { host: hostOf(schoolA.slug) })
     const resB = await app.request('/api/school', { host: hostOf(schoolB.slug) })
 
-    expect(await resA.json()).toEqual({ slug: schoolA.slug, name: schoolA.name })
-    expect(await resB.json()).toEqual({ slug: schoolB.slug, name: schoolB.name })
+    expect(await resA.json()).toEqual({ slug: schoolA.slug, name: schoolA.name, logoUrl: null })
+    expect(await resB.json()).toEqual({ slug: schoolB.slug, name: schoolB.name, logoUrl: null })
   })
 
   it('ignores attempts to pick another school via query, headers or forwarded host', async () => {
@@ -50,7 +50,7 @@ describe('GET /api/school', () => {
       headers: { 'x-school': schoolB.slug, 'x-school-id': schoolB.id, 'x-forwarded-host': hostOf(schoolB.slug) },
     })
 
-    expect(await res.json()).toEqual({ slug: schoolA.slug, name: schoolA.name })
+    expect(await res.json()).toEqual({ slug: schoolA.slug, name: schoolA.name, logoUrl: null })
   })
 })
 
@@ -92,7 +92,7 @@ describe('tenant middleware', () => {
     const res = await app.request('/api/school', { host: 'lvh.me:3000' })
 
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ slug: schoolA.slug, name: schoolA.name })
+    expect(await res.json()).toEqual({ slug: schoolA.slug, name: schoolA.name, logoUrl: null })
   })
 
   it('returns 404 on the bare domain without a default school', async () => {

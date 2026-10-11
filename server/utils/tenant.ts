@@ -28,6 +28,11 @@ export async function findTenantSchool(slug: string): Promise<TenantSchool | und
   return school
 }
 
+/** Drops one school from the cache, e.g. after its name changes. */
+export function forgetTenantSchool(slug: string) {
+  cache.delete(slug)
+}
+
 /** Tests only: forget cached schools so status changes apply immediately. */
 export function clearTenantCache() {
   cache.clear()
