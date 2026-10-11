@@ -17,7 +17,7 @@ The app is built **tenant-ready from Phase 0**: one codebase and one database se
 
 ## Isolation rules (non-negotiable)
 1. `schoolId` is **never** read from request bodies, query strings or route params. It comes only from `event.context.school`.
-2. A user's session stores their `schoolId`. If it doesn't match `event.context.school.id`, treat the request as unauthenticated (401) and clear the session.
+2. A user's session stores their `schoolId` (server-only `secure.schoolId`). If it doesn't match `event.context.school.id`, treat the request as unauthenticated (401) and clear the session — done by `requireUser` and, for `/api/_auth/session` and SSR, by the nuxt-auth-utils `fetch` hook (decision 011). The session cookie is host-only, so browsers never send it to another subdomain.
 3. All tenant data access goes through `server/utils/tenant.ts` helpers (e.g. `requireTenant(event)` and scoped query functions that always add `where schoolId = …`). Raw unscoped queries on tenant tables are only allowed in platform code and seeds.
 4. Looking up a record by id from another school returns **404** (not 403), so record existence isn't leaked.
 5. Uploaded files are stored under `schools/<schoolId>/…` and served only after a tenant check.

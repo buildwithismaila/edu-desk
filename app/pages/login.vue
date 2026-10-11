@@ -12,6 +12,8 @@ const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
 
 const state = reactive<LoginInput>({ email: '', password: '' })
+// Submitting before hydration would be a native form submit; keep the button off until the app runs
+const hydrated = useMounted()
 const error = ref<string>()
 const loading = ref(false)
 
@@ -59,7 +61,9 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
       :title="error"
     />
 
+    <!-- method="post": an early native submit must never put the password in the URL -->
     <UForm
+      method="post"
       :schema="loginSchema"
       :state="state"
       class="space-y-4"
@@ -97,6 +101,7 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
         label="Log in"
         block
         :loading="loading"
+        :disabled="!hydrated"
       />
     </UForm>
 

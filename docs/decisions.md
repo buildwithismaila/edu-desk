@@ -59,3 +59,30 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** E2E must not touch dev data and should be close to production.
 - **Decision:** Playwright `globalSetup` creates (if missing), migrates and seeds `edudesk_test` (`E2E_DATABASE_URL`, else `DATABASE_URL` renamed). The web server is `pnpm build && node .output/server/index.mjs` on port 3100 with env passed explicitly; readiness waits on the port because a bare-IP request has no school (404). Chromium maps `*.lvh.me` to 127.0.0.1, so no public DNS is needed. CI (GitHub Actions) runs `pnpm check` and E2E against a Postgres 18 service.
 - **Consequences:** First local E2E run includes a full build (~1–2 min).
+
+### 010 — No Postgres row-level security in the MVP (2026-10-11)
+- **Context:** The roadmap asked to decide on RLS as a safety net for tenant isolation in Phase 1.
+- **Decision:** Don't enable RLS now. Isolation is enforced by `requireTenant` + `whereSchool()` on every tenant query + mandatory cross-tenant integration tests on every route.
+- **Alternatives considered:** RLS keyed on `SET LOCAL app.school_id` — needs a transaction per request around every query, which fights postgres.js pooling and every `useDb()` call; little benefit while all code is tenant-scoped.
+- **Consequences:** Revisit before Phase 11, when platform (cross-tenant) code first exists.
+
+### 011 — Sessions: sealed host-only cookie, bound to the school, user re-loaded per request (2026-10-11)
+- **Context:** Users log in per school subdomain; a session must never work on another school's host.
+- **Decision:** nuxt-auth-utils sealed cookie, host-only (no `Domain`), `SameSite=Lax`, 7 days, `Secure` except under `nuxt dev` / the http E2E server. Session holds `user {id, name, role, mustChangePassword}` and server-only `secure.schoolId`. `requireUser` rejects (401 + clear) a school mismatch and re-loads the user from the DB (scoped), so deactivation and role changes apply immediately. The built-in `/api/_auth/session` (also used by SSR) rejects foreign sessions via the `fetch` hook (`server/plugins/session-tenant.ts`) — not middleware, because h3 re-reads the request cookie after `clearSession()`.
+- **Alternatives considered:** DB-stored sessions — revocable on logout, but another table and a lookup per request; not needed for the MVP.
+- **Consequences:** Logout can't revoke a copied cookie until it expires (PROGRESS known issue; add a `sessionVersion` column if needed). One indexed user query per authenticated request.
+
+### 012 — In-memory login throttling (2026-10-11)
+- **Context:** Login must resist password guessing without new infrastructure.
+- **Decision:** `server/utils/login-throttle.ts`: 5 failures per (school, email) and 50 per IP in a 15-minute window → 429 with `Retry-After`; success clears the account counter. Unknown emails still run a scrypt verify so timing doesn't reveal accounts. Wrong password and unknown email give the same 401; "account disabled" (403) only after a correct password.
+- **Consequences:** Single-instance memory; uses the socket IP. Revisit both when choosing hosting (proxy / multiple instances).
+
+### 013 — Seed uses a precomputed demo password hash (2026-10-11)
+- **Context:** The seed runs with `tsx` outside Nitro, where nuxt-auth-utils' `hashPassword()` (`#imports`) isn't available.
+- **Decision:** `server/database/seed/demo-password.ts` holds a scrypt hash of `password123` made with the same settings; a test verifies it. The seed refuses to run when `NODE_ENV=production`.
+- **Consequences:** Regenerate the hash if the scrypt settings change (the test will fail).
+
+### 014 — nuxt-auth-utils server utils as Nitro auto-imports (amends 006) (2026-10-11)
+- **Context:** Nuxt type-checks API handlers in the app context too (typed `$fetch` route types), where `#imports` is the app's and lacks server-only utils.
+- **Decision:** Server code calls `getUserSession`, `clearUserSession`, `replaceUserSession`, `hashPassword`, `verifyPassword` as auto-imported globals (declared in both contexts). The Vitest unit project registers the real implementations as globals (`tests/helpers/nitro-globals.ts`); everything else stays explicitly imported per 006. The harness also mirrors Nitro's JSON error body (`message` included).
+- **Consequences:** New auto-imported server utils used in routes must be added to `nitro-globals.ts`.

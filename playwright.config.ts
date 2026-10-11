@@ -11,6 +11,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+  // Logins run scrypt on purpose (CPU-heavy); with parallel browsers on a 4-core machine they take seconds
+  expect: { timeout: 10_000 },
   use: {
     baseURL: `http://greenfield.lvh.me:${PORT}`,
     trace: 'retain-on-failure',
@@ -48,6 +50,7 @@ export default defineConfig({
       NUXT_SESSION_COOKIE_SECURE: 'false',
     },
     reuseExistingServer: !process.env.CI,
-    timeout: 300_000,
+    // Includes the production build (1–3+ min on the dev machine)
+    timeout: 600_000,
   },
 })

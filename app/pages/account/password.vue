@@ -10,6 +10,7 @@ const toast = useToast()
 const form = useTemplateRef('form')
 
 const state = reactive<ChangePasswordInput>({ currentPassword: '', newPassword: '', confirmPassword: '' })
+const hydrated = useMounted()
 const error = ref<string>()
 const loading = ref(false)
 
@@ -59,6 +60,7 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof changePasswordSch
 
     <UForm
       ref="form"
+      method="post"
       :schema="changePasswordSchema"
       :state="state"
       class="space-y-4"
@@ -109,6 +111,7 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof changePasswordSch
         type="submit"
         label="Change password"
         :loading="loading"
+        :disabled="!hydrated"
       />
     </UForm>
   </div>

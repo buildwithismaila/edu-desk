@@ -1,6 +1,6 @@
 # Phase 1 — Authentication & roles
 
-**Status:** Approved 2026-10-11 (all open-question recommendations accepted)
+**Status:** Done 2026-10-11 · Approved 2026-10-11 (all open-question recommendations accepted)
 **Roadmap ref:** `docs/roadmap.md` → Phase 1
 
 ## Goal
@@ -93,7 +93,7 @@ The client reads the session through nuxt-auth-utils' built-in `GET /api/_auth/s
   - `user.mustChangePassword` → `/account/password` (until changed).
   - `to.meta.roles` set and the user's role not in it → `/` + toast "You don't have access to that page".
   - `PageMeta` augmented with `roles?: Role[]` and `public?: boolean`.
-- **`app/pages/login.vue`**: `layout: 'auth'`, `public: true`. School name (via `useSchool()`) above a `UForm` (`loginSchema`) with email + password and a submit button with loading state. Shows API errors (401/403/429) in a `UAlert`. `data-testid`s: `login-email`, `login-password`, `login-submit`, `login-error`.
+- **`app/pages/login.vue`**: `layout: 'auth'`, `public: true`. Form uses `method="post"` and the submit stays disabled until hydrated, so an early native submit can't put the password in the URL. School name (via `useSchool()`) above a `UForm` (`loginSchema`) with email + password and a submit button with loading state. Shows API errors (401/403/429) in a `UAlert`. `data-testid`s: `login-email`, `login-password`, `login-submit`, `login-error`.
 - **`app/pages/account/password.vue`**: change-password form (current, new, confirm). Shows a notice when `mustChangePassword`. Success toast, then to `/`.
 - **`app/pages/users/index.vue`**: `roles: ['admin']`. `UTable` (name, email, role badge, status, last login). Row action "Reset password" → confirm `UModal` → modal showing the temporary password with a copy button (`data-testid="temp-password"`). Hidden for the admin's own row.
 - **`app/pages/index.vue`**: "Welcome to {school}", plus the user's name and role.
@@ -181,16 +181,17 @@ Each ends with `pnpm check` green, a summary, browser checks and a commit messag
 6. **E2E + docs:** auth/forbidden/tenant specs, update existing specs; `PROGRESS.md`, decisions (RLS, session design, throttle, seed hash), `architecture.md`, manual checklist.
 
 ## Acceptance checklist
-- [ ] Each seeded role logs in on greenfield and sees only its nav; logout works
-- [ ] Protected pages redirect other roles; protected APIs return 401 / 403
-- [ ] School A session/credentials rejected on School B's host
-- [ ] Deactivated users can't log in or keep using a session
-- [ ] Admin resets a password; the user is forced to change it at next login
-- [ ] Users can change their own password
-- [ ] RLS decision logged in `docs/decisions.md`
-- [ ] Seed has a user per role (+ inactive, + Sunrise admin) and stays re-runnable
-- [ ] Works at 375px (login, user menu, Users table)
-- [ ] `pnpm check` and `pnpm test:e2e` green; CI green
+- [x] Each seeded role logs in on greenfield and sees only its nav; logout works
+- [x] Protected pages redirect other roles; protected APIs return 401 / 403
+- [x] School A session/credentials rejected on School B's host
+- [x] Deactivated users can't log in or keep using a session
+- [x] Admin resets a password; the user is forced to change it at next login
+- [x] Users can change their own password
+- [x] RLS decision logged in `docs/decisions.md`
+- [x] Seed has a user per role (+ inactive, + Sunrise admin) and stays re-runnable
+- [x] Works at 375px (login, user menu, Users table)
+- [x] `pnpm check` and `pnpm test:e2e` green
+- [ ] CI green (after push)
 
 ## Open questions
 1. **Login identifier.** Email only for now (as the roadmap's `unique(schoolId, email)` implies)? Many Nigerian parents use phone numbers more than email. I recommend email-only in Phase 1 and deciding "email **or** phone" login in Phase 4, when guardians are created. Making `email` nullable then is an easy migration. OK?

@@ -49,7 +49,9 @@ docs/
 ## Conventions
 - **Business logic lives in `server/services/`** as plain, testable functions. API routes stay thin: validate → authorise → call service → return.
 - **Multi-tenancy:** follow `docs/multi-tenancy.md`. `schoolId` comes only from `event.context.school`; tenant tables are queried only through `server/utils/tenant.ts` helpers; cross-school lookups return 404.
-- Every API route: resolve tenant with `requireTenant(event)`, Zod-validate input, call `requireRole(event, [...roles])`, return typed data, throw `createError` with proper status codes (400 validation, 401 unauthenticated, 403 forbidden, 404 not found, 409 conflict).
+- Every API route: resolve tenant with `requireTenant(event)`, Zod-validate input with `validateBody` / `validateParams` (`server/utils/validation.ts`; 400 with `data.fieldErrors`, or `fieldError(field, message)` for DB checks), call `requireRole(event, [...roles])` / `requireUser(event)` (`server/utils/auth.ts`), return typed data, throw `createError` with proper status codes and a user-facing `message` (400 validation, 401 unauthenticated, 403 forbidden, 404 not found, 409 conflict). Register new routes in `tests/helpers/app.ts`.
+- Pages declare access with `definePageMeta({ roles: [...] })` (or `public: true`); `app/middleware/auth.global.ts` redirects, and `app/utils/navigation.ts` lists nav items with the same roles. UI checks are UX only — the API enforces.
+- Forms: `UForm` with the shared Zod schema, `method="post"`, submit disabled until hydrated (`useMounted()`); show server errors with `apiErrorMessage` / `apiFormErrors` (`app/utils/api-error.ts`).
 - Database access only on the server. Use transactions for multi-table writes (admission, payments, promotion, publishing results).
 - Every school-owned table has a non-null `schoolId` FK, `createdAt`, `updatedAt`; unique constraints and main indexes start with `schoolId`. Students, staff and payments are **soft-deleted** (`deletedAt`).
 - **Money is integer kobo** (₦1 = 100 kobo). Format with `Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' })`. Never use floats for money.
