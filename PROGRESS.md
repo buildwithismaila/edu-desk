@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 1 — Authentication & roles (spec approved 2026-10-11; sub-steps 1–4 done — nuxt-auth-utils in the test harness; users table, whereSchool, seeded users; login/logout, session tenant binding, requireUser/requireRole, login throttle; change password, users list, admin reset)
+- **Current phase:** Phase 1 — Authentication & roles (spec approved 2026-10-11; sub-steps 1–5 done — nuxt-auth-utils in the test harness; users table, whereSchool, seeded users; login/logout, session tenant binding, requireUser/requireRole, login throttle; change password, users list, admin reset; login/password/Users pages, auth middleware, role nav, user menu)
 - **Last updated:** 2026-10-11
 
 ## Completed phases
@@ -24,7 +24,7 @@
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
-- Nuxt-environment tests: first `mountSuspended` per file takes 20–35s on the dev machine (cold Nuxt app boot); `nuxt` Vitest project raised to `testTimeout: 60_000` in sub-step 3. Investigate if the nuxt suite gets slow.
+- Nuxt-environment tests: first `mountSuspended` per file takes 20–35s on the dev machine (cold Nuxt app boot); `nuxt` Vitest project raised to `testTimeout` and `hookTimeout: 60_000`. Investigate if the nuxt suite gets slow.
 - Unit project has `hookTimeout: 60_000`: PGlite boot + migrations in `beforeAll` exceeds 10s when several integration files start in parallel.
 - Nuxt 5 / `future.compatibilityVersion: 5`: errors thrown in server middleware return JSON instead of rendering `error.vue` (nuxt.com error-handling docs). The tenant 404/403 pages rely on today's behaviour — revisit `00.tenant.ts` before upgrading.
 - Sessions are sealed cookies (nuxt-auth-utils): logout can't revoke a copied cookie server-side; it stays valid until it expires (7 days). Deactivating the user does revoke it (`requireUser` checks the DB). If needed later: a `sessionVersion` column checked in `requireUser`, bumped on logout/password change.

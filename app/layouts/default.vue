@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
+const { user } = useUserSession()
+const links = computed(() => user.value ? navigationFor(user.value.role) : [])
 
-// Role-based nav arrives in Phase 1
-const links: NavigationMenuItem[] = [
-  { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
-]
+// auth.global.ts redirects here with ?forbidden=1 when the role can't open a page
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
+if (import.meta.client) {
+  watch(() => route.query.forbidden, (forbidden) => {
+    if (!forbidden) return
+    toast.add({ title: 'You don\'t have access to that page', color: 'error', icon: 'i-lucide-shield-x' })
+    router.replace({ query: { ...route.query, forbidden: undefined } })
+  }, { immediate: true })
+}
 </script>
 
 <template>
@@ -23,6 +31,10 @@ const links: NavigationMenuItem[] = [
           :collapsed="collapsed"
           orientation="vertical"
         />
+      </template>
+
+      <template #footer="{ collapsed }">
+        <LayoutUserMenu :collapsed="collapsed" />
       </template>
     </UDashboardSidebar>
 

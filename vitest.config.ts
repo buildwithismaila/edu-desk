@@ -33,6 +33,7 @@ export default defineConfig({
           environment: 'nuxt',
           // First mount per file boots the Nuxt app (20-35s cold on the dev machine); later mounts take ms
           testTimeout: 60_000,
+          hookTimeout: 60_000,
           environmentOptions: {
             nuxt: {
               domEnvironment: 'happy-dom',
