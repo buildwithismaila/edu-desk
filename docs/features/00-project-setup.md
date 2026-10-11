@@ -1,6 +1,6 @@
 # Phase 0 — Project setup
 
-**Status:** Approved 2026-10-10 (all open-question recommendations accepted; GitHub repo creation decided in sub-step 6)
+**Status:** Done 2026-10-11 · Approved 2026-10-10 (all open-question recommendations accepted; GitHub repo creation decided in sub-step 6)
 **Roadmap ref:** `docs/roadmap.md` → Phase 0
 
 ## Goal
@@ -211,16 +211,16 @@ Each ends with `pnpm check` green, a summary, browser checks and a commit messag
 7. **Docs** — `PROGRESS.md`, `docs/decisions.md` (driver, test harness approach, env var names, school status codes), `docs/architecture.md` (new packages), manual test checklist.
 
 ## Acceptance checklist
-- [ ] `pnpm dev` runs; `greenfield.lvh.me:3000` and `sunrise.lvh.me:3000` show their own school name in the layout
-- [ ] Unknown subdomain shows the 404 "School not found" page; suspended school shows the suspended page
-- [ ] `DEFAULT_SCHOOL_SLUG` fallback works on the bare domain
-- [ ] Dashboard layout renders on desktop and 375px mobile
-- [ ] Auth and print layouts exist
-- [ ] Theme colours configured in `app.config.ts`
-- [ ] `pnpm db:generate` / `db:migrate` / `db:seed` work; seed is re-runnable
-- [ ] `pnpm check` green; `pnpm test:e2e` green on both projects
-- [ ] CI passes on GitHub
-- [ ] `PROGRESS.md` and `docs/decisions.md` updated
+- [x] `pnpm dev` runs; `greenfield.lvh.me:3000` and `sunrise.lvh.me:3000` show their own school name in the layout
+- [x] Unknown subdomain shows the 404 "School not found" page; suspended school shows the suspended page
+- [x] `DEFAULT_SCHOOL_SLUG` fallback works on the bare domain
+- [x] Dashboard layout renders on desktop and 375px mobile
+- [x] Auth and print layouts exist
+- [x] Theme colours configured in `app.config.ts`
+- [x] `pnpm db:generate` / `db:migrate` / `db:seed` work; seed is re-runnable
+- [x] `pnpm check` green; `pnpm test:e2e` green on both projects
+- [x] CI passes on GitHub
+- [x] `PROGRESS.md` and `docs/decisions.md` updated
 
 ## Open questions
 1. **Env var names.** Nuxt only overrides `runtimeConfig` at runtime from `NUXT_`-prefixed vars; a plain `DEFAULT_SCHOOL_SLUG` read via `process.env` in `nuxt.config.ts` would be **baked in at build time**. I recommend `NUXT_DEFAULT_SCHOOL_SLUG` and `NUXT_APP_DOMAIN` (and plain `DATABASE_URL`, since drizzle-kit and the seed read it too), and updating `docs/multi-tenancy.md` accordingly. OK?

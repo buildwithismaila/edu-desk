@@ -40,8 +40,9 @@ tests/
   unit/                # pure logic (services, utils, schemas)
   integration/         # API routes against PGlite
   nuxt/                # components & composables (Nuxt environment)
-  e2e/                 # Playwright journeys
+  e2e/                 # Playwright journeys; e2e/support/ holds globalSetup (E2E database) and URL helpers
   factories/           # test data builders (createStudent, createClassArm, ...)
+  helpers/             # PGlite test DB, in-process h3 test app, #imports stand-in (decision 006)
 docs/
 ```
 
@@ -57,4 +58,6 @@ docs/
 - Mobile-first and lightweight: paginate tables server-side, avoid heavy libraries, keep pages fast on slow networks.
 - Add `data-testid` attributes to key interactive elements to keep E2E selectors stable.
 - Uploaded files are stored under `schools/<schoolId>/…` and served only after a tenant check.
+- Shared app data with an explicit `useFetch` key lives in a composable (e.g. `useSchool()` → `GET /api/school`, key `school`).
+- Check APIs with the Nuxt and Nuxt UI MCP servers (`.mcp.json`) before relying on memory.
 - Printable pages (report cards, receipts, broadsheets) use a dedicated `print` layout with A4 print CSS — no PDF library in the MVP.

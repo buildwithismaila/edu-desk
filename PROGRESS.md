@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 0 — Project setup (in progress: sub-steps 1–6 done — scaffold, test tooling, database, tenant resolution, layouts & error page, CI)
+- **Current phase:** none — Phase 0 done; Phase 1 not started (spec first)
 - **Last updated:** 2026-10-11
 
 ## Completed phases
@@ -13,12 +13,17 @@
 - Known issues / tech debt: ...
 -->
 
+### Phase 0 — Project setup (2026-10-11)
+- Built: Nuxt 4 + Nuxt UI app (TS strict, ESLint), Drizzle + Postgres with `schools` table, migrations and idempotent seed (greenfield, sunrise, hillside-suspended); tenant foundation (`resolveTenantSlug`, `00.tenant.ts` middleware with 30s cache, `requireTenant`, `GET /api/school`, `NUXT_DEFAULT_SCHOOL_SLUG` fallback); dashboard/auth/print layouts, `SchoolBrand`, `useSchool()`, tenant error page (404 not found / 403 suspended); four test layers; GitHub Actions CI (check + E2E on Postgres 18); Nuxt and Nuxt UI MCP servers in `.mcp.json`.
+- Tests added: 52 unit / 22 integration (PGlite) / 10 Nuxt component / 6 E2E tests × desktop + mobile (10 run, 2 viewport-specific skips). CI green.
+- Decisions: see docs/decisions.md #005–#009
+- Known issues / tech debt: see below
+
 ## Next up
-- Phase 0 — Project setup
+- Phase 1 — Authentication & roles (write `docs/features/01-authentication.md` and wait for approval)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
 - Nuxt-environment tests: first `mountSuspended` per file takes 20–35s on the dev machine (cold Nuxt app boot); `nuxt` Vitest project raised to `testTimeout: 60_000` in sub-step 3. Investigate if the nuxt suite gets slow.
 - Unit project has `hookTimeout: 60_000`: PGlite boot + migrations in `beforeAll` exceeds 10s when several integration files start in parallel.
-- E2E uses its own database (`edudesk_test`, created by Playwright `globalSetup`; override with `E2E_DATABASE_URL`). Playwright's webServer waits on the port, not a URL, because a bare-IP host has no school and answers 404.
 - Nuxt 5 / `future.compatibilityVersion: 5`: errors thrown in server middleware return JSON instead of rendering `error.vue` (nuxt.com error-handling docs). The tenant 404/403 pages rely on today's behaviour — revisit `00.tenant.ts` before upgrading.
