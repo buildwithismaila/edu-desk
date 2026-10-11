@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; starting sub-step 1 — validators)
+- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; sub-step 1 done — validators)
 - **Last updated:** 2026-10-11
 
 ## Completed phases
@@ -26,7 +26,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 2 sub-step 1 — validators (test-first)
+- Phase 2 sub-step 2 — schema, `applySchoolDefaults`, demo seed
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
