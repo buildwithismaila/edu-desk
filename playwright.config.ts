@@ -43,6 +43,9 @@ export default defineConfig({
       DATABASE_URL: e2eDatabaseUrl(),
       NUXT_APP_DOMAIN: 'lvh.me',
       NUXT_DEFAULT_SCHOOL_SLUG: '',
+      // Test-only secret; the E2E server is plain http, so the session cookie can't be Secure
+      NUXT_SESSION_PASSWORD: 'e2e-session-password-at-least-32-characters',
+      NUXT_SESSION_COOKIE_SECURE: 'false',
     },
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,

@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** none — Phase 0 done; Phase 1 not started (spec first)
+- **Current phase:** Phase 1 — Authentication & roles (spec approved 2026-10-11; sub-step 1 done — nuxt-auth-utils installed and proven in the test harness)
 - **Last updated:** 2026-10-11
 
 ## Completed phases

@@ -20,6 +20,8 @@ export default defineConfig({
           environment: 'node',
           // Booting PGlite + migrations in beforeAll takes >10s when several files start in parallel
           hookTimeout: 60_000,
+          // Transform nuxt-auth-utils (instead of loading it natively) so its `#imports` uses the alias above
+          server: { deps: { inline: ['nuxt-auth-utils'] } },
         },
       },
       await defineVitestProject({
