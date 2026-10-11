@@ -1,4 +1,5 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, type SQL } from 'drizzle-orm'
+import type { PgColumn } from 'drizzle-orm/pg-core'
 import { createError, type H3Event } from 'h3'
 import { TENANT_ERRORS } from '../../shared/constants/tenant'
 import { type School, schools } from '../database/schema'
@@ -37,4 +38,12 @@ export function requireTenant(event: H3Event): TenantSchool {
   const school = event.context.school
   if (!school) throw createError(TENANT_ERRORS.notFound)
   return school
+}
+
+/**
+ * `schoolId = <school>` plus any extra conditions. Every query on a tenant table goes through this,
+ * so a lookup by another school's id finds nothing (and the route returns 404).
+ */
+export function whereSchool(table: { schoolId: PgColumn }, school: Pick<TenantSchool, 'id'>, ...conditions: (SQL | undefined)[]): SQL {
+  return and(eq(table.schoolId, school.id), ...conditions)!
 }
