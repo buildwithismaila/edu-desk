@@ -1,4 +1,9 @@
 import { createApp, createRouter, defineEventHandler, send, setResponseStatus, toWebHandler } from 'h3'
+import attendanceArmsHandler from '~~/server/api/attendance/arms.get'
+import attendanceRegisterGetHandler from '~~/server/api/attendance/register.get'
+import attendanceRegisterPutHandler from '~~/server/api/attendance/register.put'
+import attendanceRegisterDeleteHandler from '~~/server/api/attendance/registers/[id].delete'
+import attendanceSummaryHandler from '~~/server/api/attendance/summary.get'
 import currentTermHandler from '~~/server/api/academic/current.get'
 import assessmentGetHandler from '~~/server/api/assessment-components/index.get'
 import assessmentPutHandler from '~~/server/api/assessment-components/index.put'
@@ -44,6 +49,7 @@ import staffReactivateHandler from '~~/server/api/staff/[id]/reactivate.post'
 import staffGetHandler from '~~/server/api/staff/index.get'
 import staffPostHandler from '~~/server/api/staff/index.post'
 import studentDeleteHandler from '~~/server/api/students/[id].delete'
+import studentAttendanceHandler from '~~/server/api/students/[id]/attendance.get'
 import studentGetHandler from '~~/server/api/students/[id].get'
 import studentPatchHandler from '~~/server/api/students/[id].patch'
 import studentEnrolmentHandler from '~~/server/api/students/[id]/enrolment.put'
@@ -155,6 +161,12 @@ export function createTestApp(db: Db) {
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
     .get('/api/me/children', myChildrenHandler)
+    .get('/api/attendance/arms', attendanceArmsHandler)
+    .get('/api/attendance/register', attendanceRegisterGetHandler)
+    .put('/api/attendance/register', attendanceRegisterPutHandler)
+    .delete('/api/attendance/registers/:id', attendanceRegisterDeleteHandler)
+    .get('/api/attendance/summary', attendanceSummaryHandler)
+    .get('/api/students/:id/attendance', studentAttendanceHandler)
     .post('/api/students/import', studentsImportHandler)
     .get('/api/students/import/template', studentsImportTemplateHandler)
     .get('/api/students', studentsGetHandler)

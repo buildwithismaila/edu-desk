@@ -22,6 +22,9 @@ export function formatDate(isoDate: string | null | undefined): string {
   return `${day}/${month}/${year}`
 }
 
+/** Schools' time zone (docs/architecture.md). */
+export const SCHOOL_TIME_ZONE = 'Africa/Lagos'
+
 /** Today's calendar date (`YYYY-MM-DD`) in a time zone, e.g. the school's `Africa/Lagos`. */
 export function todayIn(timeZone: string, now = new Date()): string {
   // en-CA formats dates as YYYY-MM-DD
