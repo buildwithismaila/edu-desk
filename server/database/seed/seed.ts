@@ -17,6 +17,7 @@ import {
 import { applySchoolDefaults } from '../../services/school-defaults'
 import type { Db } from '../../utils/db'
 import { DEMO_PASSWORD_HASH } from './demo-password'
+import { type DemoAttendance, seedAttendance } from './attendance'
 import { type DemoStudents, GREENFIELD_STUDENTS, seedStudents, SUNRISE_STUDENTS } from './students'
 
 const demoSchools: NewSchool[] = [
@@ -75,6 +76,8 @@ interface DemoAcademics {
   }
   /** Admitted into the current session; default guardians get phones `${phoneBase}NNNN` */
   students?: DemoStudents & { phoneBase: string }
+  /** Past registers in the current term (never today's) */
+  attendance?: DemoAttendance
 }
 
 const FIRST_TERM_2026: TermDates = { first: { startsOn: '2026-09-14', endsOn: '2026-12-18', nextTermBeginsOn: '2027-01-11' } }
@@ -123,6 +126,8 @@ const demoAcademics: Record<string, DemoAcademics> = {
       ],
     },
     students: { ...GREENFIELD_STUDENTS, phoneBase: '+234802210' },
+    // JSS 1B has none, to show an untaken register
+    attendance: { arms: ['JSS 1A'], days: 10, takenBy: 'teacher@greenfield.test' },
   },
   sunrise: {
     sessions: [{ name: '2026/2027', terms: FIRST_TERM_2026 }],
@@ -130,6 +135,7 @@ const demoAcademics: Record<string, DemoAcademics> = {
     arms: { 'JSS 1': ['Gold', 'Diamond'], 'JSS 2': ['Gold'] },
     subjects: { jss: ['English Language', 'Mathematics'] },
     students: { ...SUNRISE_STUDENTS, phoneBase: '+234803310' },
+    attendance: { arms: ['JSS 1 Gold'], days: 2, takenBy: 'admin@sunrise.test' },
   },
 }
 
@@ -229,6 +235,7 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
 
     if (academics.assignments) await seedAssignments(tx, schoolId, currentSessionId, academics.assignments)
     if (academics.students) await seedStudents(tx, schoolId, currentSessionId, academics.students, academics.students.phoneBase)
+    if (academics.attendance) await seedAttendance(tx, schoolId, currentSessionId, academics.attendance)
   })
 }
 

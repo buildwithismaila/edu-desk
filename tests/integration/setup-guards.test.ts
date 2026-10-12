@@ -1,9 +1,10 @@
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { academicSessions, classArms } from '~~/server/database/schema'
+import { academicSessions, classArms, studentEnrolments } from '~~/server/database/schema'
 import type { Db } from '~~/server/utils/db'
 import { createClassArm, createClassLevel, createSession } from '../factories/academics'
 import { createSchool } from '../factories/schools'
+import { createRegister } from '../factories/attendance'
 import { createStudent, enrol } from '../factories/students'
 import { createUser, DEFAULT_TEST_PASSWORD } from '../factories/users'
 import { createTestApp } from '../helpers/app'
@@ -56,6 +57,39 @@ describe('deletes blocked by enrolments', () => {
     const res = await del(school, `/api/sessions/${session.id}`, cookie)
     expect(res.status).toBe(409)
     expect((await res.json()).message).toMatch(/students/)
+    expect(await db.select().from(academicSessions).where(eq(academicSessions.id, session.id))).toHaveLength(1)
+  })
+})
+
+describe('deletes blocked by attendance', () => {
+  it('refuses to delete a class arm with registers, even after its students moved (409)', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { session, terms } = await createSession(db, school)
+    const level = await createClassLevel(db, school)
+    const arm = await createClassArm(db, school, level)
+    const other = await createClassArm(db, school, level, 'B')
+    const student = await createStudent(db, school)
+    await enrol(db, school, { student, session, arm })
+    await createRegister(db, school, { term: terms[0]!, arm, date: '2026-10-12', marks: [{ student, status: 'present' }] })
+    await db.update(studentEnrolments).set({ classArmId: other.id }).where(eq(studentEnrolments.studentId, student.id))
+
+    const res = await del(school, `/api/class-arms/${arm.id}`, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toMatch(/attendance/)
+    expect(await db.select().from(classArms).where(eq(classArms.id, arm.id))).toHaveLength(1)
+  })
+
+  it('refuses to delete a session with registers (409)', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { session, terms } = await createSession(db, school)
+    const arm = await createClassArm(db, school, await createClassLevel(db, school))
+    await createRegister(db, school, { term: terms[1]!, arm, date: '2026-10-12' })
+
+    const res = await del(school, `/api/sessions/${session.id}`, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toMatch(/attendance/)
     expect(await db.select().from(academicSessions).where(eq(academicSessions.id, session.id))).toHaveLength(1)
   })
 })
