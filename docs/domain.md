@@ -9,17 +9,19 @@ These rules drive the schema, validation and tests. If a rule here conflicts wit
   - Primary: Primary 1 – Primary 6
   - JSS: JSS 1 – JSS 3
   - SSS: SSS 1 – SSS 3
-- **Arms:** each class level has one or more arms (A/B or Gold/Diamond). A student is in exactly one class arm per session.
+- **Arms:** each class level has one or more arms (A/B or Gold/Diamond). A student is in exactly one class arm per session. Display: a single-letter arm joins the level ("JSS 1A"), anything else gets a space ("JSS 1 Gold").
+- **Subjects** belong to one section; SSS subjects are core or belong to one department. Class level, arm, department and subject names are unique per school, ignoring case.
 - **SSS departments:** Science, Arts, Commercial — determine which subjects a student offers (core subjects + department subjects).
 - **Admission number:** auto-generated, configurable format, e.g. `SCH/2025/0001`; unique per school.
 
 ## Academic calendar
-- A **session** (e.g. `2025/2026`) has exactly **three terms**: First, Second, Third.
+- A **session** (e.g. `2025/2026`, consecutive years) has exactly **three terms**: First, Second, Third, created together with the session.
 - Exactly one current session and one current term at any time.
-- Each term has a start date, end date and "next term begins" date.
+- Each term has a start date, end date and "next term begins" date (each optional until known). Rules: the term ends after it starts; next term begins after it ends. No ordering is enforced across the three terms.
+- Setting a term as current also makes its session current.
 
 ## Assessment
-- Default components (configurable per school): **CA1 = 20, CA2 = 20, Exam = 60, Total = 100**. Component maxes must sum to 100.
+- Default components (configurable per school): **CA1 = 20, CA2 = 20, Exam = 60, Total = 100**. 1–5 components with unique names and whole-number maxes that must sum to 100.
 - Scores are validated: 0 ≤ score ≤ component max; blank ≠ zero (a blank means "not entered"; an absent student can be marked explicitly).
 - Scores are locked once results for that class arm are published; only Admin/Principal can unlock.
 
@@ -49,7 +51,7 @@ These rules drive the schema, validation and tests. If a rule here conflicts wit
 
 **Nursery:** skill-based ratings (Excellent / Very Good / Good / Needs Improvement) instead of numeric scores in the MVP.
 
-Grading scale bands must be contiguous, non-overlapping and cover 0–100 — validate this on save.
+Grading scale bands must be contiguous, non-overlapping and cover 0–100 with whole-number bounds and unique grades — validate this on save. Nursery has no numeric scale.
 
 ## Result computation (per student, per term, per class arm)
 - Subject total = CA1 + CA2 + Exam; grade + remark from the section's scale.

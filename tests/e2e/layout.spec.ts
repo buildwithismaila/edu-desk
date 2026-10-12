@@ -51,4 +51,21 @@ test.describe('mobile', () => {
     await expect(page.getByTestId('users-table')).toBeVisible()
     expect(await overflow()).toBeLessThanOrEqual(0)
   })
+
+  test('the school setup pages fit the screen without horizontal scroll', async ({ page }) => {
+    const overflow = () => page.evaluate<number>('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+    await loginAs(page, GREENFIELD_USERS.admin.email)
+
+    for (const [path, ready] of [
+      ['/settings/school', 'profile-save'],
+      ['/settings/calendar', 'new-session'],
+      ['/settings/classes', 'section-jss'],
+      ['/settings/subjects', 'subjects-table'],
+      ['/settings/grading', 'grading-save'],
+    ] as const) {
+      await page.goto(path)
+      await expect(page.getByTestId(ready)).toBeVisible()
+      expect(await overflow(), path).toBeLessThanOrEqual(0)
+    }
+  })
 })

@@ -1,6 +1,6 @@
 # Phase 2 — School setup
 
-**Status:** Approved 2026-10-11 (all open-question recommendations accepted)
+**Status:** Done 2026-10-12 · Approved 2026-10-11 (all open-question recommendations accepted)
 **Roadmap ref:** `docs/roadmap.md` → Phase 2
 
 ## Goal
@@ -274,14 +274,15 @@ Each ends with `pnpm check` green, a summary, browser checks and a commit messag
 9. **E2E + docs:** specs, `PROGRESS.md`, decisions, `domain.md` / `architecture.md` updates, manual checklist.
 
 ## Acceptance checklist
-- [ ] Admin configures profile + logo, a session with terms, current term, class levels + arms, departments + subjects, assessment split, grading scales, position toggle
-- [ ] Only one current session and one current term per school (DB-enforced); setting current is atomic
-- [ ] Invalid grading scales and assessment configs are rejected (API and UI)
-- [ ] Every route: validation, roles, tenant isolation tested
-- [ ] New schools get the `docs/domain.md` defaults (`applySchoolDefaults`)
-- [ ] Current session/term visible to every logged-in user
-- [ ] Works at 375px
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] Admin configures profile + logo, a session with terms, current term, class levels + arms, departments + subjects, assessment split, grading scales, position toggle
+- [x] Only one current session and one current term per school (DB-enforced); setting current is atomic
+- [x] Invalid grading scales and assessment configs are rejected (API and UI)
+- [x] Every route: validation, roles, tenant isolation tested
+- [x] New schools get the `docs/domain.md` defaults (`applySchoolDefaults`)
+- [x] Current session/term visible to every logged-in user
+- [x] Works at 375px
+- [x] Seed updated; `pnpm check` and `pnpm test:e2e` green
+- [ ] CI green (after push)
 
 ## Open questions
 1. **Sections as a fixed enum** (Nursery, Primary, JSS, SSS) rather than a table. `docs/domain.md` lists exactly these four. Schools without a nursery simply delete those class levels. OK?

@@ -30,6 +30,10 @@ export function useConfirmDialog() {
 /** `await askName({ title, label, schema, submit })` → true once `submit` succeeded. */
 export function useNameDialog() {
   const overlay = useOverlay()
-  return async (props: NameDialogOptions) =>
-    Boolean(await overlay.create(NameDialog, { destroyOnClose: true, props }).open())
+  return async (props: NameDialogOptions) => {
+    // useOverlay keeps props in reactive state; a proxied Zod schema throws on its read-only `_zod`
+    // property ("'get' on proxy: property '_zod' is a read-only…"), so keep the schema raw
+    const dialogProps = { ...props, schema: markRaw(props.schema) }
+    return Boolean(await overlay.create(NameDialog, { destroyOnClose: true, props: dialogProps }).open())
+  }
 }

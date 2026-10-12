@@ -86,3 +86,35 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** Nuxt type-checks API handlers in the app context too (typed `$fetch` route types), where `#imports` is the app's and lacks server-only utils.
 - **Decision:** Server code calls `getUserSession`, `clearUserSession`, `replaceUserSession`, `hashPassword`, `verifyPassword` as auto-imported globals (declared in both contexts). The Vitest unit project registers the real implementations as globals (`tests/helpers/nitro-globals.ts`); everything else stays explicitly imported per 006. The harness also mirrors Nitro's JSON error body (`message` included).
 - **Consequences:** New auto-imported server utils used in routes must be added to `nitro-globals.ts`.
+
+### 015 — School structure: fixed sections, per-section subjects, editable departments (2026-10-11)
+- **Context:** Phase 2 needs a model for sections, class levels, arms, SSS departments and subjects.
+- **Decision:** Sections are a fixed enum (`nursery | primary | jss | sss`, from docs/domain.md). Class levels and arms are per-school rows. Each subject belongs to one section (Mathematics in Primary, JSS and SSS is three rows). SSS departments are an editable table, seeded Science/Arts/Commercial; only SSS subjects may have one (DB check constraint). Nursery has no numeric grading scale (skill ratings in Phase 7).
+- **Alternatives considered:** a sections table (no school needs other sections); one subject row shared across sections (complicates teacher assignment and grading per section).
+- **Consequences:** Schools without a nursery delete those levels. Teacher assignment (Phase 3) and scores (Phase 6) reference section-specific subjects.
+
+### 016 — Setup data: admin writes, staff reads, hard delete with guards, case-insensitive names (2026-10-11)
+- **Context:** Who may change school setup, and what happens when setup records are removed.
+- **Decision:** Only admins write setup data and see the settings pages; staff (not parents) read it through the APIs; every logged-in user reads the current session/term. Setup rows are hard-deleted; deletes that would orphan data return 409 (current session, level with arms, department with subjects; later phases add arm-with-students, subject-with-scores). Names are unique per school ignoring case (checked in services; the DB constraint is case-sensitive).
+- **Consequences:** Principals can't edit assessment/grading yet — revisit if pilots ask.
+
+### 017 — Defaults per school and "only one current" in the database (2026-10-11)
+- **Context:** New schools need the docs/domain.md defaults; exactly one session/term must be current.
+- **Decision:** `applySchoolDefaults()` fills each category (class levels, departments, assessment split, each section's grade bands) only if the school has none of it — idempotent and never overwrites a school's edits; used by the seed and (Phase 12) onboarding. Partial unique indexes (`WHERE is_current`) allow one current session and one current term per school; `setCurrentTerm()` unsets then sets inside a transaction, and the session follows the term.
+- **Consequences:** The database rejects a second current row even if code is wrong.
+
+### 018 — Logos in Nitro fs storage, served per tenant (2026-10-11)
+- **Context:** Schools upload a logo; files must stay isolated per school.
+- **Decision:** Nitro storage mount `uploads` (fs driver, `.data/uploads`); key `schools/<schoolId>/logo.<ext>` built from the tenant, never from input. Uploads up to 1 MB, type detected from the file signature (PNG/JPEG/WebP). `GET /api/school/logo` streams the host school's logo (`Cache-Control: public, max-age=86400`); URLs carry `?v=<logoUpdatedAt>`. No resizing.
+- **Alternatives considered:** S3-compatible storage — more setup than the MVP needs; the mount can be swapped later.
+- **Consequences:** Production needs `.data` on a persistent volume and included in backups.
+
+### 019 — PATCH routes validate the merged record (2026-10-11)
+- **Context:** Partial updates can be valid on their own but invalid combined with saved values (term end before the saved start; moving an SSS department subject to JSS).
+- **Decision:** PATCH bodies are validated, merged with the saved row, and the result is validated again with the full schema (`assertValid`) before writing. List replacements (assessment split, grading scale) validate the whole list first and replace it in one transaction.
+- **Consequences:** A rejected update never changes the database.
+
+### 020 — Dialogs via useOverlay; raw schemas; callbacks returning `unknown` (2026-10-12)
+- **Context:** Settings pages need many small name/confirm dialogs.
+- **Decision:** `useNameDialog()` / `useConfirmDialog()` (`app/composables/useDialogs.ts`) open `NameDialog` / `ConfirmDialog` with Nuxt UI's `useOverlay` and await the result. Zod schemas passed as overlay props go through `markRaw()`: `useOverlay` stores props reactively, and a proxied Zod schema throws on its read-only `_zod` property (found by E2E: Save silently did nothing). Callbacks that return a typed `$fetch(...)` are typed `() => unknown`, not `() => Promise<unknown>` (TS2321 "excessive stack depth" with ~45 typed routes).
+- **Consequences:** Both rules are noted in docs/architecture.md.

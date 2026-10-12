@@ -20,3 +20,12 @@ test('the admin can open the Users page', async ({ page }) => {
   await expect(page).toHaveURL('/users')
   await expect(page.getByTestId('users-table')).toContainText(GREENFIELD_USERS.teacher.email)
 })
+
+test('a teacher opening a school setup page lands on the dashboard with a notice', async ({ page }) => {
+  await loginAs(page, GREENFIELD_USERS.teacher.email)
+
+  await page.goto('/settings/classes')
+
+  await expect(page).toHaveURL('/')
+  await expect(page.getByRole('region', { name: /Notifications/ }).getByText('You don\'t have access to that page')).toBeVisible()
+})

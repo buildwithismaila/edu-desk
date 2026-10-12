@@ -1,8 +1,8 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; sub-steps 1–8 done — validators; schema, defaults, demo seed; profile & logo API; calendar API; classes API; subjects API; assessment & grading API; settings pages)
-- **Last updated:** 2026-10-11
+- **Current phase:** Phase 2 — School setup — all sub-steps done; awaiting push + CI and your manual check
+- **Last updated:** 2026-10-12
 
 ## Completed phases
 <!-- For each finished phase:
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 2 — School setup (2026-10-12)
+- Built: school profile + logo (Nitro fs storage, signature check, tenant-scoped serving); sessions with three terms, term dates, atomic set-current (DB partial unique indexes); class levels (reorder) and arms; SSS departments and per-section subjects; assessment split (sum 100) and grading scales (contiguous 0–100) with atomic replacement; `applySchoolDefaults` for new schools; five admin settings pages, School setup nav group, current session/term in the top bar, logo in sidebar and login; demo seed (Greenfield 2026/2027 First Term current, arms, subjects; Sunrise own arms).
+- Tests (totals): 179 unit / 333 integration (PGlite) / 32 Nuxt component / 24 E2E tests x desktop + mobile (4 viewport-specific skips).
+- Decisions: see docs/decisions.md #015–#020
+- Bugs found while building: Zod schema proxied by useOverlay made dialog Save silently fail (E2E; fixed with markRaw); tenant cache showed a renamed school's old name for 30s (fixed with forgetTenantSchool); TS2321 with typed $fetch callbacks (convention in architecture.md).
 
 ### Phase 1 — Authentication & roles (2026-10-11)
 - Built: `users` table (first tenant table) + `whereSchool()` scoping; nuxt-auth-utils sessions bound to the school (host-only cookie, `secure.schoolId`, `fetch` hook + `requireUser` reject foreign sessions); `requireUser` / `requireRole` re-load the user per request; login (generic 401, disabled 403, throttled 429), logout, change password, admin users list + temporary-password reset with forced change; login/change-password/Users pages, global auth middleware with role page meta, role-based sidebar nav, user menu; seeded users per role (+ inactive, + Sunrise admin; password `password123`).
@@ -26,7 +32,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 2 sub-step 9 — E2E (school setup, grading, forbidden) + docs
+- Push Phase 2 and confirm CI; then Phase 3 — Staff management (spec first)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
