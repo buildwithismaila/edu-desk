@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** none — Phase 2 done (CI green 2026-10-12); Phase 3 not started (spec first)
+- **Current phase:** Phase 3 — Staff management (spec approved 2026-10-12; starting sub-step 1 — schema + seed)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -32,7 +32,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 3 — Staff management (write `docs/features/03-staff.md` and wait for approval)
+- Phase 3 sub-step 1 — schema, removed-user exclusion, factories, seed
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
