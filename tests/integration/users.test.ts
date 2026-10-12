@@ -32,16 +32,8 @@ async function loginAs(role: typeof ROLES[number], school = schoolA) {
 const resetPassword = (id: string, cookie?: string, slug = schoolA.slug) =>
   app.request(`/api/users/${id}/reset-password`, { host: hostOf(slug), cookie, method: 'POST' })
 
+// GET /api/users was replaced by GET /api/staff in Phase 3 (tests/integration/staff.test.ts)
 describe('permissions', () => {
-  it.each(ROLES.map(role => [role, role === 'admin' ? 200 : 403] as const))('GET /api/users as %s → %i', async (role, status) => {
-    const { cookie } = await loginAs(role)
-    expect((await app.request('/api/users', { host: hostOf(schoolA.slug), cookie })).status).toBe(status)
-  })
-
-  it('GET /api/users without a session → 401', async () => {
-    expect((await app.request('/api/users', { host: hostOf(schoolA.slug) })).status).toBe(401)
-  })
-
   it.each(ROLES.map(role => [role, role === 'admin' ? 200 : 403] as const))('POST /api/users/:id/reset-password as %s → %i', async (role, status) => {
     const target = await createUser(db, schoolA)
     const { cookie } = await loginAs(role)
@@ -51,35 +43,6 @@ describe('permissions', () => {
   it('POST /api/users/:id/reset-password without a session → 401', async () => {
     const target = await createUser(db, schoolA)
     expect((await resetPassword(target.id)).status).toBe(401)
-  })
-})
-
-describe('GET /api/users', () => {
-  it('lists only the current school\'s users, sorted by name, without sensitive fields', async () => {
-    const { cookie } = await loginAs('admin', schoolB)
-    await createUser(db, schoolB, { name: 'Zainab Musa' })
-    await createUser(db, schoolB, { name: 'Bayo Ade' })
-    await createUser(db, schoolA, { name: 'Other School User' })
-
-    const res = await app.request('/api/users', { host: hostOf(schoolB.slug), cookie })
-    const body = await res.json() as { users: Record<string, unknown>[] }
-
-    const schoolBUsers = await db.select({ id: users.id }).from(users).where(eq(users.schoolId, schoolB.id))
-    expect(body.users.map(u => u.id).sort()).toEqual(schoolBUsers.map(u => u.id).sort())
-    const names = body.users.map(u => u.name as string)
-    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)))
-    expect(Object.keys(body.users[0]!).sort()).toEqual(['email', 'id', 'isActive', 'lastLoginAt', 'mustChangePassword', 'name', 'role'])
-    expect(JSON.stringify(body)).not.toContain('scrypt')
-  })
-
-  it('ignores a schoolId in the query string', async () => {
-    const { cookie } = await loginAs('admin')
-    const bUser = await createUser(db, schoolB)
-
-    const res = await app.request(`/api/users?schoolId=${schoolB.id}`, { host: hostOf(schoolA.slug), cookie })
-    const body = await res.json() as { users: { id: string }[] }
-
-    expect(body.users.map(u => u.id)).not.toContain(bUser.id)
   })
 })
 

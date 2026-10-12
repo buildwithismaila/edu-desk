@@ -5,6 +5,7 @@ export type Role = typeof ROLES[number]
 
 /** School staff (everyone except parents). */
 export const STAFF_ROLES = ['admin', 'principal', 'bursar', 'teacher'] as const satisfies readonly Role[]
+export type StaffRole = typeof STAFF_ROLES[number]
 
 export const ROLE_LABELS: Record<Role, string> = {
   admin: 'Admin / Proprietor',

@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 3 — Staff management (spec approved 2026-10-12; sub-steps 1–3 done — schema, removed-user exclusion, seed; guard helpers + staff API; assignments API)
+- **Current phase:** Phase 3 — Staff management (spec approved 2026-10-12; sub-steps 1–4 done — schema, removed-user exclusion, seed; guard helpers + staff API; assignments API; frontend)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -32,7 +32,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 3 sub-step 4 — frontend (Staff page replacing Users, staff detail, Assignments page, My classes, nav)
+- Phase 3 sub-step 5 — E2E (staff, assignments, forbidden, nav) + docs
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

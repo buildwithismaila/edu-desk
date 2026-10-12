@@ -1,18 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { ROLES } from '#shared/constants/roles'
 import { navigationFor } from '~/utils/navigation'
 
 describe('navigationFor', () => {
-  it('gives the admin the Dashboard, Users and the School setup group', () => {
+  it('gives the admin Staff, Assignments and the School setup group', () => {
     const items = navigationFor('admin')
 
-    expect(items.map(i => i.label)).toEqual(['Dashboard', 'Users', 'School setup'])
-    expect(items[2]!.children!.map(i => i.to)).toEqual([
+    expect(items.map(i => i.label)).toEqual(['Dashboard', 'Staff', 'Assignments', 'School setup'])
+    expect(items[3]!.children!.map(i => i.to)).toEqual([
       '/settings/school', '/settings/calendar', '/settings/classes', '/settings/subjects', '/settings/grading',
     ])
   })
 
-  it.each(ROLES.filter(r => r !== 'admin'))('gives %s only the Dashboard', (role) => {
+  it('gives the principal Staff and Assignments, but not School setup', () => {
+    expect(navigationFor('principal').map(i => i.label)).toEqual(['Dashboard', 'Staff', 'Assignments'])
+  })
+
+  it.each(['bursar', 'teacher', 'parent'] as const)('gives %s only the Dashboard', (role) => {
     expect(navigationFor(role).map(i => i.label)).toEqual(['Dashboard'])
   })
 

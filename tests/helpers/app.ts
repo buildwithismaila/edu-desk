@@ -47,7 +47,6 @@ import subjectsPostHandler from '~~/server/api/subjects/index.post'
 import termPatchHandler from '~~/server/api/terms/[id].patch'
 import termSetCurrentHandler from '~~/server/api/terms/[id]/set-current.post'
 import resetPasswordHandler from '~~/server/api/users/[id]/reset-password.post'
-import usersHandler from '~~/server/api/users/index.get'
 import tenantMiddleware from '~~/server/middleware/00.tenant'
 import { rejectForeignSession, requireRole, requireUser } from '~~/server/utils/auth'
 import { resetLoginThrottle } from '~~/server/utils/login-throttle'
@@ -138,7 +137,6 @@ export function createTestApp(db: Db) {
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)
-    .get('/api/users', usersHandler)
     .post('/api/users/:id/reset-password', resetPasswordHandler)
     .get('/api/_auth/session', builtinSessionHandler)
     // Test-only probes for the auth utils; real routes are tested in their own files

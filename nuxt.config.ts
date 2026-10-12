@@ -22,6 +22,11 @@ export default defineNuxtConfig({
     },
   },
 
+  // Phase 1's Users page became Staff in Phase 3
+  routeRules: {
+    '/users': { redirect: '/staff' },
+  },
+
   // *.lvh.me resolves to 127.0.0.1; the default `localhost` may bind IPv6 (::1) only
   devServer: { host: '127.0.0.1' },
 

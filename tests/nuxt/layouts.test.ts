@@ -32,22 +32,24 @@ describe('default layout', () => {
     expect(wrapper.get('[data-testid=slot]').text()).toBe('Page content')
   })
 
-  it('shows the admin the Users link', async () => {
+  it('shows the admin the Staff and Assignments links', async () => {
     logInAs('admin')
     const wrapper = await mountSuspended(DefaultLayout, { slots })
 
     const nav = wrapper.get('[data-testid=sidebar] nav').text()
     expect(nav).toContain('Dashboard')
-    expect(nav).toContain('Users')
+    expect(nav).toContain('Staff')
+    expect(nav).toContain('Assignments')
   })
 
-  it('hides the Users link from a teacher', async () => {
+  it('hides Staff and Assignments from a teacher', async () => {
     logInAs('teacher')
     const wrapper = await mountSuspended(DefaultLayout, { slots })
 
     const nav = wrapper.get('[data-testid=sidebar] nav').text()
     expect(nav).toContain('Dashboard')
-    expect(nav).not.toContain('Users')
+    expect(nav).not.toContain('Staff')
+    expect(nav).not.toContain('Assignments')
   })
 
   it('shows the user menu with the user\'s name', async () => {
