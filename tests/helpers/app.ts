@@ -9,6 +9,10 @@ import armsPostHandler from '~~/server/api/class-levels/[id]/arms.post'
 import levelsGetHandler from '~~/server/api/class-levels/index.get'
 import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
+import departmentDeleteHandler from '~~/server/api/departments/[id].delete'
+import departmentPatchHandler from '~~/server/api/departments/[id].patch'
+import departmentsGetHandler from '~~/server/api/departments/index.get'
+import departmentsPostHandler from '~~/server/api/departments/index.post'
 import logoutHandler from '~~/server/api/auth/logout.post'
 import passwordHandler from '~~/server/api/auth/password.post'
 import schoolHandler from '~~/server/api/school.get'
@@ -21,6 +25,10 @@ import sessionDeleteHandler from '~~/server/api/sessions/[id].delete'
 import sessionPatchHandler from '~~/server/api/sessions/[id].patch'
 import sessionsGetHandler from '~~/server/api/sessions/index.get'
 import sessionsPostHandler from '~~/server/api/sessions/index.post'
+import subjectDeleteHandler from '~~/server/api/subjects/[id].delete'
+import subjectPatchHandler from '~~/server/api/subjects/[id].patch'
+import subjectsGetHandler from '~~/server/api/subjects/index.get'
+import subjectsPostHandler from '~~/server/api/subjects/index.post'
 import termPatchHandler from '~~/server/api/terms/[id].patch'
 import termSetCurrentHandler from '~~/server/api/terms/[id]/set-current.post'
 import resetPasswordHandler from '~~/server/api/users/[id]/reset-password.post'
@@ -89,6 +97,14 @@ export function createTestApp(db: Db) {
     .post('/api/class-levels/:id/arms', armsPostHandler)
     .patch('/api/class-arms/:id', armPatchHandler)
     .delete('/api/class-arms/:id', armDeleteHandler)
+    .get('/api/departments', departmentsGetHandler)
+    .post('/api/departments', departmentsPostHandler)
+    .patch('/api/departments/:id', departmentPatchHandler)
+    .delete('/api/departments/:id', departmentDeleteHandler)
+    .get('/api/subjects', subjectsGetHandler)
+    .post('/api/subjects', subjectsPostHandler)
+    .patch('/api/subjects/:id', subjectPatchHandler)
+    .delete('/api/subjects/:id', subjectDeleteHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)
