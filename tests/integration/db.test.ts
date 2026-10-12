@@ -82,7 +82,8 @@ describe('seed', () => {
       .select({ email: users.email, role: users.role, isActive: users.isActive, mustChangePassword: users.mustChangePassword, slug: schools.slug })
       .from(users)
       .innerJoin(schools, eq(users.schoolId, schools.id))
-      .where(sql`${schools.slug} in ('greenfield', 'sunrise')`)
+      // The demo login accounts; generated guardians (Phase 4) are covered in seed-students.test.ts
+      .where(sql`${schools.slug} in ('greenfield', 'sunrise') and (${users.email} like '%@greenfield.test' or ${users.email} like '%@sunrise.test')`)
 
     // Phase 3 added more Greenfield teachers (see seed-staff.test.ts)
     expect(rows.map(r => `${r.slug}:${r.email}:${r.role}:${r.isActive}`).sort()).toEqual([

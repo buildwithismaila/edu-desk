@@ -17,6 +17,7 @@ import {
 import { applySchoolDefaults } from '../../services/school-defaults'
 import type { Db } from '../../utils/db'
 import { DEMO_PASSWORD_HASH } from './demo-password'
+import { type DemoStudents, GREENFIELD_STUDENTS, seedStudents, SUNRISE_STUDENTS } from './students'
 
 const demoSchools: NewSchool[] = [
   {
@@ -48,7 +49,7 @@ const demoUsers: DemoUser[] = [
   { school: 'greenfield', email: 'principal@greenfield.test', name: 'Emeka Nwosu', role: 'principal' },
   { school: 'greenfield', email: 'bursar@greenfield.test', name: 'Fatima Bello', role: 'bursar' },
   { school: 'greenfield', email: 'teacher@greenfield.test', name: 'Tunde Adeyemi', role: 'teacher' },
-  { school: 'greenfield', email: 'parent@greenfield.test', name: 'Ngozi Eze', role: 'parent' },
+  { school: 'greenfield', email: 'parent@greenfield.test', name: 'Ngozi Eze', role: 'parent', phone: '+2348031110001' },
   { school: 'greenfield', email: 'inactive@greenfield.test', name: 'Musa Ibrahim', role: 'teacher', isActive: false },
   { school: 'greenfield', email: 'chioma@greenfield.test', name: 'Chioma Obi', role: 'teacher', phone: '+2348021112233' },
   { school: 'greenfield', email: 'yusuf@greenfield.test', name: 'Yusuf Lawal', role: 'teacher', phone: '+2347034445566' },
@@ -72,6 +73,8 @@ interface DemoAcademics {
     classTeachers: { email: string, arm: string }[]
     subjectTeachers: { email: string, subject: string, section: 'primary' | 'jss' | 'sss', arms: string[] }[]
   }
+  /** Admitted into the current session; default guardians get phones `${phoneBase}NNNN` */
+  students?: DemoStudents & { phoneBase: string }
 }
 
 const FIRST_TERM_2026: TermDates = { first: { startsOn: '2026-09-14', endsOn: '2026-12-18', nextTermBeginsOn: '2027-01-11' } }
@@ -119,12 +122,14 @@ const demoAcademics: Record<string, DemoAcademics> = {
         { email: 'principal@greenfield.test', subject: 'Civic Education', section: 'sss', arms: ['SSS 1A'] },
       ],
     },
+    students: { ...GREENFIELD_STUDENTS, phoneBase: '+234802210' },
   },
   sunrise: {
     sessions: [{ name: '2026/2027', terms: FIRST_TERM_2026 }],
     current: { session: '2026/2027', term: 'first' },
     arms: { 'JSS 1': ['Gold', 'Diamond'], 'JSS 2': ['Gold'] },
     subjects: { jss: ['English Language', 'Mathematics'] },
+    students: { ...SUNRISE_STUDENTS, phoneBase: '+234803310' },
   },
 }
 
@@ -223,6 +228,7 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
     if (rows.length) await tx.insert(subjects).values(rows).onConflictDoNothing()
 
     if (academics.assignments) await seedAssignments(tx, schoolId, currentSessionId, academics.assignments)
+    if (academics.students) await seedStudents(tx, schoolId, currentSessionId, academics.students, academics.students.phoneBase)
   })
 }
 

@@ -1,0 +1,61 @@
+import { eq } from 'drizzle-orm'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { academicSessions, classArms } from '~~/server/database/schema'
+import type { Db } from '~~/server/utils/db'
+import { createClassArm, createClassLevel, createSession } from '../factories/academics'
+import { createSchool } from '../factories/schools'
+import { createStudent, enrol } from '../factories/students'
+import { createUser, DEFAULT_TEST_PASSWORD } from '../factories/users'
+import { createTestApp } from '../helpers/app'
+import { createTestDb } from '../helpers/db'
+
+// Phase 2 deletes that would lose student history (promised in docs/features/02-school-setup.md)
+let db: Db
+let app: ReturnType<typeof createTestApp>
+
+beforeAll(async () => {
+  db = await createTestDb()
+})
+
+beforeEach(() => {
+  app = createTestApp(db)
+})
+
+async function adminOf(school: { id: string, slug: string }) {
+  const admin = await createUser(db, school, { role: 'admin' })
+  return app.login(`${school.slug}.lvh.me:3000`, admin.email!, DEFAULT_TEST_PASSWORD)
+}
+
+const del = (school: { slug: string }, path: string, cookie: string) =>
+  app.request(path, { host: `${school.slug}.lvh.me:3000`, cookie, method: 'DELETE' })
+
+describe('deletes blocked by enrolments', () => {
+  it('refuses to delete a class arm with enrolled students (409), allows it once empty', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { session } = await createSession(db, school)
+    const arm = await createClassArm(db, school, await createClassLevel(db, school))
+    await enrol(db, school, { student: await createStudent(db, school), session, arm })
+
+    const res = await del(school, `/api/class-arms/${arm.id}`, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toMatch(/students/)
+    expect(await db.select().from(classArms).where(eq(classArms.id, arm.id))).toHaveLength(1)
+
+    const empty = await createClassArm(db, school, await createClassLevel(db, school))
+    expect((await del(school, `/api/class-arms/${empty.id}`, cookie)).status).toBe(200)
+  })
+
+  it('refuses to delete a session with enrolments (409)', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { session } = await createSession(db, school)
+    const arm = await createClassArm(db, school, await createClassLevel(db, school))
+    await enrol(db, school, { student: await createStudent(db, school), session, arm })
+
+    const res = await del(school, `/api/sessions/${session.id}`, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toMatch(/students/)
+    expect(await db.select().from(academicSessions).where(eq(academicSessions.id, session.id))).toHaveLength(1)
+  })
+})

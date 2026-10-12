@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 4 — Students & guardians (spec approved 2026-10-12; sub-step 1 done — pure helpers)
+- **Current phase:** Phase 4 — Students & guardians (spec approved 2026-10-12; sub-steps 1–2 done — pure helpers; schema, enrolment guards, seed)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -38,7 +38,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 4 sub-step 2 — schema (students, enrolments, guardians, counters), Phase 2 enrolment guards, factories, seed
+- Phase 4 sub-step 3 — login by email or phone, guardians API, `/api/me/children`
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
@@ -51,3 +51,5 @@
 - TypeScript TS2321 ("excessive stack depth") with typed `$fetch` (~45 routes): a callback typed `() => Promise<unknown>` that returns a `$fetch(...)` call makes TS compare the route-inferred response type and overflow. Type such callbacks as `() => unknown` (see `NameDialogOptions.submit`, `run()` in settings pages). Watch for it as routes grow.
 - `pnpm test:unit` takes ~3.5 min (34 files; each integration file boots PGlite and runs migrations, and permission matrices log in many users with real scrypt). If it keeps growing: share one migrated PGlite per worker (template DB), or lower scrypt cost in the test runtime config only.
 - E2E needs a production build (~3.5 min, up to 10+ min when the machine is busy, e.g. with `pnpm dev` running). Tip: `pnpm build`, start `.output/server/index.mjs` on port 3100 with the E2E env from `playwright.config.ts`, and Playwright reuses it locally.
+- Vitest workers occasionally crash on Windows with native exit codes (0xC0000409 / 0x80000003) when several integration files boot PGlite at once on this 8 GB machine; rerunning passes. If it recurs, cap `maxWorkers` for the unit project.
+- `users.email` is nullable since Phase 4 (guardians may have a phone only); staff always have one (createStaffSchema requires it).

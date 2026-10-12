@@ -22,5 +22,6 @@ export async function createUser(db: Db, school: Pick<School, 'id'>, { password 
       passwordHash: await hashPassword(password),
     })
     .returning()
-  return user!
+  // Factory users always get an email unless overridden with null
+  return user! as typeof user & { email: string }
 }

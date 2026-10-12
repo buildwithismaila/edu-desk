@@ -2,7 +2,8 @@
 import { ROLE_LABELS, type Role, STAFF_ROLES, type StaffRole } from '#shared/constants/roles'
 import { createStaffSchema, updateStaffSchema } from '#shared/schemas/staff'
 
-type Staff = { id: string, name: string, email: string, phone: string | null, role: Role }
+// email is always set for staff, but the shared users column is nullable (guardians may have phone only)
+type Staff = { id: string, name: string, email: string | null, phone: string | null, role: Role }
 
 // Add (no `staff`) or edit a staff member. Emits close with the API result, or false when cancelled.
 const props = defineProps<{

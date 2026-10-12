@@ -18,6 +18,8 @@ export const schools = pgTable('schools', {
   logoKey: text(),
   /** Cache-busting version for the logo URL. */
   logoUpdatedAt: timestamp({ withTimezone: true }),
+  /** Admission number prefix, e.g. GFA → GFA/2026/0001 (Phase 4); null until set or first admission. */
+  admissionPrefix: text(),
   /** Show "position in class" on report cards (docs/domain.md). */
   showPositions: boolean().notNull().default(true),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),

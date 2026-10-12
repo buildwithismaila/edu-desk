@@ -1,7 +1,7 @@
 import { and, asc, eq, max, ne, sql } from 'drizzle-orm'
 import { SECTIONS, type Section } from '../../shared/constants/academics'
 import { classArmLabel } from '../../shared/utils/academics'
-import { type ClassArm, classArms, type ClassLevel, classLevels } from '../database/schema'
+import { type ClassArm, classArms, type ClassLevel, classLevels, studentEnrolments } from '../database/schema'
 import type { Db } from '../utils/db'
 import { conflict, notFound } from '../utils/errors'
 import { whereSchool } from '../utils/tenant'
@@ -111,8 +111,11 @@ export async function renameClassArm(db: Db, school: SchoolRef, id: string, name
   return toArmDto(level, updated!)
 }
 
-/** Phase 4 adds a 409 when the arm has students. */
+/** 409 while any student is enrolled in the arm (any session), so history isn't lost. */
 export async function deleteClassArm(db: Db, school: SchoolRef, id: string) {
   await findArm(db, school, id)
+  const [enrolled] = await db.select({ id: studentEnrolments.id }).from(studentEnrolments)
+    .where(whereSchool(studentEnrolments, school, eq(studentEnrolments.classArmId, id))).limit(1)
+  if (enrolled) throw conflict('This class arm has students. Move them to another arm first.')
   await db.delete(classArms).where(whereSchool(classArms, school, eq(classArms.id, id)))
 }

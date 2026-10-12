@@ -29,6 +29,13 @@
       "when": 1791769925131,
       "tag": "0003_staff",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791783608128,
+      "tag": "0004_students",
+      "breakpoints": true
     }
   ]
 }
