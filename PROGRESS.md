@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 2 — School setup — all sub-steps done; awaiting push + CI and your manual check
+- **Current phase:** none — Phase 2 done (CI green 2026-10-12); Phase 3 not started (spec first)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -32,7 +32,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Push Phase 2 and confirm CI; then Phase 3 — Staff management (spec first)
+- Phase 3 — Staff management (write `docs/features/03-staff.md` and wait for approval)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

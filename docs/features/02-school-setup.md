@@ -282,7 +282,7 @@ Each ends with `pnpm check` green, a summary, browser checks and a commit messag
 - [x] Current session/term visible to every logged-in user
 - [x] Works at 375px
 - [x] Seed updated; `pnpm check` and `pnpm test:e2e` green
-- [ ] CI green (after push)
+- [x] CI green
 
 ## Open questions
 1. **Sections as a fixed enum** (Nursery, Primary, JSS, SSS) rather than a table. `docs/domain.md` lists exactly these four. Schools without a nursery simply delete those class levels. OK?
