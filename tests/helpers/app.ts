@@ -2,15 +2,19 @@ import { createApp, createRouter, defineEventHandler, send, setResponseStatus, t
 import currentTermHandler from '~~/server/api/academic/current.get'
 import assessmentGetHandler from '~~/server/api/assessment-components/index.get'
 import assessmentPutHandler from '~~/server/api/assessment-components/index.put'
+import assignmentsGetHandler from '~~/server/api/assignments/index.get'
 import loginHandler from '~~/server/api/auth/login.post'
 import armDeleteHandler from '~~/server/api/class-arms/[id].delete'
 import armPatchHandler from '~~/server/api/class-arms/[id].patch'
+import classTeacherPutHandler from '~~/server/api/class-arms/[id]/class-teacher.put'
+import subjectTeachersPutHandler from '~~/server/api/class-arms/[id]/subject-teachers.put'
 import levelDeleteHandler from '~~/server/api/class-levels/[id].delete'
 import levelPatchHandler from '~~/server/api/class-levels/[id].patch'
 import armsPostHandler from '~~/server/api/class-levels/[id]/arms.post'
 import levelsGetHandler from '~~/server/api/class-levels/index.get'
 import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
+import myAssignmentsHandler from '~~/server/api/me/assignments.get'
 import departmentDeleteHandler from '~~/server/api/departments/[id].delete'
 import departmentPatchHandler from '~~/server/api/departments/[id].patch'
 import departmentsGetHandler from '~~/server/api/departments/index.get'
@@ -127,6 +131,10 @@ export function createTestApp(db: Db) {
     .delete('/api/staff/:id', staffDeleteHandler)
     .post('/api/staff/:id/deactivate', staffDeactivateHandler)
     .post('/api/staff/:id/reactivate', staffReactivateHandler)
+    .get('/api/assignments', assignmentsGetHandler)
+    .put('/api/class-arms/:id/class-teacher', classTeacherPutHandler)
+    .put('/api/class-arms/:id/subject-teachers', subjectTeachersPutHandler)
+    .get('/api/me/assignments', myAssignmentsHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)

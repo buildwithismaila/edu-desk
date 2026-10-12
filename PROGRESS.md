@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 3 — Staff management (spec approved 2026-10-12; sub-steps 1–2 done — schema, removed-user exclusion, seed; guard helpers + staff API)
+- **Current phase:** Phase 3 — Staff management (spec approved 2026-10-12; sub-steps 1–3 done — schema, removed-user exclusion, seed; guard helpers + staff API; assignments API)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -32,7 +32,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 3 sub-step 3 — assignments API + `/api/me/assignments`
+- Phase 3 sub-step 4 — frontend (Staff page replacing Users, staff detail, Assignments page, My classes, nav)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
@@ -43,3 +43,4 @@
 - Login throttle is in-memory (single instance) and uses the socket IP (`getRequestIP` without `X-Forwarded-For`). Behind a reverse proxy, all users share the proxy's IP and the per-IP cap (50 failures / 15 min) would apply to everyone. Revisit both when choosing hosting.
 - Production build got slow on the dev machine (3+ min, mostly the Nitro step; ~1 min in Phase 0). Playwright webServer timeout raised to 10 min and `expect` timeout to 10 s (scrypt logins under parallel browsers take seconds). Investigate the Nitro build time if it keeps growing.
 - TypeScript TS2321 ("excessive stack depth") with typed `$fetch` (~45 routes): a callback typed `() => Promise<unknown>` that returns a `$fetch(...)` call makes TS compare the route-inferred response type and overflow. Type such callbacks as `() => unknown` (see `NameDialogOptions.submit`, `run()` in settings pages). Watch for it as routes grow.
+- `pnpm test:unit` takes ~3.5 min (34 files; each integration file boots PGlite and runs migrations, and permission matrices log in many users with real scrypt). If it keeps growing: share one migrated PGlite per worker (template DB), or lower scrypt cost in the test runtime config only.
