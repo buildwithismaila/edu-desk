@@ -1,6 +1,9 @@
 <script setup lang="ts">
 // The caller's own classes for the current session (admin, principal, teacher)
 const { data } = await useFetch('/api/me/assignments')
+// Today's register for the arms I'm class teacher of
+const { data: attendance } = await useFetch('/api/attendance/arms', { key: 'attendance-arms' })
+const takenToday = (armId: string) => attendance.value?.arms.find(a => a.id === armId)?.taken ?? false
 
 const hasClasses = computed(() => !!data.value && (data.value.classTeacherOf.length > 0 || data.value.subjects.length > 0))
 </script>
@@ -34,15 +37,32 @@ const hasClasses = computed(() => !!data.value && (data.value.classTeacherOf.len
         <h3 class="text-sm font-medium text-muted">
           Class teacher of
         </h3>
-        <div class="mt-1 flex flex-wrap gap-1">
-          <UBadge
+        <ul class="mt-1 space-y-2">
+          <li
             v-for="arm in data!.classTeacherOf"
             :key="arm.classArmId"
-            :data-testid="`my-class-teacher-${arm.label}`"
-            :label="arm.label"
-            variant="subtle"
-          />
-        </div>
+            class="flex flex-wrap items-center gap-2"
+          >
+            <UBadge
+              :data-testid="`my-class-teacher-${arm.label}`"
+              :label="arm.label"
+              variant="subtle"
+            />
+            <span
+              :data-testid="`my-register-${arm.label}`"
+              class="text-sm text-muted"
+            >
+              Register {{ takenToday(arm.classArmId) ? 'taken today' : 'not taken today' }}
+            </span>
+            <UButton
+              :to="`/attendance?arm=${arm.classArmId}`"
+              :label="takenToday(arm.classArmId) ? 'Open register' : 'Take register'"
+              size="xs"
+              color="neutral"
+              variant="outline"
+            />
+          </li>
+        </ul>
       </div>
       <div v-if="data!.subjects.length">
         <h3 class="text-sm font-medium text-muted">

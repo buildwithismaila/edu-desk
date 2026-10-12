@@ -211,6 +211,11 @@ function guardianActions(s: Student, guardian: Guardian): DropdownMenuItem[][] {
         </dl>
       </UCard>
 
+      <StudentsAttendanceCard
+        v-if="user?.role !== 'bursar'"
+        :student-id="student.id"
+      />
+
       <UCard>
         <template #header>
           <h2 class="font-semibold">
