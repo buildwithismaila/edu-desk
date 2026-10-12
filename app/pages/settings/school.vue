@@ -19,6 +19,7 @@ const state = reactive({
   motto: profile.value?.motto ?? '',
   phone: profile.value?.phone ?? '',
   email: profile.value?.email ?? '',
+  admissionPrefix: profile.value?.admissionPrefix ?? '',
 })
 const saving = ref(false)
 
@@ -160,6 +161,17 @@ async function removeLogo() {
             />
           </UFormField>
         </div>
+        <UFormField
+          label="Admission number prefix"
+          name="admissionPrefix"
+          :help="`New admission numbers look like ${state.admissionPrefix.trim().toUpperCase() || 'GFA'}/${new Date().getFullYear()}/0001`"
+        >
+          <UInput
+            v-model="state.admissionPrefix"
+            data-testid="profile-admission-prefix"
+            class="w-full sm:w-40"
+          />
+        </UFormField>
         <UButton
           data-testid="profile-save"
           type="submit"

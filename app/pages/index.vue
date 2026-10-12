@@ -25,5 +25,9 @@ const { user } = useUserSession()
       v-if="user && isAssignableRole(user.role)"
       class="max-w-xl"
     />
+    <DashboardMyChildren
+      v-if="user?.role === 'parent'"
+      class="max-w-3xl"
+    />
   </div>
 </template>

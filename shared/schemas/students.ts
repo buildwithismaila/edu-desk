@@ -101,6 +101,9 @@ export type NewGuardianInput = z.input<typeof newGuardianSchema>
 
 export const STUDENT_PAGE_SIZE = 25
 
+/** Student photos: at most 1 MB; PNG, JPEG or WebP (checked by file signature on the server). */
+export const PHOTO_MAX_BYTES = 1024 * 1024
+
 /** GET /api/students query: server-side pagination, search and filters. */
 export const studentListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
