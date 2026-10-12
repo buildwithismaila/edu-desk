@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 3 — Staff management (spec approved 2026-10-12; sub-steps 1–4 done — schema, removed-user exclusion, seed; guard helpers + staff API; assignments API; frontend)
+- **Current phase:** Phase 3 — Staff management — all sub-steps done; awaiting push + CI and your manual check
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 3 — Staff management (2026-10-12)
+- Built: staff accounts on `users` (phone, soft delete); add with one-time temporary password, edit, role change, deactivate/reactivate, remove; self and last-active-admin guards (row-locked); class-teacher and subject-teacher assignments per session (DB one-per rules, section and eligibility checks, cascades); `/api/me/assignments`; Staff page (replaces Users; `/users` redirects), staff detail, Assignments page with gap warnings, My classes on the dashboard, role-based nav; seed: five more teachers and demo assignments with gaps.
+- Tests (totals): 202 unit / 456 integration (PGlite) / 38 Nuxt component / 30 E2E tests x desktop + mobile (4 viewport-specific skips).
+- Decisions: see docs/decisions.md #021–#024
+- Found while building: the last-admin guard is only reachable by concurrent requests (now row-locked); E2E clicks before hydration did nothing (added `gotoHydrated`).
 
 ### Phase 2 — School setup (2026-10-12)
 - Built: school profile + logo (Nitro fs storage, signature check, tenant-scoped serving); sessions with three terms, term dates, atomic set-current (DB partial unique indexes); class levels (reorder) and arms; SSS departments and per-section subjects; assessment split (sum 100) and grading scales (contiguous 0–100) with atomic replacement; `applySchoolDefaults` for new schools; five admin settings pages, School setup nav group, current session/term in the top bar, logo in sidebar and login; demo seed (Greenfield 2026/2027 First Term current, arms, subjects; Sunrise own arms).
@@ -32,7 +38,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 3 sub-step 5 — E2E (staff, assignments, forbidden, nav) + docs
+- Push Phase 3 and confirm CI; then Phase 4 — Students & guardians (spec first)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
@@ -44,3 +50,4 @@
 - Production build got slow on the dev machine (3+ min, mostly the Nitro step; ~1 min in Phase 0). Playwright webServer timeout raised to 10 min and `expect` timeout to 10 s (scrypt logins under parallel browsers take seconds). Investigate the Nitro build time if it keeps growing.
 - TypeScript TS2321 ("excessive stack depth") with typed `$fetch` (~45 routes): a callback typed `() => Promise<unknown>` that returns a `$fetch(...)` call makes TS compare the route-inferred response type and overflow. Type such callbacks as `() => unknown` (see `NameDialogOptions.submit`, `run()` in settings pages). Watch for it as routes grow.
 - `pnpm test:unit` takes ~3.5 min (34 files; each integration file boots PGlite and runs migrations, and permission matrices log in many users with real scrypt). If it keeps growing: share one migrated PGlite per worker (template DB), or lower scrypt cost in the test runtime config only.
+- E2E needs a production build (~3.5 min, up to 10+ min when the machine is busy, e.g. with `pnpm dev` running). Tip: `pnpm build`, start `.output/server/index.mjs` on port 3100 with the E2E env from `playwright.config.ts`, and Playwright reuses it locally.

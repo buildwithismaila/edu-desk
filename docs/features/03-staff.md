@@ -1,6 +1,6 @@
 # Phase 3 — Staff management
 
-**Status:** Approved 2026-10-12 (all open-question recommendations accepted)
+**Status:** Done 2026-10-12 · Approved 2026-10-12 (all open-question recommendations accepted)
 **Roadmap ref:** `docs/roadmap.md` → Phase 3
 
 ## Goal
@@ -187,15 +187,16 @@ All routes:
 5. **E2E + docs.**
 
 ## Acceptance checklist
-- [ ] Admin adds, edits, changes role, deactivates/reactivates and removes staff; temporary password on create
-- [ ] Deactivated and removed staff can't log in; existing sessions stop
-- [ ] Self and last-active-admin guards
-- [ ] One class teacher per arm and one teacher per subject per arm, per session (DB-enforced)
-- [ ] Assignments validated (school, section, eligible staff); visible per arm with gaps
-- [ ] Teachers see "My classes"; `/api/me/assignments` ready for Phases 5–6
-- [ ] Every route: validation, roles, tenant isolation tested
-- [ ] Works at 375px
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] Admin adds, edits, changes role, deactivates/reactivates and removes staff; temporary password on create
+- [x] Deactivated and removed staff can't log in; existing sessions stop
+- [x] Self and last-active-admin guards
+- [x] One class teacher per arm and one teacher per subject per arm, per session (DB-enforced)
+- [x] Assignments validated (school, section, eligible staff); visible per arm with gaps
+- [x] Teachers see "My classes"; `/api/me/assignments` ready for Phases 5–6
+- [x] Every route: validation, roles, tenant isolation tested
+- [x] Works at 375px
+- [x] Seed updated; `pnpm check` and `pnpm test:e2e` green
+- [ ] CI green (after push)
 
 ## Open questions
 1. **Who manages assignments?** I recommend admin **and principal**, since `docs/domain.md` gives principals "academics". Staff accounts (add/edit/deactivate/remove) stay **admin only**; principals get read-only staff pages. OK?

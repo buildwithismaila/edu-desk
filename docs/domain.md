@@ -87,6 +87,8 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
 
 - A parent can have many children; a child can have many guardians.
 - Students do not log in in the MVP.
+- **Teaching assignments are per session:** one class teacher per class arm, one teacher per subject per arm. Admins and principals assign them; teachers, principals and admins can be assigned. A teacher may hold several arms and subjects.
+- **Staff accounts:** deactivate for a temporary block; remove (soft delete) for staff who left — they can't log in and lose their assignments, but their records stay. An admin can't deactivate, remove or demote themselves, and a school always keeps at least one active admin.
 - Every user belongs to exactly one school; all configuration in this file (class names, grading, assessment split, fee items, position toggle) is **per school**.
 - Server-side checks are mandatory — hiding a button is not authorisation.
 

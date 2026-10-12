@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { GREENFIELD_USERS, loginAs } from './support/auth'
+import { gotoHydrated, GREENFIELD_USERS, loginAs } from './support/auth'
 
 // Creates its own session and arm (random names) and deletes them again, so reruns and the parallel
 // desktop/mobile projects don't collide. Only desktop changes the current term: both projects share
@@ -13,7 +13,7 @@ test('admin creates a session, sets its first term\'s dates and adds an arm', as
   await loginAs(page, GREENFIELD_USERS.admin.email)
 
   // New session → its three terms appear
-  await page.goto('/settings/calendar')
+  await gotoHydrated(page, '/settings/calendar')
   await page.getByTestId('new-session').click()
   await page.getByTestId('name-dialog-input').fill(session)
   await page.getByTestId('name-dialog-save').click()
@@ -47,7 +47,7 @@ test('admin creates a session, sets its first term\'s dates and adds an arm', as
   await expect(card).toHaveCount(0)
 
   // New arm on JSS 3 → listed with its label; then delete it
-  await page.goto('/settings/classes')
+  await gotoHydrated(page, '/settings/classes')
   await page.getByTestId('add-arm-JSS 3').click()
   await page.getByTestId('name-dialog-input').fill(arm)
   await page.getByTestId('name-dialog-save').click()
@@ -62,7 +62,7 @@ test('admin creates a session, sets its first term\'s dates and adds an arm', as
 
 test('a session name in the wrong format is rejected in the dialog', async ({ page }) => {
   await loginAs(page, GREENFIELD_USERS.admin.email)
-  await page.goto('/settings/calendar')
+  await gotoHydrated(page, '/settings/calendar')
 
   await page.getByTestId('new-session').click()
   await page.getByTestId('name-dialog-input').fill('2026-2027')

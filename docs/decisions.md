@@ -118,3 +118,25 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** Settings pages need many small name/confirm dialogs.
 - **Decision:** `useNameDialog()` / `useConfirmDialog()` (`app/composables/useDialogs.ts`) open `NameDialog` / `ConfirmDialog` with Nuxt UI's `useOverlay` and await the result. Zod schemas passed as overlay props go through `markRaw()`: `useOverlay` stores props reactively, and a proxied Zod schema throws on its read-only `_zod` property (found by E2E: Save silently did nothing). Callbacks that return a typed `$fetch(...)` are typed `() => unknown`, not `() => Promise<unknown>` (TS2321 "excessive stack depth" with ~45 typed routes).
 - **Consequences:** Both rules are noted in docs/architecture.md.
+
+### 021 — Staff are users; deactivate vs remove (2026-10-12)
+- **Context:** Staff need accounts; leavers must lose access but their history must stay.
+- **Decision:** Staff are `users` rows with a staff role (no separate table). **Deactivate** (`isActive = false`) is temporary: no login (403 "disabled"), sessions stop at the next request, assignments kept. **Remove** is a soft delete (`deletedAt`): treated like an unknown email at login (401), hidden from lists, assignments deleted, record and email kept. Emails are unique per school across all accounts (staff, parents, removed). New staff and admin resets get a one-time temporary password and must change it at first login.
+- **Alternatives considered:** freeing a removed account's email for reuse — would need a partial unique index and makes "restore" ambiguous.
+- **Consequences:** Re-hiring a removed person needs a manual restore (no UI in the MVP).
+
+### 022 — Self and last-active-admin guards (2026-10-12)
+- **Context:** An admin must not lock themselves or the school out.
+- **Decision:** An admin can't deactivate, remove or change the role of their own account (409). Deactivating, removing or demoting an admin is refused if it would leave no active admin (`wouldLeaveNoActiveAdmin`, 409). Through the API the actor is always an active admin, so the second rule only matters when two admins change each other concurrently; the check runs in a transaction that locks the school's admin rows (`SELECT … FOR UPDATE`). Tests call the service directly to reach it.
+- **Consequences:** Concurrent admin changes queue instead of racing.
+
+### 023 — Teaching assignments per session (2026-10-12)
+- **Context:** Later phases decide what a teacher can see (attendance: class teacher; scores: subject teacher).
+- **Decision:** `class_teacher_assignments` (one per arm per session) and `subject_teacher_assignments` (one teacher per subject per arm per session), both DB-unique. Admins and principals manage them; teachers, principals and admins can be assigned (active, not removed); a subject must be in the arm's section. Deleting a session, arm or subject removes its assignments; becoming a bursar or being removed deletes a user's assignments; deactivation keeps them (flagged in the UI). `GET /api/me/assignments` (current session) is the contract Phases 5–6 build on.
+- **Alternatives considered:** per-term assignments (more admin work for rare mid-year changes); copying from the previous session (deferred until pilots ask).
+- **Consequences:** Mid-year changes are reassignments; who entered each score is recorded in Phase 6.
+
+### 024 — E2E against a shared database: per-project data, cleanup, hydration waits (2026-10-12)
+- **Context:** Desktop and mobile projects run in parallel against one seeded E2E database; pages are server-rendered.
+- **Decision:** Tests that change data use names unique per run/project (or a different record per project), clean up after themselves (via the UI, or `page.request` in a `finally` when cleanup must survive a failed assertion), and only one project changes school-wide state such as the current term. Tests that click right after navigating use `gotoHydrated()` (waits for the Vue app to mount): a click on server-rendered HTML before hydration does nothing. Long journeys set their own timeout.
+- **Consequences:** Reruns start from the seeded state; fewer flaky clicks.

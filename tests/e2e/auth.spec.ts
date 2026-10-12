@@ -9,7 +9,10 @@ for (const [role, user] of Object.entries(GREENFIELD_USERS)) {
 
     const sidebar = await openSidebar(page, isMobile)
     await expect(sidebar.getByRole('link', { name: 'Dashboard' })).toBeVisible()
-    await expect(sidebar.getByRole('link', { name: 'Users' })).toHaveCount(role === 'admin' ? 1 : 0)
+    const manager = role === 'admin' || role === 'principal'
+    await expect(sidebar.getByRole('link', { name: 'Staff' })).toHaveCount(manager ? 1 : 0)
+    await expect(sidebar.getByRole('link', { name: 'Assignments' })).toHaveCount(manager ? 1 : 0)
+    await expect(sidebar.getByRole('link', { name: 'Calendar' })).toHaveCount(role === 'admin' ? 1 : 0)
 
     await sidebar.getByTestId('user-menu').click()
     await page.getByRole('menuitem', { name: 'Log out' }).click()
@@ -37,11 +40,11 @@ test('an inactive user is told their account is disabled', async ({ page }) => {
 })
 
 test('a logged-out visit is sent to login and returns to the page afterwards', async ({ page }) => {
-  await page.goto('/users')
-  await expect(page).toHaveURL('/login?redirect=/users')
+  await page.goto('/staff')
+  await expect(page).toHaveURL('/login?redirect=/staff')
 
   await submitLogin(page, GREENFIELD_USERS.admin.email)
 
-  await expect(page).toHaveURL('/users')
-  await expect(page.getByTestId('users-table')).toBeVisible()
+  await expect(page).toHaveURL('/staff')
+  await expect(page.getByTestId('staff-table')).toBeVisible()
 })
