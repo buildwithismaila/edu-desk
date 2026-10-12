@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { FormSubmitEvent } from '@nuxt/ui'
-import type { z } from 'zod'
 import { type LoginInput, loginSchema } from '#shared/schemas/auth'
 
 definePageMeta({ layout: 'auth', public: true })
@@ -17,11 +15,12 @@ const hydrated = useMounted()
 const error = ref<string>()
 const loading = ref(false)
 
-async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
+async function onSubmit() {
   loading.value = true
   error.value = undefined
   try {
-    await $fetch('/api/auth/login', { method: 'POST', body: event.data })
+    // What was typed, not the parsed form data: the schema turns `login` into { email } or { phone }
+    await $fetch('/api/auth/login', { method: 'POST', body: { ...state } })
     await refreshSession()
     await navigateTo(safeRedirect(route.query.redirect))
   }
