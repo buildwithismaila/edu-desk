@@ -22,9 +22,11 @@ const selectedArm = computed({
 })
 const armItems = computed(() => arms.value.map(a => ({ label: a.label, value: a.id })))
 
+// useRequestFetch: during SSR a bare $fetch doesn't forward the request (host, cookie), so the tenant is unknown
+const requestFetch = useRequestFetch()
 // Explicit type: inference on this path overflows TS (TS2321, see PROGRESS.md)
 const { data: summary, error } = await useAsyncData('attendance-summary',
-  () => armId.value ? $fetch<Summary>('/api/attendance/summary', { query: { classArmId: armId.value } }) : Promise.resolve(null),
+  () => armId.value ? requestFetch<Summary>('/api/attendance/summary', { query: { classArmId: armId.value } }) : Promise.resolve(null),
   { watch: [armId] })
 
 // Lowest attendance first helps spot students to follow up

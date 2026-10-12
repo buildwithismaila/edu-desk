@@ -30,10 +30,12 @@ const selectedArm = computed({
   set: value => setQuery({ arm: value }),
 })
 
+// useRequestFetch: during SSR a bare $fetch doesn't forward the request (host, cookie), so the tenant is unknown
+const requestFetch = useRequestFetch()
 // Explicit type: inference on this path overflows TS (TS2321, see PROGRESS.md)
 const { data: register, refresh, error } = await useAsyncData('attendance-register',
   () => armId.value && date.value
-    ? $fetch<RegisterView>('/api/attendance/register', { query: { classArmId: armId.value, date: date.value } })
+    ? requestFetch<RegisterView>('/api/attendance/register', { query: { classArmId: armId.value, date: date.value } })
     : Promise.resolve(null),
   { watch: [armId, date] })
 

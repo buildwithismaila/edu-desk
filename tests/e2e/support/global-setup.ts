@@ -1,10 +1,12 @@
 import { fileURLToPath } from 'node:url'
+import { eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
 import * as schema from '../../../server/database/schema'
 import { seed } from '../../../server/database/seed/seed'
 import { DB_CASING } from '../../../server/utils/db'
+import { SCHOOL_TIME_ZONE, todayIn } from '../../../shared/utils/dates'
 import { e2eDatabaseUrl } from './database'
 
 const migrationsFolder = fileURLToPath(new URL('../../../server/database/migrations', import.meta.url))
@@ -31,6 +33,11 @@ export default async function globalSetup() {
     const db = drizzle({ client, schema, casing: DB_CASING })
     await migrate(db, { migrationsFolder })
     await seed(db)
+    // Attendance needs today inside the current term; the seeded term (14/09–18/12/2026) won't always contain it
+    const today = todayIn(SCHOOL_TIME_ZONE)
+    await db.update(schema.terms)
+      .set({ startsOn: sql`least(${schema.terms.startsOn}, ${today}::date)`, endsOn: sql`greatest(${schema.terms.endsOn}, ${today}::date)` })
+      .where(eq(schema.terms.isCurrent, true))
   }
   finally {
     await client.end()

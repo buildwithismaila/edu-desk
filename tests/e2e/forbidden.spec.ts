@@ -21,7 +21,7 @@ test('the old Users address takes the admin to Staff', async ({ page }) => {
   await expect(page.getByTestId('staff-table')).toContainText(GREENFIELD_USERS.teacher.email)
 })
 
-for (const path of ['/staff', '/assignments']) {
+for (const path of ['/staff', '/assignments', '/attendance']) {
   test(`a bursar opening ${path} lands on the dashboard with a notice`, async ({ page }) => {
     await loginAs(page, GREENFIELD_USERS.bursar.email)
 

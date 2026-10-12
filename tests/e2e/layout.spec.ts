@@ -88,4 +88,18 @@ test.describe('mobile', () => {
     await expect(page.getByTestId('student-name')).toBeVisible()
     expect(await overflow(), 'profile').toBeLessThanOrEqual(0)
   })
+
+  test('the attendance pages fit the screen without horizontal scroll', async ({ page }) => {
+    const overflow = () => page.evaluate<number>('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+    await loginAs(page, GREENFIELD_USERS.admin.email)
+
+    for (const [path, ready] of [
+      ['/attendance', 'attendance-arm'],
+      ['/attendance/summary', 'summary-arm'],
+    ] as const) {
+      await page.goto(path)
+      await expect(page.getByTestId(ready)).toBeVisible()
+      expect(await overflow(), path).toBeLessThanOrEqual(0)
+    }
+  })
 })

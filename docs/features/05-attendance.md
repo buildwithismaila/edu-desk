@@ -163,14 +163,14 @@ Wrong role, or a teacher who isn't the arm's class teacher → **403**. An unkno
 6. **E2E + docs:** E2E global-setup term dates, specs, docs (`domain.md`, decisions, `PROGRESS.md`), CI.
 
 ## Acceptance checklist
-- [ ] A class teacher takes today's register on a phone: everyone present by default, exceptions tapped, one save, under a minute
-- [ ] One register per arm per day (DB-unique, concurrent saves safe); same-day edits by the class teacher
-- [ ] Teachers can only mark their own arm (403 otherwise); admin and principal can take or correct any date in the term, or delete a register
-- [ ] Term summary per student (arm table + profile card), late counted as present
-- [ ] Arms, terms/sessions and students with attendance can't be deleted
-- [ ] Every route: validation, roles, tenant isolation tested
-- [ ] Works at 375px
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] A class teacher takes today's register on a phone: everyone present by default, exceptions tapped, one save, under a minute
+- [x] One register per arm per day (DB-unique, concurrent saves safe); same-day edits by the class teacher
+- [x] Teachers can only mark their own arm (403 otherwise); admin and principal can take or correct any date in the term, or delete a register
+- [x] Term summary per student (arm table + profile card), late counted as present
+- [x] Arms, terms/sessions and students with attendance can't be deleted
+- [x] Every route: validation, roles, tenant isolation tested
+- [x] Works at 375px
+- [x] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Open questions
 1. **Who can take the register:** the class teacher for their arm, plus admin and principal for any arm (to cover an absent class teacher). OK, or class teacher only?

@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 5 — Attendance (spec approved 2026-10-12)
+- **Current phase:** Phase 5 — Attendance: complete (2026-10-12). Next: Phase 6 (spec to be written when you name it)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 5 — Attendance (2026-10-12)
+- Built: daily registers per class arm (DB-unique per arm and day, concurrent-safe), present/absent/late with everyone present by default; class teacher takes and edits today's register for their arm; admin/principal back-fill or correct any date in the current term and delete mistaken registers; complete-register validation; term summary per arm and per student (late counts as present, marks across arms); `/attendance` (one-tap mobile register, sticky save), `/attendance/summary`, attendance card on the student profile, register status + "Take register" in My classes, Attendance nav; delete guards for arms/sessions with attendance; seed: 10 past JSS 1A registers at Greenfield, 2 at Sunrise; E2E setup widens the current term to include the run date.
+- Tests (totals): 1004 unit + integration (PGlite) / 57 Nuxt component / 41 E2E tests × desktop + mobile (viewport-specific and desktop-only skips).
+- Decisions: see docs/decisions.md #030–#031
+- Found while building: a bare `$fetch` inside `useAsyncData` during SSR doesn't forward the request, so the tenant was unknown ("School not found") — caught by E2E, fixed with `useRequestFetch()`.
 
 ### Phase 4 — Students & guardians (2026-10-12)
 - Built: students with per-session enrolment, admission numbers `PREFIX/YEAR/NNNN` (per-year counter, manual numbers allowed, prefix on School profile); guardians as parent accounts (phone required and unique, email optional), siblings sharing guardians; login by email or phone; admission in one transaction with existing or new guardians (temporary password shown once) and optional photo; paginated, searchable, filterable list (URL query) scoped by role (teacher: own arms; bursar: no personal details; parent: own children only, 404 elsewhere); profile with edit, change class, private photo, add/edit/unlink guardian, guardian password reset, remove (soft); CSV import with dry run, row-level errors and all-or-nothing commit, template download; "My children" on the parent dashboard; Students nav; arm/session delete guards; seed: 40 Greenfield students (siblings, shared guardians), 3 Sunrise students.
@@ -44,7 +50,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 5 — approve the spec, then sub-step 1 (pure helpers: `todayIn`, `summariseAttendance`, `registerDateError`)
+- Phase 6 — Score entry: start with its spec (`docs/features/06-*.md`) when you name it
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

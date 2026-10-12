@@ -93,6 +93,10 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
 - **Removing a student** (left the school) is a soft delete: gone from lists and parents' accounts; admission number and history kept.
 - **Student photos are private:** only people who may see the student can load them.
 - **CSV import** (admin): a file is checked first and imported all-or-nothing; guardians are matched by phone; new parents get no password until the admin resets it (decision 025).
+- **Attendance** (Phase 5): one register per class arm per school day; each student is present, absent or late (late counts as present, and is shown separately).
+  - **Who takes it:** the class teacher, for today's register only, for their own arm. Admin and principal can take or correct any date in the current term up to today, and delete a register taken by mistake.
+  - **School days:** there's no weekday or holiday calendar. A day counts once a register is taken.
+  - **Per student:** "times school opened" counts the registers that include them, so joining mid-term or changing arm needs no special rule. The rate is present ÷ opened, as a whole %. Bursars and parents don't see attendance (parents get it in Phase 9).
 - **Teaching assignments are per session:** one class teacher per class arm, one teacher per subject per arm. Admins and principals assign them; teachers, principals and admins can be assigned. A teacher may hold several arms and subjects.
 - **Staff accounts:** deactivate for a temporary block; remove (soft delete) for staff who left — they can't log in and lose their assignments, but their records stay. An admin can't deactivate, remove or demote themselves, and a school always keeps at least one active admin.
 - Every user belongs to exactly one school; all configuration in this file (class names, grading, assessment split, fee items, position toggle) is **per school**.

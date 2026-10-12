@@ -168,3 +168,26 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Decision:** The unit project runs with `execArgv: ['--liftoff-only']` (no TurboFan tier-up for WASM; also faster) and `maxWorkers: 2`.
 - **Alternatives considered:** one PGlite per worker reused across files (`isolate: false` + template database) — the real fix for memory and run time, left for later (PROGRESS.md).
 - **Consequences:** Crashes are rarer but can still happen when the machine is busy; rerun.
+
+### 030 — Attendance: daily registers per arm, class teacher today, admin/principal back-fill (2026-10-12)
+- **Context:** Class teachers must take a register on a phone in under a minute; mistakes and absent teachers happen.
+- **Decision:**
+  - **Registers:** `attendance_registers` is DB-unique per (school, arm, date) and tied to the current term; `attendance_marks` is DB-unique per (register, student).
+  - **Saving:** a save must cover exactly the arm's active students. It runs in one transaction, and a concurrent first save becomes an update, so there's never a second register.
+  - **Who and when:** the class teacher (current session assignment) takes today's register only. Admin and principal can take or correct any date in the current term up to today, and delete a mistaken register. Any other teacher gets 403; unknown or foreign arms get 404.
+  - **Summaries:** built from each student's own marks across all arms in the term. Late counts as present.
+  - **Dates:** no weekday or holiday calendar.
+  - **Today:** Africa/Lagos, computed on the server.
+- **Alternatives considered:** one row per student per day without a register (can't tell "not taken" from "everyone absent", and no "days opened"); a holiday calendar (more admin work, unnecessary while days count only when a register is taken).
+- **Consequences:**
+  - Arms and sessions with registers can't be deleted (409).
+  - Past terms are read-only.
+  - The E2E global setup widens the current term to include the run date.
+
+### 031 — Pages use `useAsyncData` + explicitly typed `$fetch` for query-driven API calls (2026-10-12)
+- **Context:** Pages whose request depends on the URL (arm, date) need to skip the call until a choice exists. Inferred `$fetch` types on these routes hit TS2321.
+- **Decision:**
+  - Use `useAsyncData(key, () => cond ? requestFetch<T>(…) : null, { watch: [...] })`.
+  - `requestFetch = useRequestFetch()`: during SSR a bare `$fetch` doesn't forward the request, so the tenant ("School not found") and the session would be missing. E2E found this.
+  - Take `T` from `InternalApi[route][method]` (`nitropack/types`).
+- **Consequences:** No request is made until a choice exists, and the types stay exact.
