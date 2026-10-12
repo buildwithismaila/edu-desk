@@ -53,6 +53,9 @@ describe('classArmLabel', () => {
     ['JSS 1', 'Gold', 'JSS 1 Gold'],
     ['Nursery 2', '1', 'Nursery 2 1'],
     ['SSS 1', 'a', 'SSS 1a'],
+    // Regression: levels not ending in a number need a space ("CrecheA" was shown before)
+    ['Creche', 'A', 'Creche A'],
+    ['Pre-Nursery', 'B', 'Pre-Nursery B'],
   ])('%s + %s → %s', (level, arm, label) => {
     expect(classArmLabel(level, arm)).toBe(label)
   })

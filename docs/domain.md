@@ -9,7 +9,7 @@ These rules drive the schema, validation and tests. If a rule here conflicts wit
   - Primary: Primary 1 – Primary 6
   - JSS: JSS 1 – JSS 3
   - SSS: SSS 1 – SSS 3
-- **Arms:** each class level has one or more arms (A/B or Gold/Diamond). A student is in exactly one class arm per session. Display: a single-letter arm joins the level ("JSS 1A"), anything else gets a space ("JSS 1 Gold").
+- **Arms:** each class level has one or more arms (A/B or Gold/Diamond). A student is in exactly one class arm per session. Display: a single-letter arm joins a level name ending in a number ("JSS 1A"); anything else gets a space ("JSS 1 Gold", "Creche A").
 - **Subjects** belong to one section; SSS subjects are core or belong to one department. Class level, arm, department and subject names are unique per school, ignoring case.
 - **SSS departments:** Science, Arts, Commercial — determine which subjects a student offers (core subjects + department subjects).
 - **Admission number:** auto-generated, configurable format, e.g. `SCH/2025/0001`; unique per school.

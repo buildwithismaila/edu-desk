@@ -96,7 +96,7 @@ Shared so `UForm` shows the same errors the API returns.
   - `startsOn < endsOn`, and `nextTermBeginsOn > endsOn`, when set;
   - any of the three can be left empty.
 - **Session name:** `YYYY/YYYY` where the second year = first + 1 (e.g. `2026/2027`).
-- **Arm display name:** `classArmLabel(level, arm)`. A single-letter arm joins without a space ("JSS 1A"); anything else gets a space ("JSS 1 Gold", "Nursery 2 1").
+- **Arm display name:** `classArmLabel(level, arm)`. A single-letter arm joins a level name ending in a number ("JSS 1A"); anything else gets a space ("JSS 1 Gold", "Nursery 2 1", "Creche A" — fixed 2026-10-12).
 
 ## Logo storage
 - **Store:** Nitro storage mount `uploads`, using the `fs` driver at `.data/uploads` (dev and prod; prod needs a persistent volume). Tests use an in-memory stand-in. The key is always `schools/<schoolId>/logo.<ext>`, built from `requireTenant`, never from input.
