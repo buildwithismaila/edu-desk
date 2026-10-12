@@ -1,6 +1,14 @@
 import { createApp, createRouter, defineEventHandler, send, setResponseStatus, toWebHandler } from 'h3'
 import currentTermHandler from '~~/server/api/academic/current.get'
 import loginHandler from '~~/server/api/auth/login.post'
+import armDeleteHandler from '~~/server/api/class-arms/[id].delete'
+import armPatchHandler from '~~/server/api/class-arms/[id].patch'
+import levelDeleteHandler from '~~/server/api/class-levels/[id].delete'
+import levelPatchHandler from '~~/server/api/class-levels/[id].patch'
+import armsPostHandler from '~~/server/api/class-levels/[id]/arms.post'
+import levelsGetHandler from '~~/server/api/class-levels/index.get'
+import levelsPostHandler from '~~/server/api/class-levels/index.post'
+import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import logoutHandler from '~~/server/api/auth/logout.post'
 import passwordHandler from '~~/server/api/auth/password.post'
 import schoolHandler from '~~/server/api/school.get'
@@ -73,6 +81,14 @@ export function createTestApp(db: Db) {
     .delete('/api/sessions/:id', sessionDeleteHandler)
     .patch('/api/terms/:id', termPatchHandler)
     .post('/api/terms/:id/set-current', termSetCurrentHandler)
+    .get('/api/class-levels', levelsGetHandler)
+    .post('/api/class-levels', levelsPostHandler)
+    .put('/api/class-levels/order', levelsOrderHandler)
+    .patch('/api/class-levels/:id', levelPatchHandler)
+    .delete('/api/class-levels/:id', levelDeleteHandler)
+    .post('/api/class-levels/:id/arms', armsPostHandler)
+    .patch('/api/class-arms/:id', armPatchHandler)
+    .delete('/api/class-arms/:id', armDeleteHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)
