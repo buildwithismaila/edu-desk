@@ -52,6 +52,8 @@ import studentGuardiansPostHandler from '~~/server/api/students/[id]/guardians/i
 import studentPhotoDeleteHandler from '~~/server/api/students/[id]/photo.delete'
 import studentPhotoGetHandler from '~~/server/api/students/[id]/photo.get'
 import studentPhotoPutHandler from '~~/server/api/students/[id]/photo.put'
+import studentsImportHandler from '~~/server/api/students/import/index.post'
+import studentsImportTemplateHandler from '~~/server/api/students/import/template.get'
 import studentsGetHandler from '~~/server/api/students/index.get'
 import studentsPostHandler from '~~/server/api/students/index.post'
 import subjectDeleteHandler from '~~/server/api/subjects/[id].delete'
@@ -153,6 +155,8 @@ export function createTestApp(db: Db) {
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
     .get('/api/me/children', myChildrenHandler)
+    .post('/api/students/import', studentsImportHandler)
+    .get('/api/students/import/template', studentsImportTemplateHandler)
     .get('/api/students', studentsGetHandler)
     .post('/api/students', studentsPostHandler)
     .get('/api/students/:id', studentGetHandler)

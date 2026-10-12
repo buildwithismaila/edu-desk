@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { ROLES } from '~~/shared/constants/roles'
+import { defaultAdmissionPrefix } from '~~/shared/utils/admission-number'
 import { schools } from '~~/server/database/schema'
 import type { Db } from '~~/server/utils/db'
 import { createTwoSchools } from '../factories/schools'
@@ -29,7 +30,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   app = createTestApp(db)
   resetTestStorage()
-  await db.update(schools).set({ logoKey: null, logoUpdatedAt: null, address: null, motto: null, phone: null, email: null, showPositions: true })
+  await db.update(schools).set({ logoKey: null, logoUpdatedAt: null, address: null, motto: null, phone: null, email: null, showPositions: true, admissionPrefix: null })
 })
 
 async function loginAs(role: typeof ROLES[number], school = schoolA) {
@@ -81,6 +82,7 @@ describe('school profile', () => {
 
     expect(await res.json()).toEqual({
       name: schoolA.name, address: null, motto: null, phone: null, email: null, logoUrl: null, showPositions: true,
+      admissionPrefix: defaultAdmissionPrefix(schoolA.name),
     })
   })
 
@@ -101,6 +103,22 @@ describe('school profile', () => {
 
     expect(res.status).toBe(400)
     expect(Object.keys((await res.json()).data.fieldErrors).sort()).toEqual(['email', 'name', 'phone'])
+  })
+
+  it('sets the admission number prefix, uppercased', async () => {
+    const res = await patchProfile(await loginAs('admin'), { admissionPrefix: ' gfa ' })
+
+    expect(res.status).toBe(200)
+    expect((await res.json()).admissionPrefix).toBe('GFA')
+    const [a] = await db.select().from(schools).where(eq(schools.id, schoolA.id))
+    expect(a!.admissionPrefix).toBe('GFA')
+  })
+
+  it.each(['G', 'GREENFA', 'GF-A', ''])('rejects the admission prefix %j', async (prefix) => {
+    const res = await patchProfile(await loginAs('admin'), { admissionPrefix: prefix })
+
+    expect(res.status).toBe(400)
+    expect((await res.json()).data.fieldErrors.admissionPrefix).toEqual(['Use 2–6 letters or digits, e.g. GFA'])
   })
 
   it('shows a new school name immediately, despite the tenant cache', async () => {

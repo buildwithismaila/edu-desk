@@ -73,7 +73,7 @@ async function checkDepartment(db: Db, school: SchoolRef, departmentId: string |
  * Next free admission number for the school and year: increments the counter (inside the caller's
  * transaction, so a failed admission doesn't use a number) and skips numbers typed in manually.
  */
-async function nextAdmissionNumber(db: Db, school: SchoolRef, year: number) {
+export async function nextAdmissionNumber(db: Db, school: SchoolRef, year: number) {
   const [row] = await db.select({ name: schools.name, prefix: schools.admissionPrefix }).from(schools).where(eq(schools.id, school.id))
   let prefix = row!.prefix
   if (!prefix) {

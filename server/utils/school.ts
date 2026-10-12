@@ -1,3 +1,4 @@
+import { defaultAdmissionPrefix } from '../../shared/utils/admission-number'
 import type { School } from '../database/schema'
 
 // useStorage is a Nitro auto-import (see tests/helpers/nitro-globals.ts). The `uploads` mount is
@@ -24,5 +25,7 @@ export function toSchoolProfile(school: School) {
     email: school.email,
     logoUrl: schoolLogoUrl(school),
     showPositions: school.showPositions,
+    // Until the first admission saves it, the prefix that admission would use
+    admissionPrefix: school.admissionPrefix ?? defaultAdmissionPrefix(school.name),
   }
 }

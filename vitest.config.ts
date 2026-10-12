@@ -4,6 +4,8 @@ import { defineVitestProject } from '@nuxt/test-utils/config'
 
 export default defineConfig({
   test: {
+    // Each integration file holds its own PGlite (WASM heap) and runs scrypt: 3+ workers ran the 8 GB dev machine out of memory
+    maxWorkers: 2,
     projects: [
       {
         // Same root alias Nuxt uses, so tests can import server/ and shared/ code

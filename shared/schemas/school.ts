@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { admissionPrefixSchema } from '../utils/admission-number'
 import { optionalPhoneSchema } from './common'
 
 /** Empty or whitespace-only text → null (clears the field). */
@@ -12,6 +13,7 @@ export const schoolProfileSchema = z.object({
   phone: optionalPhoneSchema,
   email: z.union([z.literal(''), z.email('Enter a valid email address')]).nullable().transform(v => v || null),
   showPositions: z.boolean(),
+  admissionPrefix: admissionPrefixSchema,
 }).partial()
 
 export type SchoolProfileInput = z.input<typeof schoolProfileSchema>
