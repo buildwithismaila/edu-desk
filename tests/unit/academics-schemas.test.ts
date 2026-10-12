@@ -24,6 +24,10 @@ describe('termDatesSchema', () => {
     expect(termDatesSchema.safeParse(ok).success).toBe(true)
   })
 
+  it('treats an empty date as no date', () => {
+    expect(termDatesSchema.parse({ startsOn: '', endsOn: '2026-12-18' })).toEqual({ startsOn: null, endsOn: '2026-12-18' })
+  })
+
   it('allows any date to be empty', () => {
     expect(termDatesSchema.safeParse({ startsOn: null, endsOn: null, nextTermBeginsOn: null }).success).toBe(true)
     expect(termDatesSchema.safeParse({ startsOn: '2026-09-14' }).success).toBe(true)

@@ -8,6 +8,7 @@ import PrintLayout from '~/layouts/print.vue'
 
 registerEndpoint('/api/school', () => ({ slug: 'greenfield', name: 'Greenfield Academy' }))
 registerEndpoint('/api/_auth/session', () => ({}))
+registerEndpoint('/api/academic/current', () => ({ session: null, term: null }))
 
 const slots = { default: () => h('p', { 'data-testid': 'slot' }, 'Page content') }
 

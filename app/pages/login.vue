@@ -37,7 +37,14 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
 <template>
   <div class="space-y-6">
     <div class="space-y-1 text-center">
+      <img
+        v-if="school?.logoUrl"
+        :src="school.logoUrl"
+        alt=""
+        class="mx-auto size-14 rounded object-contain"
+      >
       <UIcon
+        v-else
         name="i-lucide-school"
         class="mx-auto size-8 text-primary"
       />

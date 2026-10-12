@@ -46,6 +46,9 @@ if (import.meta.client) {
             <UDashboardSidebarToggle data-testid="sidebar-toggle" />
             <UDashboardSidebarCollapse data-testid="sidebar-collapse" />
           </template>
+          <template #right>
+            <LayoutCurrentTerm />
+          </template>
         </UDashboardNavbar>
       </template>
 

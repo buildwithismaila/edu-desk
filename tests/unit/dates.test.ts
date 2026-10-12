@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDateTime } from '~~/shared/utils/dates'
+import { formatDate, formatDateTime } from '~~/shared/utils/dates'
 
 describe('formatDateTime', () => {
   it('formats as DD/MM/YYYY HH:mm in Lagos time (UTC+1)', () => {
@@ -12,5 +12,15 @@ describe('formatDateTime', () => {
 
   it.each([null, undefined])('returns an empty string for %s', (value) => {
     expect(formatDateTime(value)).toBe('')
+  })
+})
+
+describe('formatDate', () => {
+  it('formats a calendar date as DD/MM/YYYY without time-zone shifts', () => {
+    expect(formatDate('2027-01-01')).toBe('01/01/2027')
+  })
+
+  it.each([null, undefined, ''])('returns an empty string for %j', (value) => {
+    expect(formatDate(value)).toBe('')
   })
 })

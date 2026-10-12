@@ -14,3 +14,10 @@ export function formatDateTime(value: Date | string | null | undefined): string 
   )
   return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`
 }
+
+/** `YYYY-MM-DD` (a calendar date, no time zone) → `DD/MM/YYYY`; empty string for no date. */
+export function formatDate(isoDate: string | null | undefined): string {
+  if (!isoDate) return ''
+  const [year, month, day] = isoDate.split('-')
+  return `${day}/${month}/${year}`
+}

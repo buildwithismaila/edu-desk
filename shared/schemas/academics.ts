@@ -9,7 +9,8 @@ export const sessionNameSchema = z.string().trim().refine((name) => {
 /** `YYYY-MM-DD` that is a real calendar date. */
 export const isoDateSchema = z.iso.date('Enter a valid date')
 
-const optionalDate = isoDateSchema.nullable().optional()
+// '' (a cleared date input) means "no date"
+const optionalDate = z.union([z.literal('').transform(() => null), isoDateSchema]).nullable().optional()
 
 export const termDatesSchema = z.object({
   startsOn: optionalDate,

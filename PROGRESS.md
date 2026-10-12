@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; sub-steps 1–7 done — validators; schema, defaults, demo seed; profile & logo API; calendar API; classes API; subjects API; assessment & grading API)
+- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; sub-steps 1–8 done — validators; schema, defaults, demo seed; profile & logo API; calendar API; classes API; subjects API; assessment & grading API; settings pages)
 - **Last updated:** 2026-10-11
 
 ## Completed phases
@@ -26,7 +26,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 2 sub-step 8 — frontend (five settings pages, nav group, top-bar current term, logo)
+- Phase 2 sub-step 9 — E2E (school setup, grading, forbidden) + docs
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
@@ -36,3 +36,4 @@
 - Sessions are sealed cookies (nuxt-auth-utils): logout can't revoke a copied cookie server-side; it stays valid until it expires (7 days). Deactivating the user does revoke it (`requireUser` checks the DB). If needed later: a `sessionVersion` column checked in `requireUser`, bumped on logout/password change.
 - Login throttle is in-memory (single instance) and uses the socket IP (`getRequestIP` without `X-Forwarded-For`). Behind a reverse proxy, all users share the proxy's IP and the per-IP cap (50 failures / 15 min) would apply to everyone. Revisit both when choosing hosting.
 - Production build got slow on the dev machine (3+ min, mostly the Nitro step; ~1 min in Phase 0). Playwright webServer timeout raised to 10 min and `expect` timeout to 10 s (scrypt logins under parallel browsers take seconds). Investigate the Nitro build time if it keeps growing.
+- TypeScript TS2321 ("excessive stack depth") with typed `$fetch` (~45 routes): a callback typed `() => Promise<unknown>` that returns a `$fetch(...)` call makes TS compare the route-inferred response type and overflow. Type such callbacks as `() => unknown` (see `NameDialogOptions.submit`, `run()` in settings pages). Watch for it as routes grow.
