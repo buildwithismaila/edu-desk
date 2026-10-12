@@ -68,6 +68,16 @@ describe('POST /api/auth/login', () => {
     expect(sessionCookie(wrongPassword)).toBeUndefined()
   })
 
+  it('treats a removed user like an unknown email (401), even with the right password', async () => {
+    const user = await createUser(db, schoolA, { deletedAt: new Date(), isActive: false })
+
+    const res = await loginAt(schoolA.slug, user.email)
+
+    expect(res.status).toBe(401)
+    expect((await res.json()).message).toBe('Invalid email or password')
+    expect(sessionCookie(res)).toBeUndefined()
+  })
+
   it('rejects an inactive user with 403 only when the password is correct', async () => {
     const user = await createUser(db, schoolA, { isActive: false })
 

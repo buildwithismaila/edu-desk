@@ -22,6 +22,13 @@
       "when": 1791750634831,
       "tag": "0002_school_setup",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791769925131,
+      "tag": "0003_staff",
+      "breakpoints": true
     }
   ]
 }

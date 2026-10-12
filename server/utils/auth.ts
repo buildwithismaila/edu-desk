@@ -1,4 +1,4 @@
-import { eq, getTableColumns } from 'drizzle-orm'
+import { eq, getTableColumns, isNull } from 'drizzle-orm'
 import { createError, type H3Event } from 'h3'
 import type { UserSession } from '#auth-utils'
 import { hasRole, type Role } from '../../shared/constants/roles'
@@ -37,7 +37,7 @@ export async function requireUser(event: H3Event): Promise<AuthUser> {
   const [user] = await useDb()
     .select(authUserColumns)
     .from(users)
-    .where(whereSchool(users, school, eq(users.id, session.user.id)))
+    .where(whereSchool(users, school, eq(users.id, session.user.id), isNull(users.deletedAt)))
 
   if (!user?.isActive) {
     await clearUserSession(event)

@@ -4,11 +4,13 @@ import {
   academicSessions,
   classArms,
   classLevels,
+  classTeacherAssignments,
   departments,
   type NewSchool,
   type NewUser,
   schools,
   subjects,
+  subjectTeacherAssignments,
   terms,
   users,
 } from '../schema'
@@ -38,7 +40,7 @@ const demoSchools: NewSchool[] = [
   { slug: 'hillside', name: 'Hillside College', status: 'suspended' },
 ]
 
-type DemoUser = Pick<NewUser, 'email' | 'name' | 'role'> & { school: string, isActive?: boolean }
+type DemoUser = Pick<NewUser, 'email' | 'name' | 'role'> & { school: string, isActive?: boolean, phone?: string, mustChangePassword?: boolean }
 
 // All share the demo password (see demo-password.ts)
 const demoUsers: DemoUser[] = [
@@ -48,6 +50,11 @@ const demoUsers: DemoUser[] = [
   { school: 'greenfield', email: 'teacher@greenfield.test', name: 'Tunde Adeyemi', role: 'teacher' },
   { school: 'greenfield', email: 'parent@greenfield.test', name: 'Ngozi Eze', role: 'parent' },
   { school: 'greenfield', email: 'inactive@greenfield.test', name: 'Musa Ibrahim', role: 'teacher', isActive: false },
+  { school: 'greenfield', email: 'chioma@greenfield.test', name: 'Chioma Obi', role: 'teacher', phone: '+2348021112233' },
+  { school: 'greenfield', email: 'yusuf@greenfield.test', name: 'Yusuf Lawal', role: 'teacher', phone: '+2347034445566' },
+  { school: 'greenfield', email: 'grace@greenfield.test', name: 'Grace Ekpo', role: 'teacher' },
+  { school: 'greenfield', email: 'ibrahim@greenfield.test', name: 'Ibrahim Sani', role: 'teacher' },
+  { school: 'greenfield', email: 'kemi@greenfield.test', name: 'Kemi Balogun', role: 'teacher', mustChangePassword: true },
   { school: 'sunrise', email: 'admin@sunrise.test', name: 'Bola Ogunleye', role: 'admin' },
 ]
 
@@ -60,6 +67,11 @@ interface DemoAcademics {
   arms: Record<string, string[]>
   /** section → subject names; SSS keyed by department ('' = core) */
   subjects: { primary?: string[], jss?: string[], sss?: Record<string, string[]> }
+  /** For the current session; arms as labels ("JSS 1A"), subjects with their section */
+  assignments?: {
+    classTeachers: { email: string, arm: string }[]
+    subjectTeachers: { email: string, subject: string, section: 'primary' | 'jss' | 'sss', arms: string[] }[]
+  }
 }
 
 const FIRST_TERM_2026: TermDates = { first: { startsOn: '2026-09-14', endsOn: '2026-12-18', nextTermBeginsOn: '2027-01-11' } }
@@ -92,6 +104,20 @@ const demoAcademics: Record<string, DemoAcademics> = {
         'Arts': ['Literature in English', 'Government', 'Christian Religious Studies'],
         'Commercial': ['Financial Accounting', 'Commerce', 'Economics'],
       },
+    },
+    // Other arms and subjects stay unassigned so the gaps show on the Assignments page
+    assignments: {
+      classTeachers: [
+        { email: 'teacher@greenfield.test', arm: 'JSS 1A' },
+        { email: 'chioma@greenfield.test', arm: 'JSS 1B' },
+        { email: 'grace@greenfield.test', arm: 'Primary 3A' },
+      ],
+      subjectTeachers: [
+        { email: 'teacher@greenfield.test', subject: 'Mathematics', section: 'jss', arms: ['JSS 1A', 'JSS 1B'] },
+        { email: 'chioma@greenfield.test', subject: 'English Language', section: 'jss', arms: ['JSS 1A', 'JSS 1B'] },
+        { email: 'yusuf@greenfield.test', subject: 'Physics', section: 'sss', arms: ['SSS 1A', 'SSS 1B'] },
+        { email: 'principal@greenfield.test', subject: 'Civic Education', section: 'sss', arms: ['SSS 1A'] },
+      ],
     },
   },
   sunrise: {
@@ -126,12 +152,14 @@ export async function seed(db: Db) {
 
   await db
     .insert(users)
-    .values(demoUsers.map(({ school, isActive = true, ...user }) => ({
+    .values(demoUsers.map(({ school, isActive = true, mustChangePassword = false, phone = null, ...user }) => ({
       ...user,
       schoolId: schoolIds.get(school)!,
       passwordHash: DEMO_PASSWORD_HASH,
       isActive,
-      mustChangePassword: false,
+      mustChangePassword,
+      phone,
+      deletedAt: null,
     })))
     .onConflictDoUpdate({
       target: [users.schoolId, users.email],
@@ -141,6 +169,8 @@ export async function seed(db: Db) {
         passwordHash: sql`excluded.password_hash`,
         isActive: sql`excluded.is_active`,
         mustChangePassword: sql`excluded.must_change_password`,
+        phone: sql`excluded.phone`,
+        deletedAt: sql`excluded.deleted_at`,
         updatedAt: sql`now()`,
       },
     })
@@ -191,5 +221,38 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
         names.map(name => ({ schoolId, section: 'sss' as const, name, departmentId: dept ? deptIds.get(dept)! : null }))),
     ]
     if (rows.length) await tx.insert(subjects).values(rows).onConflictDoNothing()
+
+    if (academics.assignments) await seedAssignments(tx, schoolId, currentSessionId, academics.assignments)
   })
+}
+
+/** Upserts by the one-per-arm / one-per-subject keys, so re-seeding restores the demo teachers. */
+async function seedAssignments(db: Db, schoolId: string, sessionId: string, assignments: NonNullable<DemoAcademics['assignments']>) {
+  const people = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.schoolId, schoolId))
+  const userId = (email: string) => people.find(p => p.email === email)!.id
+
+  const arms = await db.select({ id: classArms.id, arm: classArms.name, level: classLevels.name })
+    .from(classArms).innerJoin(classLevels, eq(classArms.classLevelId, classLevels.id)).where(eq(classArms.schoolId, schoolId))
+  const armId = (label: string) => arms.find(a => `${a.level}${a.arm}` === label)!.id
+
+  const subjectRows = await db.select({ id: subjects.id, name: subjects.name, section: subjects.section }).from(subjects).where(eq(subjects.schoolId, schoolId))
+  const subjectId = (name: string, section: string) => subjectRows.find(s => s.name === name && s.section === section)!.id
+
+  for (const { email, arm } of assignments.classTeachers) {
+    await db.insert(classTeacherAssignments).values({ schoolId, sessionId, classArmId: armId(arm), userId: userId(email) })
+      .onConflictDoUpdate({
+        target: [classTeacherAssignments.schoolId, classTeacherAssignments.sessionId, classTeacherAssignments.classArmId],
+        set: { userId: sql`excluded.user_id`, updatedAt: sql`now()` },
+      })
+  }
+  for (const { email, subject, section, arms: labels } of assignments.subjectTeachers) {
+    for (const label of labels) {
+      await db.insert(subjectTeacherAssignments)
+        .values({ schoolId, sessionId, classArmId: armId(label), subjectId: subjectId(subject, section), userId: userId(email) })
+        .onConflictDoUpdate({
+          target: [subjectTeacherAssignments.schoolId, subjectTeacherAssignments.sessionId, subjectTeacherAssignments.classArmId, subjectTeacherAssignments.subjectId],
+          set: { userId: sql`excluded.user_id`, updatedAt: sql`now()` },
+        })
+    }
+  }
 }

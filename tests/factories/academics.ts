@@ -1,6 +1,6 @@
 import type { Section, TermNumber } from '~~/shared/constants/academics'
 import { TERM_NUMBERS } from '~~/shared/constants/academics'
-import { academicSessions, classArms, classLevels, departments, type School, subjects, terms } from '~~/server/database/schema'
+import { academicSessions, classArms, classLevels, classTeacherAssignments, departments, type School, subjects, subjectTeacherAssignments, terms } from '~~/server/database/schema'
 import type { Db } from '~~/server/utils/db'
 
 type SchoolRef = Pick<School, 'id'>
@@ -44,4 +44,18 @@ export async function createDepartment(db: Db, school: SchoolRef, name = `Depart
 export async function createSubject(db: Db, school: SchoolRef, { section = 'jss', name, departmentId }: { section?: Section, name?: string, departmentId?: string } = {}) {
   const [subject] = await db.insert(subjects).values({ schoolId: school.id, section, name: name ?? `Subject ${next()}`, departmentId }).returning()
   return subject!
+}
+
+type AssignmentRefs = { session: { id: string }, arm: { id: string }, user: { id: string } }
+
+export async function assignClassTeacher(db: Db, school: SchoolRef, { session, arm, user }: AssignmentRefs) {
+  const [row] = await db.insert(classTeacherAssignments)
+    .values({ schoolId: school.id, sessionId: session.id, classArmId: arm.id, userId: user.id }).returning()
+  return row!
+}
+
+export async function assignSubjectTeacher(db: Db, school: SchoolRef, { session, arm, user, subject }: AssignmentRefs & { subject: { id: string } }) {
+  const [row] = await db.insert(subjectTeacherAssignments)
+    .values({ schoolId: school.id, sessionId: session.id, classArmId: arm.id, subjectId: subject.id, userId: user.id }).returning()
+  return row!
 }

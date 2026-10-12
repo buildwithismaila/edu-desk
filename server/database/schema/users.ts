@@ -18,6 +18,10 @@ export const users = pgTable('users', {
   /** Set by an admin password reset; the user must change it at next login. */
   mustChangePassword: boolean().notNull().default(false),
   lastLoginAt: timestamp({ withTimezone: true }),
+  /** Normalised `+234…` (shared/utils/phone.ts); optional. */
+  phone: text(),
+  /** Soft delete for staff who left (Phase 3): can't log in, hidden from lists; email stays reserved. */
+  deletedAt: timestamp({ withTimezone: true }),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 }, t => [unique('users_school_email_unique').on(t.schoolId, t.email)])

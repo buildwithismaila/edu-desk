@@ -82,6 +82,16 @@ describe('session', () => {
     expect(clearsSession(res)).toBe(true)
   })
 
+  it('rejects the session once the user is removed (soft-deleted)', async () => {
+    const { user, cookie } = await loggedIn()
+    await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, user.id))
+
+    const res = await app.request('/__test/require-user', onA(cookie))
+
+    expect(res.status).toBe(401)
+    expect(clearsSession(res)).toBe(true)
+  })
+
   it('rejects the session once the user is deleted', async () => {
     const { user, cookie } = await loggedIn()
     await db.delete(users).where(eq(users.id, user.id))

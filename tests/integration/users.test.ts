@@ -111,6 +111,15 @@ describe('POST /api/users/:id/reset-password', () => {
     expect(row!.mustChangePassword).toBe(false)
   })
 
+  it('returns 404 for a removed user and leaves them unchanged', async () => {
+    const { cookie } = await loginAs('admin')
+    const removed = await createUser(db, schoolA, { deletedAt: new Date() })
+
+    expect((await resetPassword(removed.id, cookie)).status).toBe(404)
+    const [row] = await db.select().from(users).where(eq(users.id, removed.id))
+    expect(row!.passwordHash).toBe(removed.passwordHash)
+  })
+
   it('returns 404 for an unknown id', async () => {
     const { cookie } = await loginAs('admin')
     expect((await resetPassword('00000000-0000-4000-8000-000000000000', cookie)).status).toBe(404)

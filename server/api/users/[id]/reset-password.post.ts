@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, isNull } from 'drizzle-orm'
 import { createError, defineEventHandler } from 'h3'
 import { z } from 'zod'
 import { users } from '../../../database/schema'
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   const [updated] = await useDb()
     .update(users)
     .set({ passwordHash: await hashPassword(temporaryPassword), mustChangePassword: true })
-    .where(whereSchool(users, school, eq(users.id, id)))
+    .where(whereSchool(users, school, eq(users.id, id), isNull(users.deletedAt)))
     .returning({ id: users.id })
 
   // Another school's user is "not found", so their existence isn't revealed

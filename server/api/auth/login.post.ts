@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, isNull } from 'drizzle-orm'
 import { createError, defineEventHandler, getRequestIP, setResponseHeader } from 'h3'
 import { loginSchema } from '../../../shared/schemas/auth'
 import { users } from '../../database/schema'
@@ -28,7 +28,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = useDb()
-  const [user] = await db.select().from(users).where(whereSchool(users, school, eq(users.email, email)))
+  // Removed (soft-deleted) users are treated like unknown emails
+  const [user] = await db.select().from(users).where(whereSchool(users, school, eq(users.email, email), isNull(users.deletedAt)))
 
   let valid = false
   if (user) valid = await verifyPassword(user.passwordHash, password)

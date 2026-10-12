@@ -73,7 +73,7 @@ describe('seed', () => {
     expect(bySlug.hillside).toMatchObject({ name: 'Hillside College', status: 'suspended' })
   })
 
-  it('seeds a user per role at greenfield, an inactive teacher and a sunrise admin, re-runnably', async () => {
+  it('seeds a user per role at greenfield, more teachers, an inactive teacher and a sunrise admin, re-runnably', async () => {
     await seed(db)
     await db.update(users).set({ isActive: false, mustChangePassword: true }).where(eq(users.email, 'admin@greenfield.test'))
     await seed(db)
@@ -84,16 +84,23 @@ describe('seed', () => {
       .innerJoin(schools, eq(users.schoolId, schools.id))
       .where(sql`${schools.slug} in ('greenfield', 'sunrise')`)
 
+    // Phase 3 added more Greenfield teachers (see seed-staff.test.ts)
     expect(rows.map(r => `${r.slug}:${r.email}:${r.role}:${r.isActive}`).sort()).toEqual([
       'greenfield:admin@greenfield.test:admin:true',
       'greenfield:bursar@greenfield.test:bursar:true',
+      'greenfield:chioma@greenfield.test:teacher:true',
+      'greenfield:grace@greenfield.test:teacher:true',
+      'greenfield:ibrahim@greenfield.test:teacher:true',
       'greenfield:inactive@greenfield.test:teacher:false',
+      'greenfield:kemi@greenfield.test:teacher:true',
       'greenfield:parent@greenfield.test:parent:true',
       'greenfield:principal@greenfield.test:principal:true',
       'greenfield:teacher@greenfield.test:teacher:true',
+      'greenfield:yusuf@greenfield.test:teacher:true',
       'sunrise:admin@sunrise.test:admin:true',
     ])
-    expect(rows.every(r => !r.mustChangePassword)).toBe(true)
+    // Re-seeding resets flags: only Kemi is seeded with a forced password change
+    expect(rows.filter(r => r.mustChangePassword).map(r => r.email)).toEqual(['kemi@greenfield.test'])
   })
 
   it('stores a demo password hash that verifies against the demo password', async () => {
