@@ -21,3 +21,9 @@ export function formatDate(isoDate: string | null | undefined): string {
   const [year, month, day] = isoDate.split('-')
   return `${day}/${month}/${year}`
 }
+
+/** Today's calendar date (`YYYY-MM-DD`) in a time zone, e.g. the school's `Africa/Lagos`. */
+export function todayIn(timeZone: string, now = new Date()): string {
+  // en-CA formats dates as YYYY-MM-DD
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now)
+}
