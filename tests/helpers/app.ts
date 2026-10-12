@@ -29,6 +29,13 @@ import sessionDeleteHandler from '~~/server/api/sessions/[id].delete'
 import sessionPatchHandler from '~~/server/api/sessions/[id].patch'
 import sessionsGetHandler from '~~/server/api/sessions/index.get'
 import sessionsPostHandler from '~~/server/api/sessions/index.post'
+import staffDeleteHandler from '~~/server/api/staff/[id].delete'
+import staffGetOneHandler from '~~/server/api/staff/[id].get'
+import staffPatchHandler from '~~/server/api/staff/[id].patch'
+import staffDeactivateHandler from '~~/server/api/staff/[id]/deactivate.post'
+import staffReactivateHandler from '~~/server/api/staff/[id]/reactivate.post'
+import staffGetHandler from '~~/server/api/staff/index.get'
+import staffPostHandler from '~~/server/api/staff/index.post'
 import subjectDeleteHandler from '~~/server/api/subjects/[id].delete'
 import subjectPatchHandler from '~~/server/api/subjects/[id].patch'
 import subjectsGetHandler from '~~/server/api/subjects/index.get'
@@ -113,6 +120,13 @@ export function createTestApp(db: Db) {
     .put('/api/assessment-components', assessmentPutHandler)
     .get('/api/grading-scales', gradingGetHandler)
     .put('/api/grading-scales/:section', gradingPutHandler)
+    .get('/api/staff', staffGetHandler)
+    .post('/api/staff', staffPostHandler)
+    .get('/api/staff/:id', staffGetOneHandler)
+    .patch('/api/staff/:id', staffPatchHandler)
+    .delete('/api/staff/:id', staffDeleteHandler)
+    .post('/api/staff/:id/deactivate', staffDeactivateHandler)
+    .post('/api/staff/:id/reactivate', staffReactivateHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)
