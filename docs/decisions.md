@@ -146,3 +146,25 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Decision:** `POST /api/students/import?dryRun=true` reports every error (spreadsheet row numbers, header = row 1). A real import re-checks the file and imports everything in one transaction, or nothing (400 with the errors). Guardians are matched by phone to active parents (siblings share one; existing parents are reused, not changed); a phone that belongs to staff is an error. New parent accounts get one random password per import, hashed once and never shown (`mustChangePassword`); the admin uses "Reset password" when a parent wants to log in. Rows with a typed admission number are inserted first, so generated numbers skip them.
 - **Alternatives considered:** importing the valid rows and reporting the rest (partial state, re-import duplicates); a temporary password per parent (up to 1,000 scrypt hashes in one request, and a printed password list).
 - **Consequences:** Imported parents can't log in until the admin resets their password. A concurrent admission that takes a number or phone makes the import fail with 409 instead of half-applying.
+
+### 026 — Guardians are parent users; login by email or phone (2026-10-12)
+- **Context:** Many Nigerian parents have a phone but no email they use. Siblings share parents.
+- **Decision:** A guardian is a `users` row with role `parent` (no separate table), linked to students through `student_guardians` (relationship, primary flag). Phone is required and unique per school among active accounts (partial unique index); email is optional, so `users.email` became nullable (staff still require one). The login form takes `{ login, password }`: an email or a Nigerian phone in any common format. New guardians added through admission get a one-time temporary password, shown once.
+- **Alternatives considered:** a separate `guardians` table with optional accounts (two places for the same person once they log in).
+- **Consequences:** Guardian contact changes apply to all their children. A phone used by a staff account can't be a guardian's.
+
+### 027 — Students: per-session enrolment and role-scoped visibility (2026-10-12)
+- **Context:** Later phases (attendance, scores, results, promotion) need a student's class per session, and parents' and staff's views differ.
+- **Decision:** `student_enrolments` holds one class arm per student per session; lists and profiles use the current session. Admin/principal see all students; the bursar sees all without date of birth, state of origin, LGA and address (NDPA); teachers see the arms they're class or subject teacher of; parents see their own children. A student outside the viewer's scope is a 404, so their existence isn't revealed. Students are soft-deleted. Photos are private (`/api/students/[id]/photo` after the same check, `Cache-Control: private`).
+- **Consequences:** Phase 9 promotion adds next-session enrolments; deleting a session or arm with enrolments is refused (409).
+
+### 028 — Admission numbers: PREFIX/YEAR/NNNN with a per-year counter (2026-10-12)
+- **Context:** Schools expect sequential numbers and often have an old register to carry over.
+- **Decision:** `schools.admissionPrefix` (2–6 letters/digits, default from the name, editable) + the admission session's first year + a counter in `admission_counters (schoolId, year)` incremented inside the admission transaction (upsert), skipping numbers already taken. A manually typed number is allowed if unused (case-insensitive). Only the prefix is configurable in the MVP.
+- **Consequences:** A failed admission doesn't use a number; changing the prefix only affects new numbers.
+
+### 029 — Unit test workers: Liftoff only, at most 2 (2026-10-12)
+- **Context:** Every integration file starts a fresh worker process that compiles PGlite's WASM and runs scrypt logins. On the 8 GB dev machine, workers crashed natively ("Fatal process out of memory: Zone", `WebAssembly.Memory(): could not allocate memory`).
+- **Decision:** The unit project runs with `execArgv: ['--liftoff-only']` (no TurboFan tier-up for WASM; also faster) and `maxWorkers: 2`.
+- **Alternatives considered:** one PGlite per worker reused across files (`isolate: false` + template database) — the real fix for memory and run time, left for later (PROGRESS.md).
+- **Consequences:** Crashes are rarer but can still happen when the machine is busy; rerun.

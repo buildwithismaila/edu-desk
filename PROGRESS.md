@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 4 — Students & guardians (spec approved 2026-10-12; sub-steps 1–3 done — pure helpers; schema, enrolment guards, seed; phone login, guardians API, me/children)
+- **Current phase:** Phase 4 — Students & guardians: complete (2026-10-12). Next: Phase 5 (spec to be written when you name it)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 4 — Students & guardians (2026-10-12)
+- Built: students with per-session enrolment, admission numbers `PREFIX/YEAR/NNNN` (per-year counter, manual numbers allowed, prefix on School profile); guardians as parent accounts (phone required and unique, email optional), siblings sharing guardians; login by email or phone; admission in one transaction with existing or new guardians (temporary password shown once) and optional photo; paginated, searchable, filterable list (URL query) scoped by role (teacher: own arms; bursar: no personal details; parent: own children only, 404 elsewhere); profile with edit, change class, private photo, add/edit/unlink guardian, guardian password reset, remove (soft); CSV import with dry run, row-level errors and all-or-nothing commit, template download; "My children" on the parent dashboard; Students nav; arm/session delete guards; seed: 40 Greenfield students (siblings, shared guardians), 3 Sunrise students.
+- Tests (totals): 912 unit + integration (PGlite) / 51 Nuxt component / 37 E2E tests × desktop + mobile (74 listed; viewport-specific and desktop-only skips).
+- Decisions: see docs/decisions.md #025–#029
+- Found while building: the login page sent the parsed form data (`login` as `{ email }`/`{ phone }`), so every login failed — caught by E2E, fixed, now covered by a Nuxt test; typed `useFetch` on `/api/students/${id}` inferred `{}` (also matches `/api/students/import`); Vitest workers crashing natively under memory pressure (decision 029).
 
 ### Phase 3 — Staff management (2026-10-12)
 - Built: staff accounts on `users` (phone, soft delete); add with one-time temporary password, edit, role change, deactivate/reactivate, remove; self and last-active-admin guards (row-locked); class-teacher and subject-teacher assignments per session (DB one-per rules, section and eligibility checks, cascades); `/api/me/assignments`; Staff page (replaces Users; `/users` redirects), staff detail, Assignments page with gap warnings, My classes on the dashboard, role-based nav; seed: five more teachers and demo assignments with gaps.
@@ -38,7 +44,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 4 sub-step 5 — CSV import API (dry run + all-or-nothing commit, template, guardians matched by phone) and admission prefix on the school profile
+- Phase 5 — start with its spec (`docs/features/05-*.md`) when you name it
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

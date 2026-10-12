@@ -216,15 +216,15 @@ All routes:
 7. **E2E + docs.**
 
 ## Acceptance checklist
-- [ ] Admit with auto (or manual) admission number, enrolment, guardians (new/existing), photo — in one transaction
-- [ ] Siblings share a guardian; guardian accounts can log in (phone or email) and see their children
-- [ ] Student list with search, filters and server-side pagination; teachers see only their arms; bursars see limited fields
-- [ ] Profile with edit, class change, photo, guardians, remove (soft)
-- [ ] CSV import: preview with row-level errors; all-or-nothing import
-- [ ] Arms and sessions with enrolments can't be deleted
-- [ ] Every route: validation, roles, tenant isolation tested
-- [ ] Works at 375px
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] Admit with auto (or manual) admission number, enrolment, guardians (new/existing), photo — in one transaction
+- [x] Siblings share a guardian; guardian accounts can log in (phone or email) and see their children
+- [x] Student list with search, filters and server-side pagination; teachers see only their arms; bursars see limited fields
+- [x] Profile with edit, class change, photo, guardians, remove (soft)
+- [x] CSV import: preview with row-level errors; all-or-nothing import
+- [x] Arms and sessions with enrolments can't be deleted
+- [x] Every route: validation, roles, tenant isolation tested
+- [x] Works at 375px
+- [x] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Open questions
 1. **Login by phone.** Many Nigerian parents use a phone number more than email. I recommend **email or phone for everyone**, with phone unique per school among active accounts. Side effect: a teacher who is also a parent at the same school needs two accounts with different identifiers (e.g. email for the staff account, phone for the parent account). OK?

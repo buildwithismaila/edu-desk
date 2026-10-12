@@ -69,4 +69,23 @@ test.describe('mobile', () => {
       expect(await overflow(), path).toBeLessThanOrEqual(0)
     }
   })
+  test('the student pages fit the screen without horizontal scroll', async ({ page }) => {
+    const overflow = () => page.evaluate<number>('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+    await loginAs(page, GREENFIELD_USERS.admin.email)
+
+    for (const [path, ready] of [
+      ['/students', 'student-table'],
+      ['/students/new', 'admit-save'],
+      ['/students/import', 'import-file'],
+    ] as const) {
+      await page.goto(path)
+      await expect(page.getByTestId(ready)).toBeVisible()
+      expect(await overflow(), path).toBeLessThanOrEqual(0)
+    }
+
+    await page.getByRole('link', { name: 'All students' }).click()
+    await page.getByTestId('student-table').getByRole('link').first().click()
+    await expect(page.getByTestId('student-name')).toBeVisible()
+    expect(await overflow(), 'profile').toBeLessThanOrEqual(0)
+  })
 })

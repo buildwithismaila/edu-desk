@@ -12,7 +12,7 @@ These rules drive the schema, validation and tests. If a rule here conflicts wit
 - **Arms:** each class level has one or more arms (A/B or Gold/Diamond). A student is in exactly one class arm per session. Display: a single-letter arm joins a level name ending in a number ("JSS 1A"); anything else gets a space ("JSS 1 Gold", "Creche A").
 - **Subjects** belong to one section; SSS subjects are core or belong to one department. Class level, arm, department and subject names are unique per school, ignoring case.
 - **SSS departments:** Science, Arts, Commercial — determine which subjects a student offers (core subjects + department subjects).
-- **Admission number:** auto-generated, configurable format, e.g. `SCH/2025/0001`; unique per school.
+- **Admission number:** `PREFIX/YEAR/NNNN`, e.g. `GFA/2026/0001`. The prefix is a per-school setting (School profile; default: the school name's initials). YEAR is the first year of the admission session; NNNN is a per-school, per-year counter (4 digits, more past 9999). A number can also be typed in (existing students from an old register). Unique per school, ignoring case.
 
 ## Academic calendar
 - A **session** (e.g. `2025/2026`, consecutive years) has exactly **three terms**: First, Second, Third, created together with the session.
@@ -87,6 +87,12 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
 
 - A parent can have many children; a child can have many guardians.
 - Students do not log in in the MVP.
+- **Guardians are parent accounts:** phone required (unique per school among active accounts), email optional; they log in with their phone or email. Brothers and sisters share one guardian; a student has 1–4 guardians and always keeps at least one.
+- **Enrolment is per session:** a student is in one class arm per session (Phase 9 promotion adds the next session's). A department is only for SSS students; moving out of SSS clears it.
+- **Who sees which students:** admin and principal see all; the bursar sees all but not personal details (date of birth, state of origin, LGA, address); a teacher sees only the students in arms they are class teacher of or teach a subject in (current session); a parent sees only their own children. Anyone else gets "not found". Only the admin admits, edits, imports and manages guardians.
+- **Removing a student** (left the school) is a soft delete: gone from lists and parents' accounts; admission number and history kept.
+- **Student photos are private:** only people who may see the student can load them.
+- **CSV import** (admin): a file is checked first and imported all-or-nothing; guardians are matched by phone; new parents get no password until the admin resets it (decision 025).
 - **Teaching assignments are per session:** one class teacher per class arm, one teacher per subject per arm. Admins and principals assign them; teachers, principals and admins can be assigned. A teacher may hold several arms and subjects.
 - **Staff accounts:** deactivate for a temporary block; remove (soft delete) for staff who left — they can't log in and lose their assignments, but their records stay. An admin can't deactivate, remove or demote themselves, and a school always keeps at least one active admin.
 - Every user belongs to exactly one school; all configuration in this file (class names, grading, assessment split, fee items, position toggle) is **per school**.
