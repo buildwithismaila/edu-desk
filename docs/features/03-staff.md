@@ -196,7 +196,7 @@ All routes:
 - [x] Every route: validation, roles, tenant isolation tested
 - [x] Works at 375px
 - [x] Seed updated; `pnpm check` and `pnpm test:e2e` green
-- [ ] CI green (after push)
+- [x] CI green
 
 ## Open questions
 1. **Who manages assignments?** I recommend admin **and principal**, since `docs/domain.md` gives principals "academics". Staff accounts (add/edit/deactivate/remove) stay **admin only**; principals get read-only staff pages. OK?

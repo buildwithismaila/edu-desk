@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 3 — Staff management — all sub-steps done; awaiting push + CI and your manual check
+- **Current phase:** none — Phase 3 done (CI green 2026-10-12); Phase 4 not started (spec first)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -38,7 +38,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Push Phase 3 and confirm CI; then Phase 4 — Students & guardians (spec first)
+- Phase 4 — Students & guardians (write `docs/features/04-students.md` and wait for approval)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
