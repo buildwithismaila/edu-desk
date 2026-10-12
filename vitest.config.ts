@@ -22,6 +22,8 @@ export default defineConfig({
           environment: 'node',
           // Booting PGlite + migrations in beforeAll takes >10s when several files start in parallel
           hookTimeout: 60_000,
+          // Each file compiles PGlite's WASM; TurboFan tier-up in parallel workers hit V8 "Fatal process out of memory: Zone"
+          execArgv: ['--liftoff-only'],
           // Transform nuxt-auth-utils (instead of loading it natively) so its `#imports` uses the alias above
           server: { deps: { inline: ['nuxt-auth-utils'] } },
         },

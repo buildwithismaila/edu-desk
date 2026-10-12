@@ -38,7 +38,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 4 sub-step 4 — students API (admission, list + scoping, profile, edit, enrolment, remove, photo)
+- Phase 4 sub-step 5 — CSV import API (dry run + all-or-nothing commit, template, guardians matched by phone) and admission prefix on the school profile
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
@@ -51,5 +51,5 @@
 - TypeScript TS2321 ("excessive stack depth") with typed `$fetch` (~45 routes): a callback typed `() => Promise<unknown>` that returns a `$fetch(...)` call makes TS compare the route-inferred response type and overflow. Type such callbacks as `() => unknown` (see `NameDialogOptions.submit`, `run()` in settings pages). Watch for it as routes grow.
 - `pnpm test:unit` takes ~3.5 min (34 files; each integration file boots PGlite and runs migrations, and permission matrices log in many users with real scrypt). If it keeps growing: share one migrated PGlite per worker (template DB), or lower scrypt cost in the test runtime config only.
 - E2E needs a production build (~3.5 min, up to 10+ min when the machine is busy, e.g. with `pnpm dev` running). Tip: `pnpm build`, start `.output/server/index.mjs` on port 3100 with the E2E env from `playwright.config.ts`, and Playwright reuses it locally.
-- Vitest workers occasionally crash on Windows with native exit codes (0xC0000409 / 0x80000003) when several integration files boot PGlite at once on this 8 GB machine; rerunning passes. If it recurs, cap `maxWorkers` for the unit project.
+- Vitest unit workers crashed natively (exit 0x80000003, "Fatal process out of memory: Zone") while V8 tiered PGlite's WASM up to TurboFan in several workers at once on this 8 GB machine. Fixed with `execArgv: ['--liftoff-only']` on the unit project (baseline WASM compiler only; the suite also got ~20% faster). If PGlite-heavy tests ever get CPU-bound, revisit.
 - `users.email` is nullable since Phase 4 (guardians may have a phone only); staff always have one (createStaffSchema requires it).

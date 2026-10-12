@@ -98,3 +98,18 @@ export const enrolmentSchema = z.object({
 
 export type AdmitStudentInput = z.input<typeof admitStudentSchema>
 export type NewGuardianInput = z.input<typeof newGuardianSchema>
+
+export const STUDENT_PAGE_SIZE = 25
+
+/** GET /api/students query: server-side pagination, search and filters. */
+export const studentListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(STUDENT_PAGE_SIZE),
+  search: z.string().trim().max(60).optional().transform(v => v || undefined),
+  classLevelId: z.uuid().optional(),
+  classArmId: z.uuid().optional(),
+  gender: z.enum(GENDERS).optional(),
+  sessionId: z.uuid().optional(),
+})
+
+export type StudentListQuery = z.input<typeof studentListQuerySchema>

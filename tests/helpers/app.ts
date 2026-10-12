@@ -43,8 +43,17 @@ import staffDeactivateHandler from '~~/server/api/staff/[id]/deactivate.post'
 import staffReactivateHandler from '~~/server/api/staff/[id]/reactivate.post'
 import staffGetHandler from '~~/server/api/staff/index.get'
 import staffPostHandler from '~~/server/api/staff/index.post'
+import studentDeleteHandler from '~~/server/api/students/[id].delete'
+import studentGetHandler from '~~/server/api/students/[id].get'
+import studentPatchHandler from '~~/server/api/students/[id].patch'
+import studentEnrolmentHandler from '~~/server/api/students/[id]/enrolment.put'
 import studentGuardianDeleteHandler from '~~/server/api/students/[id]/guardians/[guardianId].delete'
 import studentGuardiansPostHandler from '~~/server/api/students/[id]/guardians/index.post'
+import studentPhotoDeleteHandler from '~~/server/api/students/[id]/photo.delete'
+import studentPhotoGetHandler from '~~/server/api/students/[id]/photo.get'
+import studentPhotoPutHandler from '~~/server/api/students/[id]/photo.put'
+import studentsGetHandler from '~~/server/api/students/index.get'
+import studentsPostHandler from '~~/server/api/students/index.post'
 import subjectDeleteHandler from '~~/server/api/subjects/[id].delete'
 import subjectPatchHandler from '~~/server/api/subjects/[id].patch'
 import subjectsGetHandler from '~~/server/api/subjects/index.get'
@@ -144,6 +153,15 @@ export function createTestApp(db: Db) {
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
     .get('/api/me/children', myChildrenHandler)
+    .get('/api/students', studentsGetHandler)
+    .post('/api/students', studentsPostHandler)
+    .get('/api/students/:id', studentGetHandler)
+    .patch('/api/students/:id', studentPatchHandler)
+    .delete('/api/students/:id', studentDeleteHandler)
+    .put('/api/students/:id/enrolment', studentEnrolmentHandler)
+    .get('/api/students/:id/photo', studentPhotoGetHandler)
+    .put('/api/students/:id/photo', studentPhotoPutHandler)
+    .delete('/api/students/:id/photo', studentPhotoDeleteHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)
