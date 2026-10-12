@@ -1,5 +1,7 @@
 import { createApp, createRouter, defineEventHandler, send, setResponseStatus, toWebHandler } from 'h3'
 import currentTermHandler from '~~/server/api/academic/current.get'
+import assessmentGetHandler from '~~/server/api/assessment-components/index.get'
+import assessmentPutHandler from '~~/server/api/assessment-components/index.put'
 import loginHandler from '~~/server/api/auth/login.post'
 import armDeleteHandler from '~~/server/api/class-arms/[id].delete'
 import armPatchHandler from '~~/server/api/class-arms/[id].patch'
@@ -13,6 +15,8 @@ import departmentDeleteHandler from '~~/server/api/departments/[id].delete'
 import departmentPatchHandler from '~~/server/api/departments/[id].patch'
 import departmentsGetHandler from '~~/server/api/departments/index.get'
 import departmentsPostHandler from '~~/server/api/departments/index.post'
+import gradingPutHandler from '~~/server/api/grading-scales/[section].put'
+import gradingGetHandler from '~~/server/api/grading-scales/index.get'
 import logoutHandler from '~~/server/api/auth/logout.post'
 import passwordHandler from '~~/server/api/auth/password.post'
 import schoolHandler from '~~/server/api/school.get'
@@ -105,6 +109,10 @@ export function createTestApp(db: Db) {
     .post('/api/subjects', subjectsPostHandler)
     .patch('/api/subjects/:id', subjectPatchHandler)
     .delete('/api/subjects/:id', subjectDeleteHandler)
+    .get('/api/assessment-components', assessmentGetHandler)
+    .put('/api/assessment-components', assessmentPutHandler)
+    .get('/api/grading-scales', gradingGetHandler)
+    .put('/api/grading-scales/:section', gradingPutHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)

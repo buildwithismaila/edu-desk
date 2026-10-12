@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; sub-steps 1–6 done — validators; schema, defaults, demo seed; profile & logo API; calendar API; classes API; subjects API)
+- **Current phase:** Phase 2 — School setup (spec approved 2026-10-11; sub-steps 1–7 done — validators; schema, defaults, demo seed; profile & logo API; calendar API; classes API; subjects API; assessment & grading API)
 - **Last updated:** 2026-10-11
 
 ## Completed phases
@@ -26,7 +26,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 2 sub-step 7 — assessment & grading API
+- Phase 2 sub-step 8 — frontend (five settings pages, nav group, top-bar current term, logo)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
