@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** none — Phase 3 done (CI green 2026-10-12); Phase 4 not started (spec first)
+- **Current phase:** Phase 4 — Students & guardians (spec approved 2026-10-12; starting sub-step 1 — pure helpers)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -38,7 +38,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 4 — Students & guardians (write `docs/features/04-students.md` and wait for approval)
+- Phase 4 sub-step 1 — admission number, CSV parser, row validator, states, schemas (test-first)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
