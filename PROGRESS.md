@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 4 — Students & guardians: complete (2026-10-12). Next: Phase 5 (spec to be written when you name it)
+- **Current phase:** Phase 5 — Attendance (spec approved 2026-10-12)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -44,7 +44,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 5 — start with its spec (`docs/features/05-*.md`) when you name it
+- Phase 5 — approve the spec, then sub-step 1 (pure helpers: `todayIn`, `summariseAttendance`, `registerDateError`)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
