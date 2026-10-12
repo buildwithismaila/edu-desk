@@ -27,7 +27,7 @@ const dateOfBirthSchema = z.union([z.literal('').transform(() => null), isoDateS
   .transform(v => v ?? null)
   .refine(v => !v || v <= new Date().toISOString().slice(0, 10), 'Date of birth can\'t be in the future')
 
-const requiredPhoneSchema = z.string().trim().min(1, 'Enter a phone number').transform((value, ctx) => {
+export const requiredPhoneSchema = z.string().trim().min(1, 'Enter a phone number').transform((value, ctx) => {
   const phone = normalisePhone(value)
   if (!phone) {
     ctx.addIssue({ code: 'custom', message: 'Enter a Nigerian phone number, e.g. 0803 123 4567' })
@@ -53,6 +53,11 @@ export const existingGuardianSchema = z.object({
 })
 
 export const studentGuardianSchema = z.union([existingGuardianSchema, newGuardianSchema])
+
+/** PATCH /api/guardians/[id]: name, phone, email ('' clears the email). */
+export const updateGuardianSchema = newGuardianSchema.omit({ relationship: true }).partial()
+
+export const guardianSearchSchema = z.object({ search: z.string().trim().max(60).optional() })
 
 const studentFields = {
   firstName: name('first name'),

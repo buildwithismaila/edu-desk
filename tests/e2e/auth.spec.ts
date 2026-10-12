@@ -28,7 +28,7 @@ test('a wrong password shows an error and stays on the login page', async ({ pag
   await page.goto('/login')
   await submitLogin(page, GREENFIELD_USERS.principal.email, 'not-the-password')
 
-  await expect(page.getByTestId('login-error')).toHaveText(/Invalid email or password/)
+  await expect(page.getByTestId('login-error')).toHaveText(/Invalid email, phone or password/)
   await expect(page).toHaveURL('/login')
 })
 

@@ -16,7 +16,7 @@ test('a Greenfield login does not carry over to Sunrise, and Greenfield credenti
   await expect(page).toHaveURL(schoolUrl(baseURL, 'sunrise', '/login?redirect=/'))
 
   await submitLogin(page, GREENFIELD_USERS.admin.email)
-  await expect(page.getByTestId('login-error')).toHaveText(/Invalid email or password/)
+  await expect(page.getByTestId('login-error')).toHaveText(/Invalid email, phone or password/)
 
   await submitLogin(page, SUNRISE_ADMIN.email)
   await expect(page.getByTestId('current-user')).toContainText(SUNRISE_ADMIN.name)

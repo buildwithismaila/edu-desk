@@ -11,7 +11,7 @@ registerEndpoint('/api/auth/login', {
   // The JSON body Nitro sends for a handled 401 (see server/api/auth/login.post.ts)
   handler: (event) => {
     setResponseStatus(event, 401, 'Unauthorized')
-    return { error: true, statusCode: 401, statusMessage: 'Unauthorized', message: 'Invalid email or password' }
+    return { error: true, statusCode: 401, statusMessage: 'Unauthorized', message: 'Invalid email, phone or password' }
   },
 })
 
@@ -27,7 +27,7 @@ describe('login page', () => {
     await wrapper.get('form').trigger('submit')
 
     await vi.waitFor(() => {
-      expect(wrapper.text()).toContain('Enter a valid email address')
+      expect(wrapper.text()).toContain('Enter your email or phone number')
       expect(wrapper.text()).toContain('Enter your password')
     })
     expect(wrapper.find('[data-testid=login-error]').exists()).toBe(false)
@@ -42,7 +42,7 @@ describe('login page', () => {
     await flushPromises()
 
     await vi.waitFor(() => {
-      expect(wrapper.get('[data-testid=login-error]').text()).toContain('Invalid email or password')
+      expect(wrapper.get('[data-testid=login-error]').text()).toContain('Invalid email, phone or password')
     })
   })
 })

@@ -55,10 +55,10 @@ describe('POST /api/users/:id/reset-password', () => {
     const { temporaryPassword } = await res.json() as { temporaryPassword: string }
 
     expect(temporaryPassword).toHaveLength(10)
-    const loginTemp = await app.postJson('/api/auth/login', { email: target.email, password: temporaryPassword }, { host: hostOf(schoolA.slug) })
+    const loginTemp = await app.postJson('/api/auth/login', { login: target.email, password: temporaryPassword }, { host: hostOf(schoolA.slug) })
     expect(loginTemp.status).toBe(200)
     expect((await loginTemp.json()).user.mustChangePassword).toBe(true)
-    const loginOld = await app.postJson('/api/auth/login', { email: target.email, password: DEFAULT_TEST_PASSWORD }, { host: hostOf(schoolA.slug) })
+    const loginOld = await app.postJson('/api/auth/login', { login: target.email, password: DEFAULT_TEST_PASSWORD }, { host: hostOf(schoolA.slug) })
     expect(loginOld.status).toBe(401)
   })
 

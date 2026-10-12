@@ -25,7 +25,7 @@ beforeEach(() => {
 })
 
 const loginAt = (slug: string, email: string, password = DEFAULT_TEST_PASSWORD) =>
-  app.postJson('/api/auth/login', { email, password }, { host: hostOf(slug) })
+  app.postJson('/api/auth/login', { login: email, password }, { host: hostOf(slug) })
 
 describe('POST /api/auth/login', () => {
   it('logs in with valid credentials and sets a host-only HttpOnly session cookie', async () => {
@@ -63,7 +63,7 @@ describe('POST /api/auth/login', () => {
     expect(wrongPassword.status).toBe(401)
     expect(unknownEmail.status).toBe(401)
     const [a, b] = [await wrongPassword.json(), await unknownEmail.json()]
-    expect(a.message).toBe('Invalid email or password')
+    expect(a.message).toBe('Invalid email, phone or password')
     expect(b.message).toBe(a.message)
     expect(sessionCookie(wrongPassword)).toBeUndefined()
   })
@@ -74,7 +74,7 @@ describe('POST /api/auth/login', () => {
     const res = await loginAt(schoolA.slug, user.email)
 
     expect(res.status).toBe(401)
-    expect((await res.json()).message).toBe('Invalid email or password')
+    expect((await res.json()).message).toBe('Invalid email, phone or password')
     expect(sessionCookie(res)).toBeUndefined()
   })
 
@@ -111,7 +111,7 @@ describe('POST /api/auth/login', () => {
   it('logs into the host\'s school even if the body names another school', async () => {
     const user = await createUser(db, schoolA)
 
-    const res = await app.postJson('/api/auth/login', { email: user.email, password: DEFAULT_TEST_PASSWORD, schoolId: schoolB.id }, { host: hostOf(schoolA.slug) })
+    const res = await app.postJson('/api/auth/login', { login: user.email, password: DEFAULT_TEST_PASSWORD, schoolId: schoolB.id }, { host: hostOf(schoolA.slug) })
     expect(res.status).toBe(200)
 
     const session = await app.request('/api/_auth/session', { host: hostOf(schoolA.slug), cookie: sessionCookie(res) })
@@ -119,11 +119,11 @@ describe('POST /api/auth/login', () => {
   })
 
   it('returns 400 with field errors for an invalid body', async () => {
-    const res = await app.postJson('/api/auth/login', { email: 'not-an-email', password: '' }, { host: hostOf(schoolA.slug) })
+    const res = await app.postJson('/api/auth/login', { login: 'not-an-email', password: '' }, { host: hostOf(schoolA.slug) })
 
     expect(res.status).toBe(400)
     const body = await res.json()
-    expect(Object.keys(body.data.fieldErrors).sort()).toEqual(['email', 'password'])
+    expect(Object.keys(body.data.fieldErrors).sort()).toEqual(['login', 'password'])
   })
 
   it('returns 429 with Retry-After after too many failed attempts, even with the right password', async () => {
@@ -137,6 +137,31 @@ describe('POST /api/auth/login', () => {
     expect(res.status).toBe(429)
     expect(Number(res.headers.get('retry-after'))).toBeGreaterThan(0)
     expect((await res.json()).message).toMatch(/Too many attempts/)
+  })
+
+  it.each(['08031230001', '0803 123 0001', '+234 803 123 0001'])('logs in by phone written as %j', async (phone) => {
+    const user = await createUser(db, schoolA, { role: 'parent', email: null, phone: '+2348031230001' })
+
+    const res = await loginAt(schoolA.slug, phone)
+
+    expect(res.status).toBe(200)
+    expect((await res.json()).user.id).toBe(user.id)
+    await db.delete(users).where(eq(users.id, user.id))
+  })
+
+  it('rejects a phone that belongs to another school\'s account', async () => {
+    await createUser(db, schoolB, { role: 'parent', phone: '+2348031230002' })
+    expect((await loginAt(schoolA.slug, '08031230002')).status).toBe(401)
+  })
+
+  it('logs in the active account when a removed account had the same phone', async () => {
+    await createUser(db, schoolA, { phone: '+2348031230003', deletedAt: new Date(), password: 'old-password-1' })
+    const current = await createUser(db, schoolA, { phone: '+2348031230003' })
+
+    const res = await loginAt(schoolA.slug, '08031230003')
+
+    expect(res.status).toBe(200)
+    expect((await res.json()).user.id).toBe(current.id)
   })
 
   it('returns 404 on an unknown school', async () => {

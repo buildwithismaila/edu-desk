@@ -15,11 +15,14 @@ import levelsGetHandler from '~~/server/api/class-levels/index.get'
 import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import myAssignmentsHandler from '~~/server/api/me/assignments.get'
+import myChildrenHandler from '~~/server/api/me/children.get'
 import departmentDeleteHandler from '~~/server/api/departments/[id].delete'
 import departmentPatchHandler from '~~/server/api/departments/[id].patch'
 import departmentsGetHandler from '~~/server/api/departments/index.get'
 import departmentsPostHandler from '~~/server/api/departments/index.post'
 import gradingPutHandler from '~~/server/api/grading-scales/[section].put'
+import guardianPatchHandler from '~~/server/api/guardians/[id].patch'
+import guardiansGetHandler from '~~/server/api/guardians/index.get'
 import gradingGetHandler from '~~/server/api/grading-scales/index.get'
 import logoutHandler from '~~/server/api/auth/logout.post'
 import passwordHandler from '~~/server/api/auth/password.post'
@@ -40,6 +43,8 @@ import staffDeactivateHandler from '~~/server/api/staff/[id]/deactivate.post'
 import staffReactivateHandler from '~~/server/api/staff/[id]/reactivate.post'
 import staffGetHandler from '~~/server/api/staff/index.get'
 import staffPostHandler from '~~/server/api/staff/index.post'
+import studentGuardianDeleteHandler from '~~/server/api/students/[id]/guardians/[guardianId].delete'
+import studentGuardiansPostHandler from '~~/server/api/students/[id]/guardians/index.post'
 import subjectDeleteHandler from '~~/server/api/subjects/[id].delete'
 import subjectPatchHandler from '~~/server/api/subjects/[id].patch'
 import subjectsGetHandler from '~~/server/api/subjects/index.get'
@@ -134,6 +139,11 @@ export function createTestApp(db: Db) {
     .put('/api/class-arms/:id/class-teacher', classTeacherPutHandler)
     .put('/api/class-arms/:id/subject-teachers', subjectTeachersPutHandler)
     .get('/api/me/assignments', myAssignmentsHandler)
+    .get('/api/guardians', guardiansGetHandler)
+    .patch('/api/guardians/:id', guardianPatchHandler)
+    .post('/api/students/:id/guardians', studentGuardiansPostHandler)
+    .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
+    .get('/api/me/children', myChildrenHandler)
     .post('/api/auth/login', loginHandler)
     .post('/api/auth/logout', logoutHandler)
     .post('/api/auth/password', passwordHandler)
@@ -165,7 +175,7 @@ export function createTestApp(db: Db) {
 
   /** Logs in and returns the session cookie (`name=value`) to send on later requests. */
   async function login(host: string, email: string, password: string) {
-    const res = await postJson('/api/auth/login', { email, password }, { host })
+    const res = await postJson('/api/auth/login', { login: email, password }, { host })
     if (res.status !== 200) throw new Error(`login failed with ${res.status}: ${await res.text()}`)
     return sessionCookie(res)!
   }

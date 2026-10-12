@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { normalisePhone } from '../utils/phone'
 
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 128
@@ -6,8 +7,26 @@ export const PASSWORD_MAX_LENGTH = 128
 /** Trimmed, lowercased email (how emails are stored). */
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email('Enter a valid email address'))
 
+const NOT_A_LOGIN = 'Enter your email or phone number'
+
+/** An email (contains @) or a Nigerian phone in any common format → `{ email }` or `{ phone }`. */
+// Explicit return type: inferred literal unions get `email?: undefined` / `phone?: undefined`,
+// which stops `'email' in login` from narrowing
+export const loginIdentifierSchema = z.string().trim().min(1, NOT_A_LOGIN).transform((value, ctx): { email: string } | { phone: string } => {
+  if (value.includes('@')) {
+    const email = emailSchema.safeParse(value)
+    if (email.success) return { email: email.data }
+  }
+  else {
+    const phone = normalisePhone(value)
+    if (phone) return { phone }
+  }
+  ctx.addIssue({ code: 'custom', message: NOT_A_LOGIN })
+  return z.NEVER
+})
+
 export const loginSchema = z.object({
-  email: emailSchema,
+  login: loginIdentifierSchema,
   // No minimum here: the length rule applies when a password is set, not when logging in
   password: z.string().min(1, 'Enter your password').max(PASSWORD_MAX_LENGTH),
 })

@@ -13,9 +13,10 @@ let timingHash: Promise<string> | undefined
 
 export default defineEventHandler(async (event) => {
   const school = requireTenant(event)
-  const { email, password } = await validateBody(event, loginSchema)
+  const { login, password } = await validateBody(event, loginSchema)
+  const identifier = 'email' in login ? login.email : login.phone
 
-  const keys = { account: `${school.id}:${email}`, ip: getRequestIP(event) ?? 'unknown' }
+  const keys = { account: `${school.id}:${identifier}`, ip: getRequestIP(event) ?? 'unknown' }
   const throttle = checkLoginThrottle(keys)
   if (!throttle.allowed) {
     setResponseHeader(event, 'Retry-After', throttle.retryAfterSeconds)
@@ -28,8 +29,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = useDb()
-  // Removed (soft-deleted) users are treated like unknown emails
-  const [user] = await db.select().from(users).where(whereSchool(users, school, eq(users.email, email), isNull(users.deletedAt)))
+  // Email or phone (Phase 4). Removed (soft-deleted) users are treated like unknown logins
+  const byLogin = 'email' in login ? eq(users.email, login.email) : eq(users.phone, login.phone)
+  const [user] = await db.select().from(users).where(whereSchool(users, school, byLogin, isNull(users.deletedAt)))
 
   let valid = false
   if (user) valid = await verifyPassword(user.passwordHash, password)
@@ -37,7 +39,7 @@ export default defineEventHandler(async (event) => {
 
   if (!user || !valid) {
     recordLoginFailure(keys)
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized', message: 'Invalid email or password' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized', message: 'Invalid email, phone or password' })
   }
   if (!user.isActive) {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden', message: 'Your account is disabled. Contact your school admin.' })

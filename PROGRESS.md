@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 4 — Students & guardians (spec approved 2026-10-12; sub-steps 1–2 done — pure helpers; schema, enrolment guards, seed)
+- **Current phase:** Phase 4 — Students & guardians (spec approved 2026-10-12; sub-steps 1–3 done — pure helpers; schema, enrolment guards, seed; phone login, guardians API, me/children)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -38,7 +38,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 4 sub-step 3 — login by email or phone, guardians API, `/api/me/children`
+- Phase 4 sub-step 4 — students API (admission, list + scoping, profile, edit, enrolment, remove, photo)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

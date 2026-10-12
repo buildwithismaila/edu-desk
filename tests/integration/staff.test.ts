@@ -46,7 +46,7 @@ function call(method: string, path: string, cookie: string | undefined, body?: u
 }
 
 const loginStatus = async (school: SchoolRef, userEmail: string, password = DEFAULT_TEST_PASSWORD) =>
-  (await app.postJson('/api/auth/login', { email: userEmail, password }, { host: hostOf(school.slug) })).status
+  (await app.postJson('/api/auth/login', { login: userEmail, password }, { host: hostOf(school.slug) })).status
 
 /** A school with a fresh admin and a session + arm + subject for assignment fixtures. */
 async function freshSchool() {
@@ -99,7 +99,7 @@ describe('create', () => {
     expect(body.staff).toMatchObject({ name: 'Chioma Obi', email: address, phone: '+2348021112233', role: 'teacher', isActive: true, mustChangePassword: true })
     expect(body.temporaryPassword).toHaveLength(10)
 
-    const login = await app.postJson('/api/auth/login', { email: address, password: body.temporaryPassword }, { host: hostOf(school.slug) })
+    const login = await app.postJson('/api/auth/login', { login: address, password: body.temporaryPassword }, { host: hostOf(school.slug) })
     expect(login.status).toBe(200)
     expect((await login.json()).user.mustChangePassword).toBe(true)
   })

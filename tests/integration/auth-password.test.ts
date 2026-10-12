@@ -39,8 +39,8 @@ describe('POST /api/auth/password', () => {
     const res = await change(cookie, validChange)
     expect(res.status).toBe(200)
 
-    const loginNew = await app.postJson('/api/auth/login', { email: user.email, password: 'brand-new-password' }, { host: host() })
-    const loginOld = await app.postJson('/api/auth/login', { email: user.email, password: DEFAULT_TEST_PASSWORD }, { host: host() })
+    const loginNew = await app.postJson('/api/auth/login', { login: user.email, password: 'brand-new-password' }, { host: host() })
+    const loginOld = await app.postJson('/api/auth/login', { login: user.email, password: DEFAULT_TEST_PASSWORD }, { host: host() })
     expect(loginNew.status).toBe(200)
     expect(loginOld.status).toBe(401)
   })
@@ -65,7 +65,7 @@ describe('POST /api/auth/password', () => {
 
     expect(res.status).toBe(400)
     expect((await res.json()).data.fieldErrors.currentPassword).toEqual(['Current password is incorrect'])
-    const login = await app.postJson('/api/auth/login', { email: user.email, password: DEFAULT_TEST_PASSWORD }, { host: host() })
+    const login = await app.postJson('/api/auth/login', { login: user.email, password: DEFAULT_TEST_PASSWORD }, { host: host() })
     expect(login.status).toBe(200)
   })
 

@@ -11,7 +11,7 @@ useHead({ title: () => `Log in · ${school.value?.name ?? ''}` })
 const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
 
-const state = reactive<LoginInput>({ email: '', password: '' })
+const state = reactive<LoginInput>({ login: '', password: '' })
 // Submitting before hydration would be a native form submit; keep the button off until the app runs
 const hydrated = useMounted()
 const error = ref<string>()
@@ -77,14 +77,17 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
       @submit="onSubmit"
     >
       <UFormField
-        label="Email"
-        name="email"
+        label="Email or phone number"
+        name="login"
       >
+        <!-- data-testid kept from Phase 1 so existing tests and helpers still find it -->
         <UInput
-          v-model="state.email"
+          v-model="state.login"
           data-testid="login-email"
-          type="email"
+          type="text"
+          inputmode="email"
           autocomplete="username"
+          placeholder="you@example.com or 0803 123 4567"
           class="w-full"
         />
       </UFormField>
