@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 8 — Fees & payments: complete (2026-10-13). Next: Phase 9 (spec to be written when you name it)
+- **Current phase:** Phase 9 — Parent portal (spec approved; in progress)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -68,7 +68,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 9 — Parent portal: start with its spec (`docs/features/09-*.md`) when you name it
+- Phase 9 — approve the spec, then sub-step 1 (requireOwnChild, parent routes and the IDOR suite)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
