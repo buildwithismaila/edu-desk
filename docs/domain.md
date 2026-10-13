@@ -67,11 +67,23 @@ Grading scale bands must be contiguous, non-overlapping and cover 0–100 with w
 - Optional per-subject position and class average/highest/lowest per subject (for the broadsheet).
 - **Third term:** optional cumulative average = mean of the term averages the student has.
 - Students with no scores in a term are excluded from ranking.
+- **Phase 7 specifics** (`shared/utils/results.ts`):
+  - **Offered subject:** a subject counts as offered when the student has at least one entered cell (a score or ABS); ABS counts as 0.
+  - **Ties:** averages are compared exactly (cross-multiplied), so floating-point error can't split a tie.
+  - **"Number in class":** the active students enrolled in the arm.
+  - **Cumulative average:** shown on third-term cards when the student has another term's average that session.
+  - **Positions toggle:** turning `showPositions` off hides positions on report cards and the broadsheet.
 
 ## Report card contents
 School name, logo, address, motto · student name, admission number, class arm, session, term, photo · subject table (CA1, CA2, Exam, Total, Grade, Remark) · total, average, position (if enabled), number in class · attendance (days present / days school opened) · affective domain (punctuality, neatness, politeness, honesty, relationship with others, etc.) and psychomotor skills (handwriting, sports, drawing, etc.) rated 1–5 · class teacher's comment · principal's/head teacher's comment · next term begins · outstanding fees (toggle).
 
 Results go through: **Draft → Submitted (by class teacher) → Published (by principal)**. Parents only see published results.
+- **Submitting** (class teacher, admin or principal) needs complete sheets and locks the arm's scores, ratings and comments.
+- **Publishing** (principal or admin) freezes each report card as published (a JSON snapshot), so later changes to grading scales, names or classes don't change what parents saw.
+- **Return to draft** (with a reason) unlocks the arm; **Unpublish** takes the cards back from parents and returns the arm to Submitted.
+- A manual unlock can't override submitted or published results.
+- The principal's comment is written before publishing.
+- **Outstanding fees** join the report card in Phase 8.
 
 ## Fees
 - Fee items (Tuition, Development Levy, Uniform, Books, PTA, Bus, …) are defined **per class level per term**; some are optional (e.g. Bus).

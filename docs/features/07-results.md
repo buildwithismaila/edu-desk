@@ -192,14 +192,14 @@ Invalid transitions → **409** (e.g. "Only submitted results can be published")
 6. **E2E + docs:** the full journey, docs, CI.
 
 ## Acceptance checklist
-- [ ] Results match hand-calculated examples (unit and integration), including ties, missing scores, ABS, band boundaries, toggled positions and the cumulative average
-- [ ] Draft → Submitted → Published, with return and unpublish; submitting needs complete sheets; submitting and publishing lock the scores
-- [ ] Published report cards are frozen snapshots; parents see only published cards for their own children
-- [ ] Principal's comments
-- [ ] A4 report card prints cleanly (one per page); broadsheet prints landscape
-- [ ] Every route: validation, roles, tenant isolation tested
-- [ ] Works at 375px (screens; print is A4)
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] Results match hand-calculated examples (unit and integration), including ties, missing scores, ABS, band boundaries, toggled positions and the cumulative average
+- [x] Draft → Submitted → Published, with return and unpublish; submitting needs complete sheets; submitting and publishing lock the scores
+- [x] Published report cards are frozen snapshots; parents see only published cards for their own children
+- [x] Principal's comments
+- [x] A4 report card prints cleanly (one per page); broadsheet prints landscape
+- [x] Every route: validation, roles, tenant isolation tested
+- [x] Works at 375px (screens; print is A4)
+- [x] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Open questions
 1. **Snapshot on publish:** publishing stores each student's report card as JSON, so later changes to grading scales, names or class don't alter a published card. Unpublishing deletes the snapshots. OK? (The alternative is always computing live, which is simpler, but published cards could silently change.)

@@ -75,19 +75,27 @@ export async function seedScores(db: Db, schoolId: string, sessionId: string, de
     const subject = await subjectOf(sheet.subject, arm.section)
     const list = await roster(arm.id)
     const entered = list.slice(0, Math.ceil(list.length * sheet.share))
+    const rows: (typeof scoreEntries.$inferInsert)[] = []
     for (const [i, student] of entered.entries()) {
       const pattern = sheet.tie && i === sheet.tie[1] ? sheet.tie[0] : i
       for (const [c, component] of components.entries()) {
-        if (sheet.missing && i === sheet.missing.student && c === sheet.missing.component) continue
+        if (sheet.missing && i === sheet.missing.student && c === sheet.missing.component) {
+          // Re-seeding restores the demo gap, even if someone filled it in
+          await db.delete(scoreEntries).where(and(eq(scoreEntries.schoolId, schoolId), eq(scoreEntries.termId, term.id),
+            eq(scoreEntries.studentId, student.id), eq(scoreEntries.subjectId, subject.id), eq(scoreEntries.componentId, component.id)))
+          continue
+        }
         const absent = !!sheet.absentOne && i === 3 && c === components.length - 1
         const score = absent ? null : Math.round(component.maxScore * (0.4 + ((pattern * 7 + c * 3 + s * 11) % 60) / 100))
-        await db.insert(scoreEntries)
-          .values({ schoolId, termId: term.id, studentId: student.id, subjectId: subject.id, componentId: component.id, score, absent, enteredById: userId(sheet.enteredBy) })
-          .onConflictDoUpdate({
-            target: [scoreEntries.schoolId, scoreEntries.termId, scoreEntries.studentId, scoreEntries.subjectId, scoreEntries.componentId],
-            set: { score, absent },
-          })
+        rows.push({ schoolId, termId: term.id, studentId: student.id, subjectId: subject.id, componentId: component.id, score, absent, enteredById: userId(sheet.enteredBy) })
       }
+    }
+    // One statement per sheet keeps re-seeding fast
+    if (rows.length) {
+      await db.insert(scoreEntries).values(rows).onConflictDoUpdate({
+        target: [scoreEntries.schoolId, scoreEntries.termId, scoreEntries.studentId, scoreEntries.subjectId, scoreEntries.componentId],
+        set: { score: sql`excluded.score`, absent: sql`excluded.absent` },
+      })
     }
   }
 
@@ -95,12 +103,13 @@ export async function seedScores(db: Db, schoolId: string, sessionId: string, de
     const arm = armOf(demo.ratings.arm)
     const list = await roster(arm.id)
     const rated = list.slice(0, Math.ceil(list.length * demo.ratings.share))
+    const traitRows = rated.flatMap((student, i) => TRAIT_KEYS.map((trait, k) =>
+      ({ schoolId, termId: term.id, studentId: student.id, trait, rating: 2 + ((i + k) % 4), enteredById: userId(demo.ratings!.enteredBy) })))
+    if (traitRows.length) {
+      await db.insert(traitRatings).values(traitRows)
+        .onConflictDoUpdate({ target: [traitRatings.schoolId, traitRatings.termId, traitRatings.studentId, traitRatings.trait], set: { rating: sql`excluded.rating` } })
+    }
     for (const [i, student] of rated.entries()) {
-      for (const [k, trait] of TRAIT_KEYS.entries()) {
-        const rating = 2 + ((i + k) % 4)
-        await db.insert(traitRatings).values({ schoolId, termId: term.id, studentId: student.id, trait, rating, enteredById: userId(demo.ratings.enteredBy) })
-          .onConflictDoUpdate({ target: [traitRatings.schoolId, traitRatings.termId, traitRatings.studentId, traitRatings.trait], set: { rating } })
-      }
       const comment = COMMENTS[i % COMMENTS.length]!
       const principalComment = demo.ratings.principal && i < Math.ceil(list.length * (demo.ratings.principalShare ?? 0))
         ? PRINCIPAL_COMMENTS[i % PRINCIPAL_COMMENTS.length]!

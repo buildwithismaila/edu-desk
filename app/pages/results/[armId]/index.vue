@@ -204,7 +204,7 @@ async function saveComments() {
         </template>
       </UAlert>
 
-      <ResultsResultsActions
+      <ResultsActions
         v-if="user && results.term.sessionIsCurrent"
         :status="results.status"
         :role="user.role"

@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 7 — Results & report cards (spec approved 2026-10-13)
+- **Current phase:** Phase 7 — Results & report cards: complete (2026-10-13). Next: Phase 8 (spec to be written when you name it)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 7 — Results & report cards (2026-10-13)
+- Built: pure results computation (subject totals with ABS = 0, averages over offered subjects, competition ranking by exact average, subject positions and stats, third-term cumulative average, completeness); Draft → Submitted → Published per (term, arm) with return-to-draft (reason) and unpublish; submitting needs complete sheets and locks scores; publishing stores frozen report-card snapshots; manual unlock refused while results hold the lock; principal's comments; report card and broadsheet API; `/results` (status per arm), arm page (completeness, ranked table, actions, principal's comments), printable A4 report cards (one per page), landscape broadsheet, single report card (parents too, published only), "Report card" link in My children, Results nav; guards for arms/sessions with results or locks; seed: every JSS 1A subject filled except Chidera's English Exam, a tie, principal's comments.
+- Tests (totals): 1176 unit + integration (PGlite) / 71 Nuxt component / 48 E2E tests × desktop + mobile (viewport-specific and desktop-only skips).
+- Decisions: see docs/decisions.md #034–#035
+- Found while building: the results page used `<ResultsResultsActions>`, but Nuxt names `components/results/ResultsActions.vue` `ResultsActions` (a folder prefix repeated in the file name is dropped), so no workflow buttons showed — caught by E2E; `students/[id].vue` beside a new `students/[id]/` folder would have become a parent route (moved to `[id]/index.vue`); a failed E2E run left data that blocked the next (the journey now resets JSS 1A first, and re-seeding restores the demo gap).
 
 ### Phase 6 — Score entry (2026-10-13)
 - Built: score sheets per (term, arm, subject) with one row per component cell, explicit ABS, whole numbers 0…max; bulk save of changed cells in one transaction with per-cell errors; subject-teacher access to assigned pairs (current term), admin/principal cover (any term of the current session), earlier sessions read-only; manual lock/unlock per (term, arm) covering scores, ratings and comments; SSS department filtering; Nursery skill ratings; class teacher's trait ratings (1–5) and comments; assessment split frozen once scores exist; subject/session delete guards; `/scores` (sheets with progress and locks), keyboard `ScoreGrid` (Enter/↓/↑/Tab, live total and grade, unsaved-changes guard), `/scores/ratings`, My classes score progress, Scores nav; seed: JSS 1A Maths complete (one ABS), JSS 1B Maths half, JSS 1A ratings, Nursery 1A Numeracy, Sunrise sheet.
@@ -56,7 +62,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 7 — approve the spec, then sub-step 1 (results computation, test-first)
+- Phase 8 — Fees & payments: start with its spec (`docs/features/08-*.md`) when you name it
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

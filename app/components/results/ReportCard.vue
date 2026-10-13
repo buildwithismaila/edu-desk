@@ -87,81 +87,85 @@ const cell = (value: number | 'ABS' | null) => value === null ? '—' : String(v
       </dl>
     </section>
 
-    <table
+    <div
       v-if="report.mode === 'scores'"
-      data-testid="report-card-subjects"
-      class="w-full border-collapse"
+      class="overflow-x-auto"
     >
-      <thead>
-        <tr class="bg-gray-100">
-          <th class="border border-gray-400 px-2 py-1 text-left">
-            Subject
-          </th>
-          <th
-            v-for="component in report.components"
-            :key="component.id"
-            class="border border-gray-400 px-1 py-1"
+      <table
+        data-testid="report-card-subjects"
+        class="w-full border-collapse"
+      >
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="border border-gray-400 px-2 py-1 text-left">
+              Subject
+            </th>
+            <th
+              v-for="component in report.components"
+              :key="component.id"
+              class="border border-gray-400 px-1 py-1"
+            >
+              {{ component.name }}<span class="block text-[10px] font-normal">/{{ component.maxScore }}</span>
+            </th>
+            <th class="border border-gray-400 px-1 py-1">
+              Total
+            </th>
+            <th class="border border-gray-400 px-1 py-1">
+              Grade
+            </th>
+            <th
+              v-if="report.summary.showPositions"
+              class="border border-gray-400 px-1 py-1"
+            >
+              Pos.
+            </th>
+            <th class="border border-gray-400 px-2 py-1 text-left">
+              Remark
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="subject in report.subjects"
+            :key="subject.id"
           >
-            {{ component.name }}<span class="block text-[10px] font-normal">/{{ component.maxScore }}</span>
-          </th>
-          <th class="border border-gray-400 px-1 py-1">
-            Total
-          </th>
-          <th class="border border-gray-400 px-1 py-1">
-            Grade
-          </th>
-          <th
-            v-if="report.summary.showPositions"
-            class="border border-gray-400 px-1 py-1"
-          >
-            Pos.
-          </th>
-          <th class="border border-gray-400 px-2 py-1 text-left">
-            Remark
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="subject in report.subjects"
-          :key="subject.id"
-        >
-          <td class="border border-gray-400 px-2 py-1">
-            {{ subject.name }}
-          </td>
-          <td
-            v-for="(value, i) in subject.cells"
-            :key="i"
-            class="border border-gray-400 px-1 py-1 text-center"
-          >
-            {{ cell(value) }}
-          </td>
-          <td class="border border-gray-400 px-1 py-1 text-center font-semibold">
-            {{ subject.total }}
-          </td>
-          <td class="border border-gray-400 px-1 py-1 text-center">
-            {{ subject.grade ?? '—' }}
-          </td>
-          <td
-            v-if="report.summary.showPositions"
-            class="border border-gray-400 px-1 py-1 text-center"
-          >
-            {{ subject.position ? ordinal(subject.position) : '—' }}
-          </td>
-          <td class="border border-gray-400 px-2 py-1">
-            {{ subject.remark ?? '' }}
-          </td>
-        </tr>
-        <tr v-if="!report.subjects.length">
-          <td
-            :colspan="report.components.length + 5"
-            class="border border-gray-400 px-2 py-2 text-center text-gray-500"
-          >
-            No scores recorded for this term.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td class="border border-gray-400 px-2 py-1">
+              {{ subject.name }}
+            </td>
+            <td
+              v-for="(value, i) in subject.cells"
+              :key="i"
+              class="border border-gray-400 px-1 py-1 text-center"
+            >
+              {{ cell(value) }}
+            </td>
+            <td class="border border-gray-400 px-1 py-1 text-center font-semibold">
+              {{ subject.total }}
+            </td>
+            <td class="border border-gray-400 px-1 py-1 text-center">
+              {{ subject.grade ?? '—' }}
+            </td>
+            <td
+              v-if="report.summary.showPositions"
+              class="border border-gray-400 px-1 py-1 text-center"
+            >
+              {{ subject.position ? ordinal(subject.position) : '—' }}
+            </td>
+            <td class="border border-gray-400 px-2 py-1">
+              {{ subject.remark ?? '' }}
+            </td>
+          </tr>
+          <tr v-if="!report.subjects.length">
+            <td
+              :colspan="report.components.length + 5"
+              class="border border-gray-400 px-2 py-2 text-center text-gray-500"
+            >
+              No scores recorded for this term.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <table
       v-else

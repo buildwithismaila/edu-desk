@@ -210,3 +210,20 @@ Record significant technical or product decisions here (newest at the bottom). K
   - **Comments:** the class teacher's comment lives in `term_comments`; the principal's comment is added in Phase 7.
   - **Nursery:** `nursery_ratings` holds one rating per (term, student, subject), and Nursery sheets use rating mode.
 - **Consequences:** Configurable traits are post-MVP. Clearing a comment deletes the row, so Phase 7 must set columns to null instead once the principal's comment shares the row.
+
+### 034 — Results: pure computation, a per-arm workflow, frozen published report cards (2026-10-13)
+- **Context:** Results must match hand-calculated examples. Parents may only see what the principal published, and a published card shouldn't silently change.
+- **Decision:**
+  - **Computation:** `computeArmResults` (pure, `shared/utils/results.ts`) does the work: averages over offered subjects, competition ranking by exact average, per-subject positions and stats, cumulative average in the third term.
+  - **Statuses:** `result_statuses` holds one row per (term, arm); no row means Draft. A returned arm keeps its row with the reason.
+  - **Transitions:** `transitionResults` defines who may do what, and both the API and the buttons use it. Submit needs complete sheets and adds the score lock. Publish writes `published_results` (one JSON report card per student) in one transaction. Unpublish deletes the snapshots. Return to draft removes the lock. A manual unlock is refused while results hold it.
+  - **Reading:** staff read live results before publishing and snapshots after. Parents read only snapshots.
+- **Alternatives considered:** always computing live (published cards could change after a grading-scale edit); storing computed numbers per student and subject (more tables, the same risk).
+- **Consequences:**
+  - A correction after publishing is: unpublish → return to draft → fix → submit → publish.
+  - Report card content is versioned by the snapshot shape (`ReportCard` type); later phases (fees) add fields, and old snapshots simply lack them.
+
+### 035 — Report cards and broadsheets are print-styled pages (2026-10-13)
+- **Context:** Schools print report cards on A4 and file broadsheets.
+- **Decision:** The pages use the `print` layout, plain tables, A4 `@page` rules and `break-after: page` per card, with no PDF library. The browser's "Save as PDF" covers digital copies.
+- **Consequences:** The output looks slightly different in each browser's print engine (checked in Chromium). The parent's card is the same component.
