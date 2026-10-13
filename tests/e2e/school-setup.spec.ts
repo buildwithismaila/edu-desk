@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test'
 import { gotoHydrated, GREENFIELD_USERS, loginAs } from './support/auth'
 
 // Creates its own session and arm (random names) and deletes them again, so reruns and the parallel
-// desktop/mobile projects don't collide. Only desktop changes the current term: both projects share
-// the E2E database, and two projects switching it at once would race on the top bar.
+// desktop/mobile projects don't collide. Switching the current term is in current-term.spec.ts, which
+// runs on its own after everything else (every other test relies on the current term).
 
-test('admin creates a session, sets its first term\'s dates and adds an arm', async ({ page, isMobile }) => {
+test('admin creates a session, sets its first term\'s dates and adds an arm', async ({ page }) => {
   const year = 2100 + Math.floor(Math.random() * 7000)
   const session = `${year}/${year + 1}`
   const arm = `E${Date.now().toString(36).slice(-6)}`
@@ -30,16 +30,6 @@ test('admin creates a session, sets its first term\'s dates and adds an arm', as
   await page.getByTestId('term-dates-save').click()
   await expect(firstTerm).toContainText(`14/09/${year} – 18/12/${year}`)
   await expect(firstTerm).toContainText(`Next term begins 11/01/${year + 1}`)
-
-  if (!isMobile) {
-    // Make it current: the top bar follows; then restore the demo term
-    await firstTerm.getByTestId('set-current-term').click()
-    await expect(page.getByTestId('current-term')).toHaveText(`${session} · First Term`)
-    await expect(firstTerm.getByTestId('current-term-badge')).toBeVisible()
-
-    await page.getByTestId('term-2026/2027-first').getByTestId('set-current-term').click()
-    await expect(page.getByTestId('current-term')).toHaveText('2026/2027 · First Term')
-  }
 
   // Clean up the session
   await page.getByRole('button', { name: `Delete ${session}` }).click()

@@ -25,6 +25,7 @@ export default defineConfig({
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: 'current-term.spec.ts',
     },
     {
       name: 'mobile',
@@ -32,6 +33,14 @@ export default defineConfig({
         ...devices['Pixel 5'],
         viewport: { width: 375, height: 667 },
       },
+      testIgnore: 'current-term.spec.ts',
+    },
+    // Tests that change school-wide state every other test relies on (the current term) run alone, last
+    {
+      name: 'school-state',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: 'current-term.spec.ts',
+      dependencies: ['desktop', 'mobile'],
     },
   ],
   webServer: {

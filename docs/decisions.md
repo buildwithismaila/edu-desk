@@ -227,3 +227,8 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** Schools print report cards on A4 and file broadsheets.
 - **Decision:** The pages use the `print` layout, plain tables, A4 `@page` rules and `break-after: page` per card, with no PDF library. The browser's "Save as PDF" covers digital copies.
 - **Consequences:** The output looks slightly different in each browser's print engine (checked in Chromium). The parent's card is the same component.
+
+### 036 — E2E: school-wide state changes run last, on their own (2026-10-13)
+- **Context:** Desktop and mobile run in parallel against one database. Switching the current term (school setup) made the parallel results journey publish into the wrong term (403) and show the wrong status.
+- **Decision:** Tests that change state every other test relies on, such as the current term, live in their own spec (`current-term.spec.ts`). That spec runs in a `school-state` Playwright project that depends on `desktop` and `mobile`, so it runs after them and alone. Tests that write data also restore it at the start as well as the end, so a failed run can't block the next.
+- **Consequences:** The E2E run takes slightly longer. Decision 024 (per-project data, cleanup) still applies.
