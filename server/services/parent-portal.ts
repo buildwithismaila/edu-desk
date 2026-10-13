@@ -145,7 +145,7 @@ export async function childFees(db: Db, school: SchoolRef, child: Child, termId?
     bill: {
       lines: details.lines.map(l => ({ kind: l.kind, description: l.description, amountKobo: l.amountKobo })),
       discounts: details.discounts.map(d => ({ reason: d.reason, amountKobo: d.amountKobo })),
-      payments: details.payments.map(p => ({ id: p.id, receiptNumber: p.receiptNumber, amountKobo: p.amountKobo, method: p.method, paidOn: p.paidOn, reversed: p.reversed })),
+      payments: details.payments.map(p => ({ id: p.id, receiptNumber: p.receiptNumber, amountKobo: p.amountKobo, method: p.method, reference: p.reference, paidOn: p.paidOn, reversed: p.reversed })),
       totals: details.totals,
     },
   }

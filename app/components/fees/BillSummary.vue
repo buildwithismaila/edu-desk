@@ -2,7 +2,10 @@
 import type { InternalApi } from 'nitropack/types'
 import { PAYMENT_METHOD_LABELS } from '#shared/schemas/fees'
 
-type Bill = NonNullable<InternalApi['/api/students/:id/fees']['get']['bill']>
+type StaffBill = NonNullable<InternalApi['/api/students/:id/fees']['get']['bill']>
+type ParentBill = NonNullable<InternalApi['/api/me/children/:id/fees']['get']['bill']>
+// The staff bill, or a parent's (no ids on lines and discounts, no reversal reasons)
+type Bill = StaffBill | ParentBill
 
 // A term bill: lines, discounts, payments (reversed ones marked) and the totals; actions are emitted.
 const props = defineProps<{ bill: Bill, canEdit?: boolean }>()
@@ -19,8 +22,8 @@ const t = computed(() => props.bill.totals)
     >
       <tbody>
         <tr
-          v-for="line in bill.lines"
-          :key="line.id"
+          v-for="(line, i) in bill.lines"
+          :key="i"
           class="border-b border-default"
         >
           <td class="py-1.5">
@@ -31,15 +34,15 @@ const t = computed(() => props.bill.totals)
           </td>
         </tr>
         <tr
-          v-for="discount in bill.discounts"
-          :key="discount.id"
+          v-for="(discount, i) in bill.discounts"
+          :key="i"
           data-testid="bill-discount"
           class="border-b border-default text-success"
         >
           <td class="py-1.5">
-            Discount: {{ discount.reason }}{{ discount.kind === 'percent' ? ` (${discount.value / 100}%)` : '' }}
+            Discount: {{ discount.reason }}{{ 'kind' in discount && discount.kind === 'percent' ? ` (${discount.value / 100}%)` : '' }}
             <UButton
-              v-if="canEdit"
+              v-if="canEdit && 'id' in discount"
               icon="i-lucide-x"
               size="xs"
               color="neutral"
@@ -117,7 +120,7 @@ const t = computed(() => props.bill.totals)
             </p>
             <p class="text-muted">
               {{ formatDate(payment.paidOn) }} · {{ PAYMENT_METHOD_LABELS[payment.method] }}{{ payment.reference ? ` · ${payment.reference}` : '' }}
-              <template v-if="payment.reversed && payment.reversalReason">
+              <template v-if="payment.reversed && 'reversalReason' in payment && payment.reversalReason">
                 · {{ payment.reversalReason }}
               </template>
             </p>

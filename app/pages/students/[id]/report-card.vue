@@ -20,8 +20,8 @@ const print = () => window.print()
   <div class="space-y-4 py-4">
     <div class="no-print mx-auto flex max-w-[190mm] flex-wrap items-center justify-between gap-2 px-4">
       <UButton
-        :to="user?.role === 'parent' ? '/' : `/students/${route.params.id}`"
-        :label="user?.role === 'parent' ? 'My children' : 'Student profile'"
+        :to="user?.role === 'parent' ? `/my-children/${route.params.id}` : `/students/${route.params.id}`"
+        :label="user?.role === 'parent' ? 'Back to my child' : 'Student profile'"
         icon="i-lucide-arrow-left"
         color="neutral"
         variant="ghost"

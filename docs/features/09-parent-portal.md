@@ -69,7 +69,7 @@ Every route:
   - **Fees:** term select, the bill (the `BillSummary` read-only variant without the Reverse action and without reversal reasons), and a "Receipt" button per payment.
 - **`/my-children/[id]/receipts/[paymentId]`** (`print` layout): uses the shared `Receipt` component.
 - **Back links:** the report card page links back to the child page for parents.
-- **Nav for parents:** Dashboard, plus "My children" when there's more than one child. Parents keep landing on the dashboard.
+- **Nav for parents:** Dashboard only. The dashboard *is* the list of children (one card each), so a separate "My children" item would just duplicate it. Parents keep landing on the dashboard.
 
 ## Seed (demo)
 - **Ngozi Eze** (`parent@greenfield.test`, phone `08031110001`) has Chidera (JSS 1A) and Somto (Primary 3A).

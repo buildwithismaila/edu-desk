@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// A parent's own children with their class this session
+// A parent's own children: a card each, linking to the child's page
 const { data: children } = await useFetch('/api/me/children', { default: () => [] })
 </script>
 
@@ -19,38 +19,11 @@ const { data: children } = await useFetch('/api/me/children', { default: () => [
       No children are linked to your account yet. Please contact the school.
     </p>
     <div class="grid gap-3 sm:grid-cols-2">
-      <UCard
+      <DashboardChildCard
         v-for="child in children"
         :key="child.id"
-        :data-testid="`my-child-${child.admissionNumber}`"
-      >
-        <div class="flex items-center gap-3">
-          <UAvatar
-            :src="child.photoUrl ?? undefined"
-            :alt="child.name"
-            size="xl"
-          />
-          <div class="min-w-0">
-            <p class="font-medium">
-              {{ child.name }}
-            </p>
-            <p class="text-sm text-muted">
-              {{ child.classLabel ?? 'No class this session' }}
-            </p>
-            <p class="text-sm text-muted">
-              {{ child.admissionNumber }}
-            </p>
-            <ULink
-              v-if="child.latestReportCard"
-              :to="`/students/${child.id}/report-card?term=${child.latestReportCard.termId}`"
-              :data-testid="`my-child-report-${child.admissionNumber}`"
-              class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary"
-            >
-              <UIcon name="i-lucide-file-text" />Report card · {{ child.latestReportCard.term }}
-            </ULink>
-          </div>
-        </div>
-      </UCard>
+        :child="child"
+      />
     </div>
   </section>
 </template>

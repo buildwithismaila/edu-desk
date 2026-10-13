@@ -236,8 +236,8 @@ describe('fees', () => {
     expect(body.bill.lines).toEqual([{ kind: 'item', description: 'Tuition', amountKobo: 5_000_000 }])
     expect(body.bill.discounts).toEqual([{ reason: 'Sibling', amountKobo: 500_000 }])
     expect(body.bill.payments).toEqual([
-      { id: f.adaPaid.id, receiptNumber: f.adaPaid.receiptNumber, amountKobo: 2_000_000, method: 'cash', paidOn: '2026-10-05', reversed: false },
-      { id: f.adaReversed.id, receiptNumber: f.adaReversed.receiptNumber, amountKobo: 1_000_000, method: 'cash', paidOn: '2026-10-06', reversed: true },
+      { id: f.adaPaid.id, receiptNumber: f.adaPaid.receiptNumber, amountKobo: 2_000_000, method: 'cash', reference: null, paidOn: '2026-10-05', reversed: false },
+      { id: f.adaReversed.id, receiptNumber: f.adaReversed.receiptNumber, amountKobo: 1_000_000, method: 'cash', reference: null, paidOn: '2026-10-06', reversed: true },
     ])
     // ₦50,000 − ₦5,000 − ₦20,000 (the reversed ₦10,000 doesn't count)
     expect(body.bill.totals).toMatchObject({ balance: 2_500_000, paid: 2_000_000 })
