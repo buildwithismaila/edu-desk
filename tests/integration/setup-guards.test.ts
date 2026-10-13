@@ -1,10 +1,11 @@
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { academicSessions, classArms, studentEnrolments } from '~~/server/database/schema'
+import { academicSessions, assessmentComponents, classArms, studentEnrolments, subjects } from '~~/server/database/schema'
 import type { Db } from '~~/server/utils/db'
-import { createClassArm, createClassLevel, createSession } from '../factories/academics'
+import { createClassArm, createClassLevel, createSession, createSubject } from '../factories/academics'
 import { createSchool } from '../factories/schools'
 import { createRegister } from '../factories/attendance'
+import { createAssessmentComponents, createScore } from '../factories/scores'
 import { createStudent, enrol } from '../factories/students'
 import { createUser, DEFAULT_TEST_PASSWORD } from '../factories/users'
 import { createTestApp } from '../helpers/app'
@@ -91,5 +92,49 @@ describe('deletes blocked by attendance', () => {
     expect(res.status).toBe(409)
     expect((await res.json()).message).toMatch(/attendance/)
     expect(await db.select().from(academicSessions).where(eq(academicSessions.id, session.id))).toHaveLength(1)
+  })
+})
+
+describe('deletes and changes blocked by scores', () => {
+  async function scored() {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { session, terms } = await createSession(db, school)
+    const subject = await createSubject(db, school)
+    const [component] = await createAssessmentComponents(db, school)
+    await createScore(db, school, { term: terms[0]!, student: await createStudent(db, school), subject, component: component!, score: 15 })
+    return { school, cookie, session, subject }
+  }
+
+  it('refuses to delete a subject with scores (409)', async () => {
+    const { school, cookie, subject } = await scored()
+    const res = await del(school, `/api/subjects/${subject.id}`, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toMatch(/scores/)
+    expect(await db.select().from(subjects).where(eq(subjects.id, subject.id))).toHaveLength(1)
+  })
+
+  it('refuses to delete a session with scores (409)', async () => {
+    const { school, cookie, session } = await scored()
+    const res = await del(school, `/api/sessions/${session.id}`, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toMatch(/scores/)
+    expect(await db.select().from(academicSessions).where(eq(academicSessions.id, session.id))).toHaveLength(1)
+  })
+
+  it('freezes the assessment split once scores exist (409), but not before', async () => {
+    const split = { components: [{ name: 'CA', maxScore: 40 }, { name: 'Exam', maxScore: 60 }] }
+    const put = (school: { slug: string }, cookie: string) => app.request('/api/assessment-components', {
+      host: `${school.slug}.lvh.me:3000`, cookie, method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(split),
+    })
+
+    const { school, cookie } = await scored()
+    const res = await put(school, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toBe('Scores have already been entered with this split, so it can\'t be changed.')
+    expect((await db.select().from(assessmentComponents).where(eq(assessmentComponents.schoolId, school.id))).map(c => c.name)).toEqual(['CA1', 'CA2', 'Exam'])
+
+    const fresh = await createSchool(db)
+    expect((await put(fresh, await adminOf(fresh))).status).toBe(200)
   })
 })

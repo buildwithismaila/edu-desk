@@ -1,0 +1,100 @@
+import { and, asc, eq, isNull, sql } from 'drizzle-orm'
+import { NURSERY_RATING_VALUES, TRAIT_KEYS } from '../../../shared/constants/traits'
+import {
+  assessmentComponents,
+  classArms,
+  classLevels,
+  nurseryRatings,
+  scoreEntries,
+  studentEnrolments,
+  students,
+  subjects,
+  termComments,
+  terms,
+  traitRatings,
+  users,
+} from '../schema'
+import type { Db } from '../../utils/db'
+
+export interface DemoScores {
+  /** Subject score sheets: arm label, subject (in the arm's section), share of students entered (1 = all) */
+  sheets: { arm: string, subject: string, share: number, enteredBy: string, absentOne?: boolean }[]
+  /** Class teacher's trait ratings and comments for a share of an arm */
+  ratings?: { arm: string, share: number, enteredBy: string }
+  /** Nursery skill ratings for one subject */
+  nursery?: { arm: string, subject: string, enteredBy: string }
+}
+
+const COMMENTS = [
+  'A diligent student who participates well in class.',
+  'Shows steady improvement. Keep it up.',
+  'Can do better with more attention to homework.',
+  'Very neat and well behaved.',
+  'Needs to be more punctual.',
+]
+
+/**
+ * Idempotent demo scores for the current term: upserts by the one-per-cell keys. Values are a fixed
+ * pattern within each component's max, so totals and grades vary.
+ */
+export async function seedScores(db: Db, schoolId: string, sessionId: string, demo: DemoScores) {
+  const [term] = await db.select().from(terms).where(and(eq(terms.schoolId, schoolId), eq(terms.isCurrent, true)))
+  if (!term) return
+  const people = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.schoolId, schoolId))
+  const userId = (email: string) => people.find(p => p.email === email)?.id
+  const arms = await db.select({ id: classArms.id, arm: classArms.name, level: classLevels.name, section: classLevels.section })
+    .from(classArms).innerJoin(classLevels, eq(classArms.classLevelId, classLevels.id)).where(eq(classArms.schoolId, schoolId))
+  const armOf = (label: string) => arms.find(a => `${a.level}${a.arm}` === label || `${a.level} ${a.arm}` === label)!
+  const components = await db.select().from(assessmentComponents).where(eq(assessmentComponents.schoolId, schoolId)).orderBy(asc(assessmentComponents.sortOrder))
+  const roster = (armId: string) => db.select({ id: students.id }).from(studentEnrolments)
+    .innerJoin(students, eq(studentEnrolments.studentId, students.id))
+    .where(and(eq(studentEnrolments.schoolId, schoolId), eq(studentEnrolments.sessionId, sessionId), eq(studentEnrolments.classArmId, armId), isNull(students.deletedAt)))
+    .orderBy(asc(students.admissionNumber))
+  const subjectOf = (name: string, section: string) => db.select({ id: subjects.id }).from(subjects)
+    .where(and(eq(subjects.schoolId, schoolId), eq(subjects.name, name), sql`${subjects.section} = ${section}`)).then(r => r[0]!)
+
+  for (const sheet of demo.sheets) {
+    const arm = armOf(sheet.arm)
+    const subject = await subjectOf(sheet.subject, arm.section)
+    const list = await roster(arm.id)
+    const entered = list.slice(0, Math.ceil(list.length * sheet.share))
+    for (const [i, student] of entered.entries()) {
+      for (const [c, component] of components.entries()) {
+        const absent = !!sheet.absentOne && i === 3 && c === components.length - 1
+        const score = absent ? null : Math.round(component.maxScore * (0.4 + ((i * 7 + c * 3) % 60) / 100))
+        await db.insert(scoreEntries)
+          .values({ schoolId, termId: term.id, studentId: student.id, subjectId: subject.id, componentId: component.id, score, absent, enteredById: userId(sheet.enteredBy) })
+          .onConflictDoUpdate({
+            target: [scoreEntries.schoolId, scoreEntries.termId, scoreEntries.studentId, scoreEntries.subjectId, scoreEntries.componentId],
+            set: { score, absent },
+          })
+      }
+    }
+  }
+
+  if (demo.ratings) {
+    const arm = armOf(demo.ratings.arm)
+    const list = await roster(arm.id)
+    const rated = list.slice(0, Math.ceil(list.length * demo.ratings.share))
+    for (const [i, student] of rated.entries()) {
+      for (const [k, trait] of TRAIT_KEYS.entries()) {
+        const rating = 2 + ((i + k) % 4)
+        await db.insert(traitRatings).values({ schoolId, termId: term.id, studentId: student.id, trait, rating, enteredById: userId(demo.ratings.enteredBy) })
+          .onConflictDoUpdate({ target: [traitRatings.schoolId, traitRatings.termId, traitRatings.studentId, traitRatings.trait], set: { rating } })
+      }
+      const comment = COMMENTS[i % COMMENTS.length]!
+      await db.insert(termComments).values({ schoolId, termId: term.id, studentId: student.id, classTeacherComment: comment, enteredById: userId(demo.ratings.enteredBy) })
+        .onConflictDoUpdate({ target: [termComments.schoolId, termComments.termId, termComments.studentId], set: { classTeacherComment: comment } })
+    }
+  }
+
+  if (demo.nursery) {
+    const arm = armOf(demo.nursery.arm)
+    const subject = await subjectOf(demo.nursery.subject, 'nursery')
+    for (const [i, student] of (await roster(arm.id)).entries()) {
+      const rating = NURSERY_RATING_VALUES[i % NURSERY_RATING_VALUES.length]!
+      await db.insert(nurseryRatings).values({ schoolId, termId: term.id, studentId: student.id, subjectId: subject.id, rating, enteredById: userId(demo.nursery.enteredBy) })
+        .onConflictDoUpdate({ target: [nurseryRatings.schoolId, nurseryRatings.termId, nurseryRatings.studentId, nurseryRatings.subjectId], set: { rating } })
+    }
+  }
+}

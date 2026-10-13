@@ -18,6 +18,7 @@ import { applySchoolDefaults } from '../../services/school-defaults'
 import type { Db } from '../../utils/db'
 import { DEMO_PASSWORD_HASH } from './demo-password'
 import { type DemoAttendance, seedAttendance } from './attendance'
+import { type DemoScores, seedScores } from './scores'
 import { type DemoStudents, GREENFIELD_STUDENTS, seedStudents, SUNRISE_STUDENTS } from './students'
 
 const demoSchools: NewSchool[] = [
@@ -68,7 +69,7 @@ interface DemoAcademics {
   /** class level name → arm names */
   arms: Record<string, string[]>
   /** section → subject names; SSS keyed by department ('' = core) */
-  subjects: { primary?: string[], jss?: string[], sss?: Record<string, string[]> }
+  subjects: { nursery?: string[], primary?: string[], jss?: string[], sss?: Record<string, string[]> }
   /** For the current session; arms as labels ("JSS 1A"), subjects with their section */
   assignments?: {
     classTeachers: { email: string, arm: string }[]
@@ -78,6 +79,8 @@ interface DemoAcademics {
   students?: DemoStudents & { phoneBase: string }
   /** Past registers in the current term (never today's) */
   attendance?: DemoAttendance
+  /** Scores, ratings and comments in the current term */
+  scores?: DemoScores
 }
 
 const FIRST_TERM_2026: TermDates = { first: { startsOn: '2026-09-14', endsOn: '2026-12-18', nextTermBeginsOn: '2027-01-11' } }
@@ -102,6 +105,7 @@ const demoAcademics: Record<string, DemoAcademics> = {
       ...Object.fromEntries(['JSS 1', 'JSS 2', 'JSS 3', 'SSS 1', 'SSS 2', 'SSS 3'].map(level => [level, ['A', 'B']])),
     },
     subjects: {
+      nursery: ['Numeracy', 'Literacy', 'Rhymes & Songs'],
       primary: ['English Language', 'Mathematics', 'Basic Science', 'Social Studies', 'Christian Religious Studies', 'Islamic Religious Studies', 'Verbal Reasoning', 'Quantitative Reasoning', 'Cultural and Creative Arts', 'Computer Studies'],
       jss: ['English Language', 'Mathematics', 'Basic Science', 'Basic Technology', 'Business Studies', 'Civic Education', 'Social Studies', 'Christian Religious Studies', 'Computer Studies', 'French'],
       sss: {
@@ -128,6 +132,15 @@ const demoAcademics: Record<string, DemoAcademics> = {
     students: { ...GREENFIELD_STUDENTS, phoneBase: '+234802210' },
     // JSS 1B has none, to show an untaken register
     attendance: { arms: ['JSS 1A'], days: 10, takenBy: 'teacher@greenfield.test' },
+    // JSS 1A Maths complete (one ABS), JSS 1B Maths half done, so progress shows
+    scores: {
+      sheets: [
+        { arm: 'JSS 1A', subject: 'Mathematics', share: 1, enteredBy: 'teacher@greenfield.test', absentOne: true },
+        { arm: 'JSS 1B', subject: 'Mathematics', share: 0.5, enteredBy: 'teacher@greenfield.test' },
+      ],
+      ratings: { arm: 'JSS 1A', share: 0.5, enteredBy: 'teacher@greenfield.test' },
+      nursery: { arm: 'Nursery 1A', subject: 'Numeracy', enteredBy: 'admin@greenfield.test' },
+    },
   },
   sunrise: {
     sessions: [{ name: '2026/2027', terms: FIRST_TERM_2026 }],
@@ -136,6 +149,7 @@ const demoAcademics: Record<string, DemoAcademics> = {
     subjects: { jss: ['English Language', 'Mathematics'] },
     students: { ...SUNRISE_STUDENTS, phoneBase: '+234803310' },
     attendance: { arms: ['JSS 1 Gold'], days: 2, takenBy: 'admin@sunrise.test' },
+    scores: { sheets: [{ arm: 'JSS 1 Gold', subject: 'Mathematics', share: 0.5, enteredBy: 'admin@sunrise.test' }] },
   },
 }
 
@@ -224,8 +238,9 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
 
     const depts = await tx.select({ id: departments.id, name: departments.name }).from(departments).where(eq(departments.schoolId, schoolId))
     const deptIds = new Map(depts.map(d => [d.name, d.id]))
-    const { primary = [], jss = [], sss = {} } = academics.subjects
+    const { nursery = [], primary = [], jss = [], sss = {} } = academics.subjects
     const rows = [
+      ...nursery.map(name => ({ schoolId, section: 'nursery' as const, name })),
       ...primary.map(name => ({ schoolId, section: 'primary' as const, name })),
       ...jss.map(name => ({ schoolId, section: 'jss' as const, name })),
       ...Object.entries(sss).flatMap(([dept, names]) =>
@@ -236,6 +251,7 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
     if (academics.assignments) await seedAssignments(tx, schoolId, currentSessionId, academics.assignments)
     if (academics.students) await seedStudents(tx, schoolId, currentSessionId, academics.students, academics.students.phoneBase)
     if (academics.attendance) await seedAttendance(tx, schoolId, currentSessionId, academics.attendance)
+    if (academics.scores) await seedScores(tx, schoolId, currentSessionId, academics.scores)
   })
 }
 

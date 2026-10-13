@@ -4,12 +4,15 @@ import type { AssessmentComponentInput } from '../../shared/utils/assessment'
 import type { GradeBand } from '../../shared/utils/grading'
 import { assessmentComponents, gradeBands } from '../database/schema'
 import type { Db } from '../utils/db'
+import { conflict } from '../utils/errors'
 import { whereSchool } from '../utils/tenant'
+import { schoolHasScores } from './scores'
 
 type SchoolRef = { id: string }
 
 // Callers validate first (shared/schemas/grading.ts); replacing is one transaction, so a failure keeps the old set.
-// Phase 6 adds "locked once scores exist" to both replacements.
+// The assessment split is frozen once scores exist (they reference its components); grade bands are not
+// (grades are computed from totals when results are made).
 
 export function listAssessmentComponents(db: Db, school: SchoolRef) {
   return db.select({ id: assessmentComponents.id, name: assessmentComponents.name, maxScore: assessmentComponents.maxScore })
@@ -17,6 +20,7 @@ export function listAssessmentComponents(db: Db, school: SchoolRef) {
 }
 
 export async function replaceAssessmentComponents(db: Db, school: SchoolRef, components: AssessmentComponentInput[]) {
+  if (await schoolHasScores(db, school)) throw conflict('Scores have already been entered with this split, so it can\'t be changed.')
   await db.transaction(async (tx) => {
     await tx.delete(assessmentComponents).where(whereSchool(assessmentComponents, school))
     await tx.insert(assessmentComponents).values(components.map((c, i) => ({ ...c, schoolId: school.id, sortOrder: i })))

@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { defineEventHandler } from 'h3'
 import { academicSessions, attendanceRegisters, studentEnrolments, terms } from '../../database/schema'
+import { sessionHasScores } from '../../services/scores'
 import { requireRole } from '../../utils/auth'
 import { useDb } from '../../utils/db'
 import { conflict, notFound } from '../../utils/errors'
@@ -25,6 +26,7 @@ export default defineEventHandler(async (event) => {
     .innerJoin(terms, eq(attendanceRegisters.termId, terms.id))
     .where(whereSchool(attendanceRegisters, school, eq(terms.sessionId, id))).limit(1)
   if (register) throw conflict('This session has attendance records, so it can\'t be deleted.')
+  if (await sessionHasScores(db, school, id)) throw conflict('This session has scores, so it can\'t be deleted.')
 
   await db.delete(academicSessions).where(byId)
   return { deleted: true }

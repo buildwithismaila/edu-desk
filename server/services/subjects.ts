@@ -6,6 +6,7 @@ import type { Db } from '../utils/db'
 import { conflict, notFound } from '../utils/errors'
 import { whereSchool } from '../utils/tenant'
 import { assertValid, fieldError } from '../utils/validation'
+import { subjectHasScores } from './scores'
 
 type SchoolRef = { id: string }
 type SubjectValues = { section: Section, name: string, code: string | null, departmentId: string | null }
@@ -116,8 +117,9 @@ export async function updateSubject(db: Db, school: SchoolRef, id: string, chang
   return (await getSubject(db, school, id))!
 }
 
-/** Phase 6 adds a 409 when the subject has scores. */
+/** 409 when the subject has scores or Nursery ratings, so they aren't lost. */
 export async function deleteSubject(db: Db, school: SchoolRef, id: string) {
   if (!await getSubject(db, school, id)) throw notFound('Subject not found')
+  if (await subjectHasScores(db, school, id)) throw conflict('This subject has scores, so it can\'t be deleted.')
   await db.delete(subjects).where(whereSchool(subjects, school, eq(subjects.id, id)))
 }
