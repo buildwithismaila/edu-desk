@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 8 — Fees & payments (spec approved 2026-10-13)
+- **Current phase:** Phase 8 — Fees & payments: complete (2026-10-13). Next: Phase 9 (spec to be written when you name it)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 8 — Fees & payments (2026-10-13)
+- Built: integer-kobo money helpers (`parseNaira`, `formatNaira`); fee items per class level per term (replace, copy between terms, optional items); idempotent bill generation with carry-forward of arrears/credit from the previous term; refresh (items on bills without payments, carry-forward on all); optional items and fixed/percent discounts (capped at the items); append-only payments with per-year receipt numbers (concurrency-safe), reversal with a reason, no edit/delete routes; receipts (printable A4, REVERSED stamp); student ledger across terms; debtors list (printable) and term collections (by level, method, day) that reconcile; bursar still kept out of academics (tested); optional outstanding-fees line on report cards (school setting, frozen on publish); pages: Fee items, Bills, student Fees, Receipt, Debtors, Collections; Fees nav group; seed: items for every level, bills for every student, payments in every state (full, part, credit, reversal, discount) and carried-forward arrears/credit.
+- Tests (totals): 1254 unit + integration (PGlite) / 77 Nuxt component / 52 E2E tests × desktop + mobile (viewport-specific and desktop-only skips), plus the school-state project.
+- Decisions: see docs/decisions.md #037–#038
+- Found while building: the in-process test app answered unknown `/api` routes with 200 (a stand-in for Nuxt's renderer), so "payments have no edit route" couldn't be proven — unknown `/api` routes are now 404 as in Nitro; generated routes had wrong relative import depth (caught by the tests); the seed got slow again (fee inserts batched).
 
 ### Phase 7 — Results & report cards (2026-10-13)
 - Built: pure results computation (subject totals with ABS = 0, averages over offered subjects, competition ranking by exact average, subject positions and stats, third-term cumulative average, completeness); Draft → Submitted → Published per (term, arm) with return-to-draft (reason) and unpublish; submitting needs complete sheets and locks scores; publishing stores frozen report-card snapshots; manual unlock refused while results hold the lock; principal's comments; report card and broadsheet API; `/results` (status per arm), arm page (completeness, ranked table, actions, principal's comments), printable A4 report cards (one per page), landscape broadsheet, single report card (parents too, published only), "Report card" link in My children, Results nav; guards for arms/sessions with results or locks; seed: every JSS 1A subject filled except Chidera's English Exam, a tie, principal's comments.
@@ -62,7 +68,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 8 — approve the spec, then sub-step 1 (money, balance, ledger, carry-forward helpers, test-first)
+- Phase 9 — Parent portal: start with its spec (`docs/features/09-*.md`) when you name it
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.

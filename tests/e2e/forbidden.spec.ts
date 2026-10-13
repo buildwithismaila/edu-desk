@@ -50,3 +50,12 @@ test('a parent opening Students lands on the dashboard with a notice', async ({ 
   await expect(page.getByRole('region', { name: /Notifications/ }).getByText('You don\'t have access to that page')).toBeVisible()
   await expect(page.getByTestId('my-children')).toContainText('Chidera Eze')
 })
+
+test('a teacher opening Fees lands on the dashboard with a notice', async ({ page }) => {
+  await loginAs(page, GREENFIELD_USERS.teacher.email)
+
+  await page.goto('/fees/bills')
+
+  await expect(page).toHaveURL('/')
+  await expect(page.getByRole('region', { name: /Notifications/ }).getByText('You don\'t have access to that page')).toBeVisible()
+})

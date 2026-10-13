@@ -232,3 +232,21 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** Desktop and mobile run in parallel against one database. Switching the current term (school setup) made the parallel results journey publish into the wrong term (403) and show the wrong status.
 - **Decision:** Tests that change state every other test relies on, such as the current term, live in their own spec (`current-term.spec.ts`). That spec runs in a `school-state` Playwright project that depends on `desktop` and `mobile`, so it runs after them and alone. Tests that write data also restore it at the start as well as the end, so a failed run can't block the next.
 - **Consequences:** The E2E run takes slightly longer. Decision 024 (per-project data, cleanup) still applies.
+
+### 037 — Fees: bills from fee items, live carry-forward, discounts capped at the items (2026-10-13)
+- **Context:** Bursars bill every student each term and need balances that always reconcile, arrears that follow the student, and room to fix fee changes after billing.
+- **Decision:**
+  - **Bills:** `fee_items` are set per (term, class level). `bills` are one per (term, student). `bill_lines` hold the item lines plus one `carry_forward` line, which is the previous term's balance and negative for credit.
+  - **Generate and refresh:** generating creates only the missing bills. Refreshing re-syncs item lines on bills without payments (keeping chosen optional items) and carry-forward lines on every bill.
+  - **Discounts:** fixed in kobo or percent in basis points, applied to items only and together capped at the items total, so a discount can never create credit.
+  - **One source of truth:** every balance (bill, ledger, debtors, collections, report card) comes from the pure `billBalance`.
+- **Alternatives considered:** a stored running balance per student (it drifts unless every write updates it); arrears as a separate account (more tables, and the carry-forward line does the job).
+- **Consequences:** Fee changes after payments are adjusted bill by bill (optional items, discounts). The carry-forward line reflects the old bill until the next refresh.
+
+### 038 — Payments are append-only, with per-year receipt numbers (2026-10-13)
+- **Context:** Money records must be auditable: no edits, no deletes.
+- **Decision:**
+  - **Append-only:** `payments` has no update or delete route. A tested 404 proves there's no such route, and the test app now returns 404 for unknown `/api` routes, like Nitro. A mistake is reversed once, with a reason (`reversedAt`, `reversedById`, `reversalReason`), and reversed payments don't count as paid.
+  - **Receipt numbers:** `RCT/YEAR/NNNNNN`, from `receipt_counters`, incremented in the payment's transaction, so concurrent payments get unique numbers.
+  - **Online payments later:** `channel` (`manual`) and `gatewayReference` are ready for them.
+- **Consequences:** A wrong payment shows twice in the ledger (payment and reversal). Receipts show REVERSED with the reason.

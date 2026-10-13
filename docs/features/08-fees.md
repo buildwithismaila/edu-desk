@@ -201,14 +201,14 @@ All routes:
 6. **E2E + docs.**
 
 ## Acceptance checklist
-- [ ] Balances always reconcile: bills, discounts, payments and reversals match in the ledger, debtors and collections (unit and integration)
-- [ ] Bill generation is idempotent; carry-forward of arrears and credit works
-- [ ] No payment can be edited or hard-deleted; reversals keep an audit trail
-- [ ] Printable receipts; debtors list per arm; term collections summary
-- [ ] The bursar can't access academics; teachers can't access fees
-- [ ] Every route: validation, roles, tenant isolation tested
-- [ ] Works at 375px
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] Balances always reconcile: bills, discounts, payments and reversals match in the ledger, debtors and collections (unit and integration)
+- [x] Bill generation is idempotent; carry-forward of arrears and credit works
+- [x] No payment can be edited or hard-deleted; reversals keep an audit trail
+- [x] Printable receipts; debtors list per arm; term collections summary
+- [x] The bursar can't access academics; teachers can't access fees
+- [x] Every route: validation, roles, tenant isolation tested
+- [x] Works at 375px
+- [x] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Open questions
 1. **Who manages fees:** admin and bursar; the principal is read-only (reports, ledgers). OK?

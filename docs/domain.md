@@ -93,6 +93,14 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
 - Payments are never edited or hard-deleted — they are reversed with a reason (audit trail).
 - Printable receipt per payment; debtors list per class arm; term collections summary.
 - Online payments (Paystack/Flutterwave) are post-MVP; design the payments table so a `channel` and `gatewayReference` can be added.
+- **Phase 8 specifics** (`shared/utils/fees.ts`, `shared/utils/money.ts`):
+  - **Money:** amounts are integer kobo, typed and shown in naira; at most ₦10,000,000 per line or payment.
+  - **Bills:** one per student per term, holding the compulsory items of the student's class level; optional items (e.g. Bus) are added per student. The previous term's closing balance becomes an "Arrears brought forward" line, or a negative "Credit brought forward" line (first term looks back to the previous session's third term). Generating is idempotent; "Refresh" re-syncs item lines on bills without payments, and carry-forward lines on all bills.
+  - **Discounts:** fixed (₦) or percent (on the items, not arrears, half-up to the kobo), together capped at the items. They can be removed, because they aren't money received.
+  - **Payments:** each gets `RCT/YEAR/NNNNNN` from a per-school, per-year counter. A payment is never edited or deleted, only reversed once with a reason; a reversed payment doesn't count as paid.
+  - **Reports:** expected (billed − discounts) − collected = outstanding − credit, for the term.
+  - **Access:** admin and bursar manage fees; the principal can read them; teachers can't see fees; parents see them in Phase 9.
+  - **Report cards:** a school setting adds the term's fee balance to the card, frozen when the results are published.
 
 ## Roles & permissions
 | Role | Can do |

@@ -98,6 +98,8 @@ test.describe('mobile', () => {
       ['/attendance/summary', 'summary-arm'],
       ['/scores', 'scores-arm-filter'],
       ['/scores/ratings', 'ratings-arm'],
+      ['/fees/bills', 'bills-table'],
+      ['/fees/collections', 'collections-expected'],
     ] as const) {
       await page.goto(path)
       await expect(page.getByTestId(ready)).toBeVisible()
