@@ -38,6 +38,15 @@ import scoreSheetPutHandler from '~~/server/api/scores/sheet.put'
 import scoreSheetsHandler from '~~/server/api/scores/sheets.get'
 import ratingsSheetGetHandler from '~~/server/api/ratings/sheet.get'
 import ratingsSheetPutHandler from '~~/server/api/ratings/sheet.put'
+import resultsArmsHandler from '~~/server/api/results/arms.get'
+import resultsBroadsheetHandler from '~~/server/api/results/broadsheet.get'
+import resultsGetHandler from '~~/server/api/results/index.get'
+import resultsPrincipalCommentsHandler from '~~/server/api/results/principal-comments.put'
+import resultsPublishHandler from '~~/server/api/results/publish.post'
+import resultsReportCardsHandler from '~~/server/api/results/report-cards.get'
+import resultsReturnHandler from '~~/server/api/results/return.post'
+import resultsSubmitHandler from '~~/server/api/results/submit.post'
+import resultsUnpublishHandler from '~~/server/api/results/unpublish.post'
 import schoolHandler from '~~/server/api/school.get'
 import logoDeleteHandler from '~~/server/api/school/logo.delete'
 import logoGetHandler from '~~/server/api/school/logo.get'
@@ -57,6 +66,7 @@ import staffGetHandler from '~~/server/api/staff/index.get'
 import staffPostHandler from '~~/server/api/staff/index.post'
 import studentDeleteHandler from '~~/server/api/students/[id].delete'
 import studentAttendanceHandler from '~~/server/api/students/[id]/attendance.get'
+import studentReportCardHandler from '~~/server/api/students/[id]/report-card.get'
 import studentGetHandler from '~~/server/api/students/[id].get'
 import studentPatchHandler from '~~/server/api/students/[id].patch'
 import studentEnrolmentHandler from '~~/server/api/students/[id]/enrolment.put'
@@ -180,6 +190,16 @@ export function createTestApp(db: Db) {
     .delete('/api/scores/locks', scoreLocksDeleteHandler)
     .get('/api/ratings/sheet', ratingsSheetGetHandler)
     .put('/api/ratings/sheet', ratingsSheetPutHandler)
+    .get('/api/results/arms', resultsArmsHandler)
+    .get('/api/results', resultsGetHandler)
+    .post('/api/results/submit', resultsSubmitHandler)
+    .post('/api/results/publish', resultsPublishHandler)
+    .post('/api/results/return', resultsReturnHandler)
+    .post('/api/results/unpublish', resultsUnpublishHandler)
+    .put('/api/results/principal-comments', resultsPrincipalCommentsHandler)
+    .get('/api/results/report-cards', resultsReportCardsHandler)
+    .get('/api/results/broadsheet', resultsBroadsheetHandler)
+    .get('/api/students/:id/report-card', studentReportCardHandler)
     .get('/api/students/:id/attendance', studentAttendanceHandler)
     .post('/api/students/import', studentsImportHandler)
     .get('/api/students/import/template', studentsImportTemplateHandler)
