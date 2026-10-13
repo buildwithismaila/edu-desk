@@ -35,7 +35,12 @@ import billsGetHandler from '~~/server/api/fees/bills/index.get'
 import billOptionalItemsHandler from '~~/server/api/fees/bills/[id]/optional-items.put'
 import billDiscountsHandler from '~~/server/api/fees/bills/[id]/discounts.post'
 import discountDeleteHandler from '~~/server/api/fees/discounts/[id].delete'
-import myChildrenHandler from '~~/server/api/me/children.get'
+import myChildrenHandler from '~~/server/api/me/children/index.get'
+import myChildHandler from '~~/server/api/me/children/[id].get'
+import myChildResultsHandler from '~~/server/api/me/children/[id]/results.get'
+import myChildAttendanceHandler from '~~/server/api/me/children/[id]/attendance.get'
+import myChildFeesHandler from '~~/server/api/me/children/[id]/fees.get'
+import myChildReceiptHandler from '~~/server/api/me/children/[id]/payments/[paymentId].get'
 import departmentDeleteHandler from '~~/server/api/departments/[id].delete'
 import departmentPatchHandler from '~~/server/api/departments/[id].patch'
 import departmentsGetHandler from '~~/server/api/departments/index.get'
@@ -193,6 +198,11 @@ export function createTestApp(db: Db) {
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
     .get('/api/me/children', myChildrenHandler)
+    .get('/api/me/children/:id', myChildHandler)
+    .get('/api/me/children/:id/results', myChildResultsHandler)
+    .get('/api/me/children/:id/attendance', myChildAttendanceHandler)
+    .get('/api/me/children/:id/fees', myChildFeesHandler)
+    .get('/api/me/children/:id/payments/:paymentId', myChildReceiptHandler)
     .get('/api/attendance/arms', attendanceArmsHandler)
     .get('/api/attendance/register', attendanceRegisterGetHandler)
     .put('/api/attendance/register', attendanceRegisterPutHandler)

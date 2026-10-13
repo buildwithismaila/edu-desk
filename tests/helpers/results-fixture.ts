@@ -81,7 +81,7 @@ export async function resultsFixture(db: Db, app: ReturnType<typeof createTestAp
 
   return {
     school, session, first, second, third, components: { ca1, ca2, exam }, level, armA, armB, maths, english,
-    students: { ada, bola, chidi, dayo }, users, cookies, scores,
+    students: { ada, bola, chidi, dayo }, parents: { ada: adaParent, dayo: dayoParent }, users, cookies, scores,
   }
 }
 export type ResultsFixture = Awaited<ReturnType<typeof resultsFixture>>

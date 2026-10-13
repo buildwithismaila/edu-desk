@@ -1,7 +1,7 @@
 import { and, asc, eq, ilike, inArray, isNull, ne, or } from 'drizzle-orm'
 import { classArmLabel } from '../../shared/utils/academics'
 import { normalisePhone } from '../../shared/utils/phone'
-import { academicSessions, classArms, classLevels, publishedResults, studentEnrolments, studentGuardians, students, terms, users } from '../database/schema'
+import { academicSessions, classArms, classLevels, studentEnrolments, studentGuardians, students, users } from '../database/schema'
 import type { Db } from '../utils/db'
 import { conflict, notFound } from '../utils/errors'
 import { generateTemporaryPassword } from '../utils/password'
@@ -135,18 +135,11 @@ export async function listMyChildren(db: Db, school: SchoolRef, parentId: string
     .leftJoin(classLevels, eq(classArms.classLevelId, classLevels.id))
     .where(whereSchool(studentGuardians, school, eq(studentGuardians.guardianId, parentId), isNull(students.deletedAt)))
     .orderBy(asc(students.firstName))
-  // A published report card for the current term (Phase 7)
-  const [currentTerm] = await db.select({ id: terms.id, number: terms.number }).from(terms).where(whereSchool(terms, school, eq(terms.isCurrent, true)))
-  const published = currentTerm && rows.length
-    ? new Set((await db.select({ studentId: publishedResults.studentId }).from(publishedResults)
-        .where(whereSchool(publishedResults, school, eq(publishedResults.termId, currentTerm.id), inArray(publishedResults.studentId, rows.map(r => r.id))))).map(p => p.studentId))
-    : new Set<string>()
   return rows.map(r => ({
     id: r.id,
     name: `${r.firstName} ${r.lastName}`,
     admissionNumber: r.admissionNumber,
     classLabel: r.level && r.arm ? classArmLabel(r.level, r.arm) : null,
     photoUrl: studentPhotoUrl({ id: r.id, photoKey: r.photoKey, photoUpdatedAt: r.photoUpdatedAt }),
-    reportCard: currentTerm && published.has(r.id) ? { termId: currentTerm.id, termNumber: currentTerm.number } : null,
   }))
 }
