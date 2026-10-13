@@ -18,12 +18,29 @@ import type { Db } from '../../utils/db'
 
 export interface DemoScores {
   /** Subject score sheets: arm label, subject (in the arm's section), share of students entered (1 = all) */
-  sheets: { arm: string, subject: string, share: number, enteredBy: string, absentOne?: boolean }[]
+  sheets: {
+    arm: string
+    subject: string
+    share: number
+    enteredBy: string
+    /** Marks the 4th student absent for the last component */
+    absentOne?: boolean
+    /** Leaves one cell blank: student index (by admission number), component index */
+    missing?: { student: number, component: number }
+    /** The second student copies the first's scores, so they tie for position */
+    tie?: [number, number]
+  }[]
   /** Class teacher's trait ratings and comments for a share of an arm */
-  ratings?: { arm: string, share: number, enteredBy: string }
+  ratings?: { arm: string, share: number, enteredBy: string, principalShare?: number, principal?: string }
   /** Nursery skill ratings for one subject */
   nursery?: { arm: string, subject: string, enteredBy: string }
 }
+
+const PRINCIPAL_COMMENTS = [
+  'An impressive result. Keep it up.',
+  'Good effort; aim higher next term.',
+  'Promoted on trial. Work harder.',
+]
 
 const COMMENTS = [
   'A diligent student who participates well in class.',
@@ -53,15 +70,17 @@ export async function seedScores(db: Db, schoolId: string, sessionId: string, de
   const subjectOf = (name: string, section: string) => db.select({ id: subjects.id }).from(subjects)
     .where(and(eq(subjects.schoolId, schoolId), eq(subjects.name, name), sql`${subjects.section} = ${section}`)).then(r => r[0]!)
 
-  for (const sheet of demo.sheets) {
+  for (const [s, sheet] of demo.sheets.entries()) {
     const arm = armOf(sheet.arm)
     const subject = await subjectOf(sheet.subject, arm.section)
     const list = await roster(arm.id)
     const entered = list.slice(0, Math.ceil(list.length * sheet.share))
     for (const [i, student] of entered.entries()) {
+      const pattern = sheet.tie && i === sheet.tie[1] ? sheet.tie[0] : i
       for (const [c, component] of components.entries()) {
+        if (sheet.missing && i === sheet.missing.student && c === sheet.missing.component) continue
         const absent = !!sheet.absentOne && i === 3 && c === components.length - 1
-        const score = absent ? null : Math.round(component.maxScore * (0.4 + ((i * 7 + c * 3) % 60) / 100))
+        const score = absent ? null : Math.round(component.maxScore * (0.4 + ((pattern * 7 + c * 3 + s * 11) % 60) / 100))
         await db.insert(scoreEntries)
           .values({ schoolId, termId: term.id, studentId: student.id, subjectId: subject.id, componentId: component.id, score, absent, enteredById: userId(sheet.enteredBy) })
           .onConflictDoUpdate({
@@ -83,8 +102,12 @@ export async function seedScores(db: Db, schoolId: string, sessionId: string, de
           .onConflictDoUpdate({ target: [traitRatings.schoolId, traitRatings.termId, traitRatings.studentId, traitRatings.trait], set: { rating } })
       }
       const comment = COMMENTS[i % COMMENTS.length]!
-      await db.insert(termComments).values({ schoolId, termId: term.id, studentId: student.id, classTeacherComment: comment, enteredById: userId(demo.ratings.enteredBy) })
-        .onConflictDoUpdate({ target: [termComments.schoolId, termComments.termId, termComments.studentId], set: { classTeacherComment: comment } })
+      const principalComment = demo.ratings.principal && i < Math.ceil(list.length * (demo.ratings.principalShare ?? 0))
+        ? PRINCIPAL_COMMENTS[i % PRINCIPAL_COMMENTS.length]!
+        : null
+      const comments = { classTeacherComment: comment, principalComment, principalCommentById: principalComment ? userId(demo.ratings.principal!) : null }
+      await db.insert(termComments).values({ schoolId, termId: term.id, studentId: student.id, ...comments, enteredById: userId(demo.ratings.enteredBy) })
+        .onConflictDoUpdate({ target: [termComments.schoolId, termComments.termId, termComments.studentId], set: comments })
     }
   }
 

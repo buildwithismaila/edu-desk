@@ -83,6 +83,8 @@ interface DemoAcademics {
   scores?: DemoScores
 }
 
+const GREENFIELD_JSS_SUBJECTS = ['English Language', 'Mathematics', 'Basic Science', 'Basic Technology', 'Business Studies', 'Civic Education', 'Social Studies', 'Christian Religious Studies', 'Computer Studies', 'French']
+
 const FIRST_TERM_2026: TermDates = { first: { startsOn: '2026-09-14', endsOn: '2026-12-18', nextTermBeginsOn: '2027-01-11' } }
 
 const demoAcademics: Record<string, DemoAcademics> = {
@@ -107,7 +109,7 @@ const demoAcademics: Record<string, DemoAcademics> = {
     subjects: {
       nursery: ['Numeracy', 'Literacy', 'Rhymes & Songs'],
       primary: ['English Language', 'Mathematics', 'Basic Science', 'Social Studies', 'Christian Religious Studies', 'Islamic Religious Studies', 'Verbal Reasoning', 'Quantitative Reasoning', 'Cultural and Creative Arts', 'Computer Studies'],
-      jss: ['English Language', 'Mathematics', 'Basic Science', 'Basic Technology', 'Business Studies', 'Civic Education', 'Social Studies', 'Christian Religious Studies', 'Computer Studies', 'French'],
+      jss: GREENFIELD_JSS_SUBJECTS,
       sss: {
         '': ['English Language', 'Mathematics', 'Civic Education'],
         'Science': ['Physics', 'Chemistry', 'Biology'],
@@ -132,13 +134,22 @@ const demoAcademics: Record<string, DemoAcademics> = {
     students: { ...GREENFIELD_STUDENTS, phoneBase: '+234802210' },
     // JSS 1B has none, to show an untaken register
     attendance: { arms: ['JSS 1A'], days: 10, takenBy: 'teacher@greenfield.test' },
-    // JSS 1A Maths complete (one ABS), JSS 1B Maths half done, so progress shows
+    // JSS 1A: every subject, ready for results, except Chidera Eze's English Exam (the gap to fill);
+    // students 6 and 7 tie; one ABS in Maths. JSS 1B Maths half done, so progress shows.
     scores: {
       sheets: [
-        { arm: 'JSS 1A', subject: 'Mathematics', share: 1, enteredBy: 'teacher@greenfield.test', absentOne: true },
+        ...GREENFIELD_JSS_SUBJECTS.map(subject => ({
+          arm: 'JSS 1A',
+          subject,
+          share: 1,
+          enteredBy: subject === 'Mathematics' ? 'teacher@greenfield.test' : subject === 'English Language' ? 'chioma@greenfield.test' : 'admin@greenfield.test',
+          absentOne: subject === 'Mathematics',
+          missing: subject === 'English Language' ? { student: 0, component: 2 } : undefined,
+          tie: [5, 6] as [number, number],
+        })),
         { arm: 'JSS 1B', subject: 'Mathematics', share: 0.5, enteredBy: 'teacher@greenfield.test' },
       ],
-      ratings: { arm: 'JSS 1A', share: 0.5, enteredBy: 'teacher@greenfield.test' },
+      ratings: { arm: 'JSS 1A', share: 1, enteredBy: 'teacher@greenfield.test', principalShare: 0.5, principal: 'principal@greenfield.test' },
       nursery: { arm: 'Nursery 1A', subject: 'Numeracy', enteredBy: 'admin@greenfield.test' },
     },
   },

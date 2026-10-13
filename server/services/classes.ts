@@ -6,6 +6,7 @@ import type { Db } from '../utils/db'
 import { conflict, notFound } from '../utils/errors'
 import { whereSchool } from '../utils/tenant'
 import { fieldError } from '../utils/validation'
+import { armHasResults } from './scores'
 
 type SchoolRef = { id: string }
 
@@ -120,5 +121,6 @@ export async function deleteClassArm(db: Db, school: SchoolRef, id: string) {
   const [register] = await db.select({ id: attendanceRegisters.id }).from(attendanceRegisters)
     .where(whereSchool(attendanceRegisters, school, eq(attendanceRegisters.classArmId, id))).limit(1)
   if (register) throw conflict('This class arm has attendance records, so it can\'t be deleted.')
+  if (await armHasResults(db, school, id)) throw conflict('This class arm has results or locked scores, so it can\'t be deleted.')
   await db.delete(classArms).where(whereSchool(classArms, school, eq(classArms.id, id)))
 }

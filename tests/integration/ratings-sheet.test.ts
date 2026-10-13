@@ -113,7 +113,8 @@ describe('PUT /api/ratings/sheet', () => {
 
     await save(f, f.cookies.classTeacher, { ...sheetOf(f), students: [{ studentId: f.ada.id, ratings: { punctuality: 2, honesty: null }, comment: '' }] })
     expect((await ratingsOf(f.ada)).map(r => [r.trait, r.rating])).toEqual([['punctuality', 2]])
-    expect(await commentOf(f.ada)).toBeUndefined()
+    // The row stays (it also holds the principal's comment); only the class teacher's comment is cleared
+    expect(await commentOf(f.ada)).toMatchObject({ classTeacherComment: null })
   })
 
   it('validates ratings, traits and the students', async () => {

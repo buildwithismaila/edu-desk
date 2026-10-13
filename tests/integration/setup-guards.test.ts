@@ -5,7 +5,8 @@ import type { Db } from '~~/server/utils/db'
 import { createClassArm, createClassLevel, createSession, createSubject } from '../factories/academics'
 import { createSchool } from '../factories/schools'
 import { createRegister } from '../factories/attendance'
-import { createAssessmentComponents, createScore } from '../factories/scores'
+import { setResultStatus } from '../factories/results'
+import { createAssessmentComponents, createScore, lockScores } from '../factories/scores'
 import { createStudent, enrol } from '../factories/students'
 import { createUser, DEFAULT_TEST_PASSWORD } from '../factories/users'
 import { createTestApp } from '../helpers/app'
@@ -136,5 +137,35 @@ describe('deletes and changes blocked by scores', () => {
 
     const fresh = await createSchool(db)
     expect((await put(fresh, await adminOf(fresh))).status).toBe(200)
+  })
+})
+
+describe('deletes blocked by locks and results', () => {
+  it('refuses to delete a class arm with a score lock or results (409)', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { terms } = await createSession(db, school)
+    const level = await createClassLevel(db, school)
+    const locked = await createClassArm(db, school, level, 'A')
+    const withResults = await createClassArm(db, school, level, 'B')
+    await lockScores(db, school, { term: terms[0]!, arm: locked })
+    await setResultStatus(db, school, { term: terms[0]!, arm: withResults, status: 'draft' })
+
+    for (const arm of [locked, withResults]) {
+      const res = await del(school, `/api/class-arms/${arm.id}`, cookie)
+      expect(res.status).toBe(409)
+      expect((await res.json()).message).toMatch(/results/)
+      expect(await db.select().from(classArms).where(eq(classArms.id, arm.id))).toHaveLength(1)
+    }
+  })
+
+  it('refuses to delete a session with a results status (409)', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { session, terms } = await createSession(db, school)
+    const arm = await createClassArm(db, school, await createClassLevel(db, school))
+    await setResultStatus(db, school, { term: terms[0]!, arm, status: 'draft' })
+
+    expect((await del(school, `/api/sessions/${session.id}`, cookie)).status).toBe(409)
   })
 })

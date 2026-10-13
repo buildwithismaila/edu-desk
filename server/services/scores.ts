@@ -9,6 +9,8 @@ import {
   classArms,
   classLevels,
   nurseryRatings,
+  publishedResults,
+  resultStatuses,
   scoreEntries,
   scoreLocks,
   studentEnrolments,
@@ -41,12 +43,21 @@ export async function subjectHasScores(db: Db, school: SchoolRef, subjectId: str
   return !!rating
 }
 
-/** Whether any term of the session has scores, ratings, comments or locks. */
+/** Whether any term of the session has scores, ratings, comments, locks or results. */
 export async function sessionHasScores(db: Db, school: SchoolRef, sessionId: string) {
   const termIds = (await db.select({ id: terms.id }).from(terms).where(whereSchool(terms, school, eq(terms.sessionId, sessionId)))).map(t => t.id)
   if (!termIds.length) return false
-  for (const table of [scoreEntries, nurseryRatings, traitRatings, termComments, scoreLocks]) {
+  for (const table of [scoreEntries, nurseryRatings, traitRatings, termComments, scoreLocks, resultStatuses, publishedResults]) {
     const [row] = await db.select({ id: table.id }).from(table).where(whereSchool(table, school, inArray(table.termId, termIds))).limit(1)
+    if (row) return true
+  }
+  return false
+}
+
+/** Whether the arm has a score lock or results (any term): deleting it would lose them. */
+export async function armHasResults(db: Db, school: SchoolRef, armId: string) {
+  for (const table of [scoreLocks, resultStatuses, publishedResults]) {
+    const [row] = await db.select({ id: table.id }).from(table).where(whereSchool(table, school, eq(table.classArmId, armId))).limit(1)
     if (row) return true
   }
   return false

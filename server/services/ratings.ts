@@ -89,7 +89,9 @@ export async function saveRatingsSheet(db: Db, school: SchoolRef, viewer: Viewer
           .onConflictDoUpdate({ target: [traitRatings.schoolId, traitRatings.termId, traitRatings.studentId, traitRatings.trait], set: { rating, enteredById: viewer.id, updatedAt: new Date() } })
       }
       if (comment === null) {
-        await tx.delete(termComments).where(whereSchool(termComments, school, and(eq(termComments.termId, term.id), eq(termComments.studentId, studentId))))
+        // Null the column, not the row: it also holds the principal's comment
+        await tx.update(termComments).set({ classTeacherComment: null, enteredById: viewer.id })
+          .where(whereSchool(termComments, school, and(eq(termComments.termId, term.id), eq(termComments.studentId, studentId))))
       }
       else {
         await tx.insert(termComments).values({ schoolId: school.id, termId: term.id, studentId, classTeacherComment: comment, enteredById: viewer.id })

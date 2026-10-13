@@ -70,7 +70,7 @@ export const traitRatings = pgTable('trait_ratings', {
   check('trait_ratings_range', sql`${t.rating} between 1 and 5`),
 ])
 
-/** The class teacher's comment for the term (the principal's comes in Phase 7). */
+/** The class teacher's and principal's comments for the term. Clearing one nulls its column. */
 export const termComments = pgTable('term_comments', {
   id: uuid().primaryKey().defaultRandom(),
   schoolId: schoolId(),
@@ -78,6 +78,9 @@ export const termComments = pgTable('term_comments', {
   studentId: studentId(),
   classTeacherComment: text(),
   enteredById: enteredById(),
+  /** Phase 7: the principal's (head teacher's) comment */
+  principalComment: text(),
+  principalCommentById: enteredById(),
   ...timestamps,
 }, t => [
   unique('term_comments_one_per_student').on(t.schoolId, t.termId, t.studentId),
