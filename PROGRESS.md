@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 7 — Results & report cards: complete (2026-10-13). Next: Phase 8 (spec to be written when you name it)
+- **Current phase:** Phase 8 — Fees & payments (spec approved 2026-10-13)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -62,7 +62,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 8 — Fees & payments: start with its spec (`docs/features/08-*.md`) when you name it
+- Phase 8 — approve the spec, then sub-step 1 (money, balance, ledger, carry-forward helpers, test-first)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
