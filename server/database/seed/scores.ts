@@ -30,8 +30,8 @@ export interface DemoScores {
     /** The second student copies the first's scores, so they tie for position */
     tie?: [number, number]
   }[]
-  /** Class teacher's trait ratings and comments for a share of an arm */
-  ratings?: { arm: string, share: number, enteredBy: string, principalShare?: number, principal?: string }
+  /** Class teachers' trait ratings and comments for a share of an arm */
+  ratings?: { arm: string, share: number, enteredBy: string, principalShare?: number, principal?: string }[]
   /** Nursery skill ratings for one subject */
   nursery?: { arm: string, subject: string, enteredBy: string }
 }
@@ -99,23 +99,23 @@ export async function seedScores(db: Db, schoolId: string, sessionId: string, de
     }
   }
 
-  if (demo.ratings) {
-    const arm = armOf(demo.ratings.arm)
+  for (const ratings of demo.ratings ?? []) {
+    const arm = armOf(ratings.arm)
     const list = await roster(arm.id)
-    const rated = list.slice(0, Math.ceil(list.length * demo.ratings.share))
+    const rated = list.slice(0, Math.ceil(list.length * ratings.share))
     const traitRows = rated.flatMap((student, i) => TRAIT_KEYS.map((trait, k) =>
-      ({ schoolId, termId: term.id, studentId: student.id, trait, rating: 2 + ((i + k) % 4), enteredById: userId(demo.ratings!.enteredBy) })))
+      ({ schoolId, termId: term.id, studentId: student.id, trait, rating: 2 + ((i + k) % 4), enteredById: userId(ratings.enteredBy) })))
     if (traitRows.length) {
       await db.insert(traitRatings).values(traitRows)
         .onConflictDoUpdate({ target: [traitRatings.schoolId, traitRatings.termId, traitRatings.studentId, traitRatings.trait], set: { rating: sql`excluded.rating` } })
     }
     for (const [i, student] of rated.entries()) {
       const comment = COMMENTS[i % COMMENTS.length]!
-      const principalComment = demo.ratings.principal && i < Math.ceil(list.length * (demo.ratings.principalShare ?? 0))
+      const principalComment = ratings.principal && i < Math.ceil(list.length * (ratings.principalShare ?? 0))
         ? PRINCIPAL_COMMENTS[i % PRINCIPAL_COMMENTS.length]!
         : null
-      const comments = { classTeacherComment: comment, principalComment, principalCommentById: principalComment ? userId(demo.ratings.principal!) : null }
-      await db.insert(termComments).values({ schoolId, termId: term.id, studentId: student.id, ...comments, enteredById: userId(demo.ratings.enteredBy) })
+      const comments = { classTeacherComment: comment, principalComment, principalCommentById: principalComment ? userId(ratings.principal!) : null }
+      await db.insert(termComments).values({ schoolId, termId: term.id, studentId: student.id, ...comments, enteredById: userId(ratings.enteredBy) })
         .onConflictDoUpdate({ target: [termComments.schoolId, termComments.termId, termComments.studentId], set: comments })
     }
   }

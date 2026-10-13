@@ -19,6 +19,7 @@ import type { Db } from '../../utils/db'
 import { DEMO_PASSWORD_HASH } from './demo-password'
 import { type DemoAttendance, seedAttendance } from './attendance'
 import { type DemoFees, seedFees } from './fees'
+import { type DemoResults, seedResults } from './results'
 import { type DemoScores, seedScores } from './scores'
 import { type DemoStudents, GREENFIELD_STUDENTS, seedStudents, SUNRISE_STUDENTS } from './students'
 
@@ -84,6 +85,7 @@ interface DemoAcademics {
   scores?: DemoScores
   /** Fee items, bills and payments in the current term */
   fees?: DemoFees
+  results?: DemoResults
 }
 
 const BASE_FEES = [{ name: 'Development Levy', naira: 10_000 }, { name: 'PTA', naira: 2_500 }]
@@ -93,6 +95,8 @@ const GREENFIELD_FEE_ITEMS: DemoFees['items'] = {
   jss: [{ name: 'Tuition', naira: 85_000 }, ...BASE_FEES, { name: 'Books', naira: 15_000 }, { name: 'Bus', naira: 25_000, optional: true }],
   sss: [{ name: 'Tuition', naira: 95_000 }, ...BASE_FEES, { name: 'Books', naira: 18_000 }, { name: 'Bus', naira: 25_000, optional: true }],
 }
+
+const GREENFIELD_PRIMARY_SUBJECTS = ['English Language', 'Mathematics', 'Basic Science', 'Social Studies', 'Christian Religious Studies', 'Islamic Religious Studies', 'Verbal Reasoning', 'Quantitative Reasoning', 'Cultural and Creative Arts', 'Computer Studies']
 
 const GREENFIELD_JSS_SUBJECTS = ['English Language', 'Mathematics', 'Basic Science', 'Basic Technology', 'Business Studies', 'Civic Education', 'Social Studies', 'Christian Religious Studies', 'Computer Studies', 'French']
 
@@ -119,7 +123,7 @@ const demoAcademics: Record<string, DemoAcademics> = {
     },
     subjects: {
       nursery: ['Numeracy', 'Literacy', 'Rhymes & Songs'],
-      primary: ['English Language', 'Mathematics', 'Basic Science', 'Social Studies', 'Christian Religious Studies', 'Islamic Religious Studies', 'Verbal Reasoning', 'Quantitative Reasoning', 'Cultural and Creative Arts', 'Computer Studies'],
+      primary: GREENFIELD_PRIMARY_SUBJECTS,
       jss: GREENFIELD_JSS_SUBJECTS,
       sss: {
         '': ['English Language', 'Mathematics', 'Civic Education'],
@@ -143,10 +147,11 @@ const demoAcademics: Record<string, DemoAcademics> = {
       ],
     },
     students: { ...GREENFIELD_STUDENTS, phoneBase: '+234802210' },
-    // JSS 1B has none, to show an untaken register
-    attendance: { arms: ['JSS 1A'], days: 10, takenBy: 'teacher@greenfield.test' },
+    // JSS 1B has none, to show an untaken register; Primary 3A's feed the parent portal (Somto Eze)
+    attendance: { arms: ['JSS 1A', 'Primary 3A'], days: 10, takenBy: 'teacher@greenfield.test' },
     // JSS 1A: every subject, ready for results, except Chidera Eze's English Exam (the gap to fill);
-    // students 6 and 7 tie; one ABS in Maths. JSS 1B Maths half done, so progress shows.
+    // students 6 and 7 tie; one ABS in Maths. JSS 1B Maths half done, so progress shows. Primary 3A complete
+    // (published below, so Somto Eze's parent sees a report card).
     scores: {
       sheets: [
         ...GREENFIELD_JSS_SUBJECTS.map(subject => ({
@@ -159,8 +164,12 @@ const demoAcademics: Record<string, DemoAcademics> = {
           tie: [5, 6] as [number, number],
         })),
         { arm: 'JSS 1B', subject: 'Mathematics', share: 0.5, enteredBy: 'teacher@greenfield.test' },
+        ...GREENFIELD_PRIMARY_SUBJECTS.map(subject => ({ arm: 'Primary 3A', subject, share: 1, enteredBy: 'grace@greenfield.test' })),
       ],
-      ratings: { arm: 'JSS 1A', share: 1, enteredBy: 'teacher@greenfield.test', principalShare: 0.5, principal: 'principal@greenfield.test' },
+      ratings: [
+        { arm: 'JSS 1A', share: 1, enteredBy: 'teacher@greenfield.test', principalShare: 0.5, principal: 'principal@greenfield.test' },
+        { arm: 'Primary 3A', share: 1, enteredBy: 'grace@greenfield.test', principalShare: 1, principal: 'principal@greenfield.test' },
+      ],
       nursery: { arm: 'Nursery 1A', subject: 'Numeracy', enteredBy: 'admin@greenfield.test' },
     },
     // JSS 1A shows every payment state: paid, partly paid, credit, unpaid, a reversal, a discount, and
@@ -191,6 +200,8 @@ const demoAcademics: Record<string, DemoAcademics> = {
       },
       bursar: 'bursar@greenfield.test',
     },
+    // JSS 1A stays Draft for the Phase 7 demo
+    results: { publish: ['Primary 3A'], by: 'principal@greenfield.test' },
   },
   sunrise: {
     sessions: [{ name: '2026/2027', terms: FIRST_TERM_2026 }],
@@ -308,6 +319,8 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
     if (academics.attendance) await seedAttendance(tx, schoolId, currentSessionId, academics.attendance)
     if (academics.scores) await seedScores(tx, schoolId, currentSessionId, academics.scores)
     if (academics.fees) await seedFees(tx, schoolId, currentSessionId, academics.fees)
+    // Last: the snapshots include attendance and the fees line
+    if (academics.results) await seedResults(tx, schoolId, academics.results)
   })
 }
 

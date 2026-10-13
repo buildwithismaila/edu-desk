@@ -25,22 +25,26 @@ async function registersOf(schoolId: string) {
 }
 
 describe('demo seed: attendance', () => {
-  it('gives Greenfield JSS 1A registers on past weekdays only (none for JSS 1B, none today)', async () => {
+  it('gives Greenfield JSS 1A and Primary 3A registers on past weekdays only (none for JSS 1B, none today)', async () => {
     const registers = await registersOf(ids.greenfield!)
     const today = todayIn('Africa/Lagos')
 
     expect(registers.length).toBeGreaterThan(0)
-    expect(registers.length).toBeLessThanOrEqual(10)
-    expect(new Set(registers.map(r => `${r.level}${r.arm}`))).toEqual(new Set(['JSS 1A']))
+    expect(registers.filter(r => `${r.level}${r.arm}` === 'JSS 1A').length).toBeLessThanOrEqual(10)
+    expect(registers.filter(r => `${r.level}${r.arm}` === 'Primary 3A').length).toBeLessThanOrEqual(10)
+    expect(new Set(registers.map(r => `${r.level}${r.arm}`))).toEqual(new Set(['JSS 1A', 'Primary 3A']))
     for (const { date } of registers) {
       expect(date < today).toBe(true)
       expect([0, 6]).not.toContain(new Date(`${date}T00:00:00Z`).getUTCDay())
     }
   })
 
-  it('marks every JSS 1A student on each register, with some absences and lates', async () => {
-    const [register] = await registersOf(ids.greenfield!)
-    expect(await db.select().from(attendanceMarks).where(eq(attendanceMarks.registerId, register!.id))).toHaveLength(10)
+  it('marks every student on each register, with some absences and lates', async () => {
+    const registers = await registersOf(ids.greenfield!)
+    const jss1a = registers.find(r => `${r.level}${r.arm}` === 'JSS 1A')!
+    const primary3a = registers.find(r => `${r.level}${r.arm}` === 'Primary 3A')!
+    expect(await db.select().from(attendanceMarks).where(eq(attendanceMarks.registerId, jss1a.id))).toHaveLength(10)
+    expect(await db.select().from(attendanceMarks).where(eq(attendanceMarks.registerId, primary3a.id))).toHaveLength(8)
 
     const marks = await db.select({ status: attendanceMarks.status }).from(attendanceMarks).where(eq(attendanceMarks.schoolId, ids.greenfield!))
     const statuses = new Set(marks.map(m => m.status))
