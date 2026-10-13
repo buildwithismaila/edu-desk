@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { TERM_LABELS } from '#shared/constants/academics'
+
 // A parent's own children with their class this session
 const { data: children } = await useFetch('/api/me/children', { default: () => [] })
 </script>
@@ -40,6 +42,14 @@ const { data: children } = await useFetch('/api/me/children', { default: () => [
             <p class="text-sm text-muted">
               {{ child.admissionNumber }}
             </p>
+            <ULink
+              v-if="child.reportCard"
+              :to="`/students/${child.id}/report-card?term=${child.reportCard.termId}`"
+              :data-testid="`my-child-report-${child.admissionNumber}`"
+              class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary"
+            >
+              <UIcon name="i-lucide-file-text" />Report card · {{ TERM_LABELS[child.reportCard.termNumber] }}
+            </ULink>
           </div>
         </div>
       </UCard>

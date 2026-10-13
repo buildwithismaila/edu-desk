@@ -239,6 +239,6 @@ describe('GET /api/me/children', () => {
 
     const body = await (await call('GET', '/api/me/children', cookie, school.slug)).json()
 
-    expect(body).toEqual([{ id: mine.id, name: 'Chidera Eze', admissionNumber: 'GFA/2026/0001', classLabel: 'JSS 1A', photoUrl: null }])
+    expect(body).toEqual([{ id: mine.id, name: 'Chidera Eze', admissionNumber: 'GFA/2026/0001', classLabel: 'JSS 1A', photoUrl: null, reportCard: null }])
   })
 })

@@ -94,6 +94,9 @@ describe('who can open a report card', () => {
     const res = await parentCard(f.cookies.parent)
     expect(res.status).toBe(200)
     expect(await res.json()).toMatchObject({ status: 'published', student: { name: 'Ada Obi' }, summary: { average: 68.5 } })
+    // "My children" links to it now
+    const children = await (await http.get(f, f.cookies.parent, '/api/me/children')).json()
+    expect(children[0].reportCard).toEqual({ termId: f.first.id, termNumber: 'first' })
     // Another family's child
     expect((await parentCard(f.cookies.dayoParent)).status).toBe(404)
     expect((await parentCard(f.cookies.parent, f.students.bola)).status).toBe(404)
