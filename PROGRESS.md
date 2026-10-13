@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 6 — Score entry: complete (2026-10-13). Next: Phase 7 (spec to be written when you name it)
+- **Current phase:** Phase 7 — Results & report cards (spec approved 2026-10-13)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -56,7 +56,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 7 — Results & report cards: start with its spec (`docs/features/07-*.md`) when you name it
+- Phase 7 — approve the spec, then sub-step 1 (results computation, test-first)
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
