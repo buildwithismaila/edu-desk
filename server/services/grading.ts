@@ -31,7 +31,7 @@ export async function replaceAssessmentComponents(db: Db, school: SchoolRef, com
 const bandColumns = { id: gradeBands.id, grade: gradeBands.grade, minScore: gradeBands.minScore, maxScore: gradeBands.maxScore, remark: gradeBands.remark }
 
 /** One section's bands, highest first (as on report cards). */
-function listBands(db: Db, school: SchoolRef, section: GradedSection) {
+export function listBands(db: Db, school: SchoolRef, section: GradedSection) {
   return db.select(bandColumns).from(gradeBands)
     .where(whereSchool(gradeBands, school, eq(gradeBands.section, section))).orderBy(desc(gradeBands.minScore))
 }

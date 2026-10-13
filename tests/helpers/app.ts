@@ -31,6 +31,13 @@ import guardiansGetHandler from '~~/server/api/guardians/index.get'
 import gradingGetHandler from '~~/server/api/grading-scales/index.get'
 import logoutHandler from '~~/server/api/auth/logout.post'
 import passwordHandler from '~~/server/api/auth/password.post'
+import scoreLocksDeleteHandler from '~~/server/api/scores/locks.delete'
+import scoreLocksPutHandler from '~~/server/api/scores/locks.put'
+import scoreSheetGetHandler from '~~/server/api/scores/sheet.get'
+import scoreSheetPutHandler from '~~/server/api/scores/sheet.put'
+import scoreSheetsHandler from '~~/server/api/scores/sheets.get'
+import ratingsSheetGetHandler from '~~/server/api/ratings/sheet.get'
+import ratingsSheetPutHandler from '~~/server/api/ratings/sheet.put'
 import schoolHandler from '~~/server/api/school.get'
 import logoDeleteHandler from '~~/server/api/school/logo.delete'
 import logoGetHandler from '~~/server/api/school/logo.get'
@@ -166,6 +173,13 @@ export function createTestApp(db: Db) {
     .put('/api/attendance/register', attendanceRegisterPutHandler)
     .delete('/api/attendance/registers/:id', attendanceRegisterDeleteHandler)
     .get('/api/attendance/summary', attendanceSummaryHandler)
+    .get('/api/scores/sheets', scoreSheetsHandler)
+    .get('/api/scores/sheet', scoreSheetGetHandler)
+    .put('/api/scores/sheet', scoreSheetPutHandler)
+    .put('/api/scores/locks', scoreLocksPutHandler)
+    .delete('/api/scores/locks', scoreLocksDeleteHandler)
+    .get('/api/ratings/sheet', ratingsSheetGetHandler)
+    .put('/api/ratings/sheet', ratingsSheetPutHandler)
     .get('/api/students/:id/attendance', studentAttendanceHandler)
     .post('/api/students/import', studentsImportHandler)
     .get('/api/students/import/template', studentsImportTemplateHandler)

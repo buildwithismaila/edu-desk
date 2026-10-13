@@ -6,7 +6,6 @@ import type { AttendanceStatus } from '../../shared/schemas/attendance'
 import { classArmLabel } from '../../shared/utils/academics'
 import { registerDateError, summariseAttendance } from '../../shared/utils/attendance'
 import {
-  academicSessions,
   attendanceMarks,
   attendanceRegisters,
   classArms,
@@ -14,7 +13,6 @@ import {
   classTeacherAssignments,
   studentEnrolments,
   students,
-  terms,
   users,
 } from '../database/schema'
 import type { Db } from '../utils/db'
@@ -23,6 +21,7 @@ import { whereSchool } from '../utils/tenant'
 import { fieldError } from '../utils/validation'
 import { getCurrentTerm } from './calendar'
 import { studentPhotoUrl } from './guardians'
+import { resolveTerm } from './terms'
 
 type SchoolRef = { id: string }
 type Viewer = { id: string, role: Role }
@@ -198,23 +197,6 @@ export async function deleteRegister(db: Db, school: SchoolRef, id: string) {
   const [register] = await db.delete(attendanceRegisters).where(whereSchool(attendanceRegisters, school, eq(attendanceRegisters.id, id)))
     .returning({ id: attendanceRegisters.id })
   if (!register) throw notFound('Register not found')
-}
-
-/** The given term (404 if not the school's) or the current one (400 if none), with its session's name. */
-async function resolveTerm(db: Db, school: SchoolRef, termId?: string) {
-  const [term] = await db.select({
-    id: terms.id,
-    number: terms.number,
-    startsOn: terms.startsOn,
-    endsOn: terms.endsOn,
-    sessionId: terms.sessionId,
-    sessionName: academicSessions.name,
-  })
-    .from(terms).innerJoin(academicSessions, eq(terms.sessionId, academicSessions.id))
-    .where(whereSchool(terms, school, termId ? eq(terms.id, termId) : eq(terms.isCurrent, true)))
-  if (term) return term
-  if (termId) throw notFound('Term not found')
-  throw fieldError('term', 'Set a current term first')
 }
 
 /** Every mark of these students in the term's registers (any arm, so a mid-term move counts both). */
