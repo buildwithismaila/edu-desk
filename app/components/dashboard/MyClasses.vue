@@ -4,6 +4,9 @@ const { data } = await useFetch('/api/me/assignments')
 // Today's register for the arms I'm class teacher of
 const { data: attendance } = await useFetch('/api/attendance/arms', { key: 'attendance-arms' })
 const takenToday = (armId: string) => attendance.value?.arms.find(a => a.id === armId)?.taken ?? false
+// Score progress for the subjects I teach (current term)
+const { data: scoreSheets } = await useFetch('/api/scores/sheets', { key: 'score-sheets' })
+const progressOf = (armId: string, subjectId: string) => scoreSheets.value?.sheets.find(s => s.classArmId === armId && s.subjectId === subjectId)
 
 const hasClasses = computed(() => !!data.value && (data.value.classTeacherOf.length > 0 || data.value.subjects.length > 0))
 </script>
@@ -72,9 +75,17 @@ const hasClasses = computed(() => !!data.value && (data.value.classTeacherOf.len
           <li
             v-for="s in data!.subjects"
             :key="`${s.subjectId}-${s.classArmId}`"
-            :data-testid="`my-subject-${s.name}-${s.label}`"
+            class="flex flex-wrap items-center gap-2"
           >
-            {{ s.name }} — {{ s.label }}
+            <span :data-testid="`my-subject-${s.name}-${s.label}`">{{ s.name }} — {{ s.label }}</span>
+            <ULink
+              v-if="progressOf(s.classArmId, s.subjectId)"
+              :to="`/scores/${s.classArmId}/${s.subjectId}`"
+              :data-testid="`my-scores-${s.name}-${s.label}`"
+              class="text-muted"
+            >
+              Scores: {{ progressOf(s.classArmId, s.subjectId)!.complete }}/{{ progressOf(s.classArmId, s.subjectId)!.students }} complete
+            </ULink>
           </li>
         </ul>
       </div>

@@ -4,6 +4,7 @@ import MyClasses from '~/components/dashboard/MyClasses.vue'
 
 let mine: unknown
 registerEndpoint('/api/me/assignments', () => mine)
+registerEndpoint('/api/scores/sheets', () => ({ term: { id: 't1', number: 'first' }, sheets: [{ classArmId: 'a2', armLabel: 'JSS 1B', section: 'jss', subjectId: 'm', subjectName: 'Mathematics', students: 8, complete: 4, locked: false }] }))
 registerEndpoint('/api/attendance/arms', () => ({ today: '2026-10-12', arms: [{ id: 'a1', label: 'JSS 1A', students: 10, taken: true }] }))
 
 afterEach(() => {
@@ -26,6 +27,8 @@ describe('MyClasses', () => {
     expect(wrapper.text()).toContain('My classes · 2026/2027')
     expect(wrapper.find('[data-testid="my-class-teacher-JSS 1A"]').exists()).toBe(true)
     expect(wrapper.get('[data-testid="my-subject-Mathematics-JSS 1B"]').text()).toBe('Mathematics — JSS 1B')
+    expect(wrapper.get('[data-testid="my-scores-Mathematics-JSS 1B"]').text()).toBe('Scores: 4/8 complete')
+    expect(wrapper.find('[data-testid="my-scores-Mathematics-JSS 1A"]').exists()).toBe(false)
   })
 
   it('shows whether today\'s register is taken for my class-teacher arms', async () => {

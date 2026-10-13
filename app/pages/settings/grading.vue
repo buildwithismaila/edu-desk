@@ -23,7 +23,7 @@ const tabs = GRADED_SECTIONS.map(s => ({ label: SECTION_LABELS[s], value: s }))
           Assessment split
         </h2>
         <p class="text-sm text-muted">
-          The parts of each subject's score. Maximums must add up to 100.
+          The parts of each subject's score. Maximums must add up to 100. Once any score is entered, the split can't be changed (the scores depend on it).
         </p>
       </template>
       <SettingsAssessmentEditor
