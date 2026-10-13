@@ -26,6 +26,7 @@ const base: Report = {
     psychomotor: [{ label: 'Handwriting', rating: null as number | null }],
   },
   comments: { classTeacher: 'Hard-working', principal: 'Well done' },
+  fees: null,
 }
 
 describe('ReportCard', () => {
@@ -68,6 +69,16 @@ describe('ReportCard', () => {
     const report = { ...base, summary: { ...base.summary, cumulativeAverage: 72.83 } }
     const wrapper = await mountSuspended(ReportCard, { props: { report } })
     expect(wrapper.get('[data-testid=report-card-summary]').text()).toContain('Cumulative average (session): 72.83')
+  })
+
+  it('shows outstanding fees, credit or fully paid only when the school turns it on', async () => {
+    expect((await mountSuspended(ReportCard, { props: { report: base } })).find('[data-testid=report-card-fees]').exists()).toBe(false)
+    const owing = await mountSuspended(ReportCard, { props: { report: { ...base, fees: { balanceKobo: 2_500_050 } } } })
+    expect(owing.get('[data-testid=report-card-fees]').text()).toBe('Outstanding fees: ₦25,000.50')
+    const credit = await mountSuspended(ReportCard, { props: { report: { ...base, fees: { balanceKobo: -50_000 } } } })
+    expect(credit.get('[data-testid=report-card-fees]').text()).toBe('Fees credit: ₦500.00')
+    const paid = await mountSuspended(ReportCard, { props: { report: { ...base, fees: { balanceKobo: 0 } } } })
+    expect(paid.get('[data-testid=report-card-fees]').text()).toBe('Fees: Fully paid')
   })
 
   it('shows skill ratings for Nursery instead of scores', async () => {

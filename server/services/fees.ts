@@ -290,7 +290,7 @@ export async function listBills(db: Db, school: SchoolRef, query: { termId?: str
   }
 }
 
-async function findBill(db: Db, school: SchoolRef, id: string) {
+export async function findBill(db: Db, school: SchoolRef, id: string) {
   const [bill] = await db.select().from(bills).where(whereSchool(bills, school, eq(bills.id, id)))
   if (!bill) throw notFound('Bill not found')
   return bill

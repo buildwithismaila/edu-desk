@@ -13,6 +13,7 @@ export const schoolProfileSchema = z.object({
   phone: optionalPhoneSchema,
   email: z.union([z.literal(''), z.email('Enter a valid email address')]).nullable().transform(v => v || null),
   showPositions: z.boolean(),
+  showFeesOnReportCard: z.boolean(),
   admissionPrefix: admissionPrefixSchema,
 }).partial()
 

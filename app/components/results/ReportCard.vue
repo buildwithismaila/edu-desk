@@ -269,6 +269,14 @@ const cell = (value: number | 'ABS' | null) => value === null ? '—' : String(v
       </p>
     </section>
 
+    <p
+      v-if="report.fees && report.fees.balanceKobo !== null"
+      data-testid="report-card-fees"
+    >
+      <span class="font-semibold">{{ report.fees.balanceKobo > 0 ? 'Outstanding fees' : report.fees.balanceKobo < 0 ? 'Fees credit' : 'Fees' }}:</span>
+      {{ report.fees.balanceKobo === 0 ? 'Fully paid' : formatNaira(Math.abs(report.fees.balanceKobo)) }}
+    </p>
+
     <footer class="border-t border-gray-300 pt-2 text-xs text-gray-500">
       Ratings: 5 Excellent · 4 Very good · 3 Good · 2 Fair · 1 Poor
       <template v-if="report.status !== 'published'">

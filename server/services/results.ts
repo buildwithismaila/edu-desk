@@ -37,6 +37,7 @@ import { schoolLogoUrl } from '../utils/school'
 import { whereSchool } from '../utils/tenant'
 import { fieldError } from '../utils/validation'
 import { studentAttendanceSummary } from './attendance'
+import { termBalanceOf } from './payments'
 import { getCurrentTerm } from './calendar'
 import { listAssessmentComponents, listBands } from './grading'
 import { studentPhotoUrl } from './guardians'
@@ -135,6 +136,8 @@ async function buildReports(db: Db, school: SchoolRef, arm: Arm, term: Term, sta
     has: (studentId, subjectId, componentId) => componentId ? `${studentId}:${subjectId}:${componentId}` in cells : rated.has(`${studentId}:${subjectId}`),
   })
   const showPositions = schoolRow!.showPositions
+  // Phase 8: the term's fee balance, when the school shows it on report cards
+  const feeBalances = schoolRow!.showFeesOnReportCard ? await termBalanceOf(db, school, term.id, ids) : null
 
   const reports = []
   for (const student of roster) {
@@ -186,6 +189,7 @@ async function buildReports(db: Db, school: SchoolRef, arm: Arm, term: Term, sta
         psychomotor: PSYCHOMOTOR_TRAITS.map(t => ({ label: t.label, rating: traitOf(t.key) })),
       },
       comments: { classTeacher: comment?.classTeacherComment ?? null, principal: comment?.principalComment ?? null },
+      fees: feeBalances ? { balanceKobo: feeBalances.get(student.id) ?? null } : null,
     })
   }
   return { reports, completeness, subjectStats: computed.subjectStats, sectionSubjects }

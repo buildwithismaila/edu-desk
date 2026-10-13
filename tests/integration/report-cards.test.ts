@@ -4,6 +4,7 @@ import { nurseryRatings, schools, termComments, traitRatings } from '~~/server/d
 import type { Db } from '~~/server/utils/db'
 import { createClassArm, createClassLevel, createSubject } from '../factories/academics'
 import { createRegister } from '../factories/attendance'
+import { createBill, createPayment } from '../factories/fees'
 import { createStudent, enrol } from '../factories/students'
 import { createTestApp } from '../helpers/app'
 import { createTestDb } from '../helpers/db'
@@ -78,6 +79,21 @@ describe('report card contents', () => {
     const f = await resultsFixture(db, app)
     const cards = await (await http.get(f, f.cookies.classTeacher, `/api/results/report-cards?${armQuery(f)}`)).json()
     expect(cards.map((c: { student: { name: string } }) => c.student.name)).toEqual(['Bola Ade', 'Chidi Eze', 'Ada Obi'])
+  })
+})
+
+describe('outstanding fees on the card', () => {
+  it('shows the term balance only when the school turns it on', async () => {
+    const f = await resultsFixture(db, app)
+    const bill = await createBill(db, f.school, { term: f.first, student: f.students.ada, level: f.level, arm: f.armA, items: [{ name: 'Tuition', amountKobo: 5_000_000 }] })
+    await createPayment(db, f.school, { bill, student: f.students.ada, amountKobo: 1_000_000 })
+    const card = async (student = f.students.ada) => (await (await http.get(f, f.cookies.admin, `/api/students/${student.id}/report-card`)).json()).fees
+
+    expect(await card()).toBeNull()
+    await db.update(schools).set({ showFeesOnReportCard: true }).where(eq(schools.id, f.school.id))
+    expect(await card()).toEqual({ balanceKobo: 4_000_000 })
+    // No bill this term
+    expect(await card(f.students.bola)).toEqual({ balanceKobo: null })
   })
 })
 

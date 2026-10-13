@@ -1,4 +1,4 @@
-import { createApp, createRouter, defineEventHandler, send, setResponseStatus, toWebHandler } from 'h3'
+import { createApp, createError, createRouter, defineEventHandler, send, setResponseStatus, toWebHandler } from 'h3'
 import attendanceArmsHandler from '~~/server/api/attendance/arms.get'
 import attendanceRegisterGetHandler from '~~/server/api/attendance/register.get'
 import attendanceRegisterPutHandler from '~~/server/api/attendance/register.put'
@@ -20,6 +20,12 @@ import levelsGetHandler from '~~/server/api/class-levels/index.get'
 import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import myAssignmentsHandler from '~~/server/api/me/assignments.get'
+import paymentsPostHandler from '~~/server/api/fees/payments/index.post'
+import paymentReverseHandler from '~~/server/api/fees/payments/[id]/reverse.post'
+import paymentGetHandler from '~~/server/api/fees/payments/[id].get'
+import studentFeesHandler from '~~/server/api/students/[id]/fees.get'
+import debtorsHandler from '~~/server/api/fees/debtors.get'
+import collectionsHandler from '~~/server/api/fees/collections.get'
 import feeItemsGetHandler from '~~/server/api/fees/items/index.get'
 import feeItemsPutHandler from '~~/server/api/fees/items/index.put'
 import feeItemsCopyHandler from '~~/server/api/fees/items/copy.post'
@@ -208,6 +214,12 @@ export function createTestApp(db: Db) {
     .put('/api/fees/bills/:id/optional-items', billOptionalItemsHandler)
     .post('/api/fees/bills/:id/discounts', billDiscountsHandler)
     .delete('/api/fees/discounts/:id', discountDeleteHandler)
+    .post('/api/fees/payments', paymentsPostHandler)
+    .post('/api/fees/payments/:id/reverse', paymentReverseHandler)
+    .get('/api/fees/payments/:id', paymentGetHandler)
+    .get('/api/students/:id/fees', studentFeesHandler)
+    .get('/api/fees/debtors', debtorsHandler)
+    .get('/api/fees/collections', collectionsHandler)
     .get('/api/results/arms', resultsArmsHandler)
     .get('/api/results', resultsGetHandler)
     .post('/api/results/submit', resultsSubmitHandler)
@@ -238,8 +250,12 @@ export function createTestApp(db: Db) {
     // Test-only probes for the auth utils; real routes are tested in their own files
     .get('/__test/require-user', defineEventHandler(async event => ({ id: (await requireUser(event)).id })))
     .get('/__test/require-admin', defineEventHandler(async event => ({ id: (await requireRole(event, ['admin'])).id }))))
-  // Stand-in for Nuxt's asset/renderer handlers, to check which paths the middleware lets through
-  app.use(defineEventHandler(() => 'passed through'))
+  // Stand-in for Nuxt's asset/renderer handlers, to check which paths the middleware lets through.
+  // An unknown /api route is a 404, as in Nitro (so "there is no such route" can be tested)
+  app.use(defineEventHandler((event) => {
+    if (event.path.startsWith('/api/')) throw createError({ statusCode: 404, statusMessage: 'Not Found', message: 'Page not found' })
+    return 'passed through'
+  }))
 
   const handler = toWebHandler(app)
 
