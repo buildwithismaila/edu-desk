@@ -10,6 +10,18 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Attendance', icon: 'i-lucide-clipboard-check', to: '/attendance', roles: ['admin', 'principal', 'teacher'] },
   { label: 'Scores', icon: 'i-lucide-notebook-pen', to: '/scores', roles: ['admin', 'principal', 'teacher'] },
   { label: 'Results', icon: 'i-lucide-award', to: '/results', roles: ['admin', 'principal', 'teacher'] },
+  {
+    label: 'Fees',
+    icon: 'i-lucide-wallet',
+    roles: ['admin', 'bursar', 'principal'],
+    defaultOpen: true,
+    children: [
+      { label: 'Bills', icon: 'i-lucide-receipt', to: '/fees/bills' },
+      { label: 'Debtors', icon: 'i-lucide-hand-coins', to: '/fees/debtors' },
+      { label: 'Collections', icon: 'i-lucide-chart-column', to: '/fees/collections' },
+      { label: 'Fee items', icon: 'i-lucide-list', to: '/fees' },
+    ],
+  },
   { label: 'Staff', icon: 'i-lucide-users', to: '/staff', roles: ['admin', 'principal'] },
   { label: 'Assignments', icon: 'i-lucide-clipboard-list', to: '/assignments', roles: ['admin', 'principal'] },
   {

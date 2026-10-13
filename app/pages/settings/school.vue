@@ -44,6 +44,16 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof schoolProfileSche
   }
 }
 
+async function setShowFees(showFeesOnReportCard: boolean) {
+  try {
+    await $fetch('/api/school/profile', { method: 'PATCH', body: { showFeesOnReportCard } })
+    await afterChange(showFeesOnReportCard ? 'Outstanding fees will show on report cards' : 'Fees will be left off report cards')
+  }
+  catch (e) {
+    toast.add({ title: apiErrorMessage(e), color: 'error' })
+  }
+}
+
 async function setShowPositions(showPositions: boolean) {
   try {
     await $fetch('/api/school/profile', { method: 'PATCH', body: { showPositions } })
@@ -231,6 +241,14 @@ async function removeLogo() {
         label="Show position in class on report cards"
         description="Turn off if your school doesn't rank students."
         @update:model-value="setShowPositions"
+      />
+      <USwitch
+        data-testid="show-fees"
+        :model-value="profile?.showFeesOnReportCard ?? false"
+        label="Show outstanding fees on report cards"
+        description="The balance when results are published. Off by default."
+        class="mt-4"
+        @update:model-value="setShowFees"
       />
     </UCard>
   </div>

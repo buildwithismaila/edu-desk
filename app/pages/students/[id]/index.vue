@@ -25,6 +25,7 @@ const passwordDialog = overlay.create(TemporaryPasswordDialog, { destroyOnClose:
 
 const { user } = useUserSession()
 const isAdmin = computed(() => user.value?.role === 'admin')
+const seesFees = computed(() => ['admin', 'bursar', 'principal'].includes(user.value?.role ?? ''))
 
 // Explicit type: `/api/students/${id}` also matches /api/students/import, so inference gives {}
 type Student = InternalApi['/api/students/:id']['get']
@@ -175,6 +176,15 @@ function guardianActions(s: Student, guardian: Guardian): DropdownMenuItem[][] {
             </template>
           </p>
         </div>
+        <UButton
+          v-if="seesFees"
+          :to="`/students/${student.id}/fees`"
+          data-testid="student-fees-link"
+          label="Fees"
+          icon="i-lucide-wallet"
+          color="neutral"
+          variant="outline"
+        />
         <UDropdownMenu
           v-if="isAdmin"
           :items="studentActions"
