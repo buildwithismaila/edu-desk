@@ -20,6 +20,15 @@ import levelsGetHandler from '~~/server/api/class-levels/index.get'
 import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import myAssignmentsHandler from '~~/server/api/me/assignments.get'
+import feeItemsGetHandler from '~~/server/api/fees/items/index.get'
+import feeItemsPutHandler from '~~/server/api/fees/items/index.put'
+import feeItemsCopyHandler from '~~/server/api/fees/items/copy.post'
+import billsGenerateHandler from '~~/server/api/fees/bills/generate.post'
+import billsRefreshHandler from '~~/server/api/fees/bills/refresh.post'
+import billsGetHandler from '~~/server/api/fees/bills/index.get'
+import billOptionalItemsHandler from '~~/server/api/fees/bills/[id]/optional-items.put'
+import billDiscountsHandler from '~~/server/api/fees/bills/[id]/discounts.post'
+import discountDeleteHandler from '~~/server/api/fees/discounts/[id].delete'
 import myChildrenHandler from '~~/server/api/me/children.get'
 import departmentDeleteHandler from '~~/server/api/departments/[id].delete'
 import departmentPatchHandler from '~~/server/api/departments/[id].patch'
@@ -190,6 +199,15 @@ export function createTestApp(db: Db) {
     .delete('/api/scores/locks', scoreLocksDeleteHandler)
     .get('/api/ratings/sheet', ratingsSheetGetHandler)
     .put('/api/ratings/sheet', ratingsSheetPutHandler)
+    .get('/api/fees/items', feeItemsGetHandler)
+    .put('/api/fees/items', feeItemsPutHandler)
+    .post('/api/fees/items/copy', feeItemsCopyHandler)
+    .post('/api/fees/bills/generate', billsGenerateHandler)
+    .post('/api/fees/bills/refresh', billsRefreshHandler)
+    .get('/api/fees/bills', billsGetHandler)
+    .put('/api/fees/bills/:id/optional-items', billOptionalItemsHandler)
+    .post('/api/fees/bills/:id/discounts', billDiscountsHandler)
+    .delete('/api/fees/discounts/:id', discountDeleteHandler)
     .get('/api/results/arms', resultsArmsHandler)
     .get('/api/results', resultsGetHandler)
     .post('/api/results/submit', resultsSubmitHandler)
