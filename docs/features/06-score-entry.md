@@ -194,16 +194,16 @@ Wrong role, or a teacher not assigned to the pair or arm → **403**. Another sc
 6. **E2E + docs:** specs, `domain.md`, decisions, `PROGRESS.md`, CI.
 
 ## Acceptance checklist
-- [ ] Teachers only see and edit their assigned subject/arm pairs (403 otherwise); admin and principal can cover any sheet
-- [ ] Keyboard-friendly grid with per-cell validation; invalid scores can't be saved (client and server); blank ≠ 0 ≠ ABS
-- [ ] Explicit save as a bulk upsert in one transaction
-- [ ] Locked (arm, term) scores and ratings can't be edited; only admin and principal lock and unlock
-- [ ] Class teacher enters affective/psychomotor ratings (1–5) and comments for their arm
-- [ ] Nursery uses skill ratings per subject
-- [ ] The assessment split is frozen once scores exist; subjects and sessions with scores can't be deleted
-- [ ] Every route: validation, roles, tenant isolation tested
-- [ ] Works at 375px (grid scrolls inside its card)
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] Teachers only see and edit their assigned subject/arm pairs (403 otherwise); admin and principal can cover any sheet
+- [x] Keyboard-friendly grid with per-cell validation; invalid scores can't be saved (client and server); blank ≠ 0 ≠ ABS
+- [x] Explicit save as a bulk upsert in one transaction
+- [x] Locked (arm, term) scores and ratings can't be edited; only admin and principal lock and unlock
+- [x] Class teacher enters affective/psychomotor ratings (1–5) and comments for their arm
+- [x] Nursery uses skill ratings per subject
+- [x] The assessment split is frozen once scores exist; subjects and sessions with scores can't be deleted
+- [x] Every route: validation, roles, tenant isolation tested
+- [x] Works at 375px (grid scrolls inside its card)
+- [x] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Open questions
 1. **Whole-number scores only** (no 7.5)? Most Nigerian schools record whole marks. OK?

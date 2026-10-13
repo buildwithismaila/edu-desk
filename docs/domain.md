@@ -23,7 +23,14 @@ These rules drive the schema, validation and tests. If a rule here conflicts wit
 ## Assessment
 - Default components (configurable per school): **CA1 = 20, CA2 = 20, Exam = 60, Total = 100**. 1–5 components with unique names and whole-number maxes that must sum to 100.
 - Scores are validated: 0 ≤ score ≤ component max; blank ≠ zero (a blank means "not entered"; an absent student can be marked explicitly).
-- Scores are locked once results for that class arm are published; only Admin/Principal can unlock.
+- Scores are locked once results for that class arm are published; only Admin/Principal can unlock. (Phase 6: admin/principal can also lock and unlock an arm's term by hand; a lock covers scores, ratings and comments.)
+- **Score entry** (Phase 6):
+  - Scores are whole numbers. `ABS` marks an absent student; it counts as 0 in the total but is shown as ABS.
+  - **Who enters scores:** the subject teacher, for the subject and arm pairs they're assigned this session, in the current term only. Admin and principal can enter or correct scores in any term of the current session. Earlier sessions are read-only.
+  - **Which students:** SSS department subjects list only that department's students. SSS students without a department get core subjects only.
+  - **Nursery:** one skill rating per subject per term (Excellent / Very Good / Good / Needs Improvement) instead of scores.
+  - **Ratings and comments:** the class teacher rates the fixed affective and psychomotor traits 1–5 and writes the term comment for their arm.
+  - **Freeze:** once any score exists, the assessment split can't be changed.
 
 ## Grading scales (configurable per section; seed these defaults)
 **SSS (WAEC style)**

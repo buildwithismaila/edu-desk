@@ -191,3 +191,22 @@ Record significant technical or product decisions here (newest at the bottom). K
   - `requestFetch = useRequestFetch()`: during SSR a bare `$fetch` doesn't forward the request, so the tenant ("School not found") and the session would be missing. E2E found this.
   - Take `T` from `InternalApi[route][method]` (`nitropack/types`).
 - **Consequences:** No request is made until a choice exists, and the types stay exact.
+
+### 032 — Score entry: one row per cell, explicit absent, bulk save of changed cells (2026-10-13)
+- **Context:** Teachers enter CA1/CA2/Exam for a whole class at once, often on slow connections. Blank, zero and absent must stay different, and invalid scores must never be stored.
+- **Decision:**
+  - **Storage:** `score_entries` holds one row per (term, student, subject, component). A blank cell has no row. `absent` is explicit (score null; a DB check enforces score xor absent). Rows don't store the arm, so a student who changes arm keeps their scores.
+  - **Saving:** the grid sends only changed cells. The server checks every cell (on the sheet, a known component, 0…max) and refuses the whole save with `cellErrors` if any is wrong. Otherwise it upserts or deletes in one transaction.
+  - **Who:** the assigned subject teacher (current term), or admin and principal (any term of the current session).
+  - **Locks:** `score_locks` per (term, arm) make scores, ratings and comments read-only (409) until admin or principal unlocks them. Phase 7's publish will create the lock.
+  - **Freeze:** the assessment split can't be changed once scores exist (409).
+- **Alternatives considered:** one row per student and subject with a JSON of components (hard to validate against the split, no FK per component); auto-saving each cell (more requests on slow networks, half-saved sheets).
+- **Consequences:** Changing the split mid-year needs a per-session snapshot (post-MVP). Subjects and sessions with scores can't be deleted.
+
+### 033 — Ratings, comments and Nursery ratings (2026-10-13)
+- **Context:** The report card needs affective/psychomotor ratings, a class teacher's comment, and a skill-based result for Nursery.
+- **Decision:**
+  - **Traits:** a fixed list in `shared/constants/traits.ts`, rated 1–5 in `trait_ratings` (term, student, trait), entered by the class teacher of the arm (current session) or admin/principal.
+  - **Comments:** the class teacher's comment lives in `term_comments`; the principal's comment is added in Phase 7.
+  - **Nursery:** `nursery_ratings` holds one rating per (term, student, subject), and Nursery sheets use rating mode.
+- **Consequences:** Configurable traits are post-MVP. Clearing a comment deletes the row, so Phase 7 must set columns to null instead once the principal's comment shares the row.

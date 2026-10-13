@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 6 — Score entry (spec approved 2026-10-13)
+- **Current phase:** Phase 6 — Score entry: complete (2026-10-13). Next: Phase 7 (spec to be written when you name it)
 - **Last updated:** 2026-10-12
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 6 — Score entry (2026-10-13)
+- Built: score sheets per (term, arm, subject) with one row per component cell, explicit ABS, whole numbers 0…max; bulk save of changed cells in one transaction with per-cell errors; subject-teacher access to assigned pairs (current term), admin/principal cover (any term of the current session), earlier sessions read-only; manual lock/unlock per (term, arm) covering scores, ratings and comments; SSS department filtering; Nursery skill ratings; class teacher's trait ratings (1–5) and comments; assessment split frozen once scores exist; subject/session delete guards; `/scores` (sheets with progress and locks), keyboard `ScoreGrid` (Enter/↓/↑/Tab, live total and grade, unsaved-changes guard), `/scores/ratings`, My classes score progress, Scores nav; seed: JSS 1A Maths complete (one ABS), JSS 1B Maths half, JSS 1A ratings, Nursery 1A Numeracy, Sunrise sheet.
+- Tests (totals): 1099 unit + integration (PGlite) / 63 Nuxt component / 45 E2E tests × desktop + mobile (viewport-specific and desktop-only skips).
+- Decisions: see docs/decisions.md #032–#033
+- Found while building: nothing new in the app; one E2E locator filtered by text that the action itself changed (fixed in the test).
 
 ### Phase 5 — Attendance (2026-10-12)
 - Built: daily registers per class arm (DB-unique per arm and day, concurrent-safe), present/absent/late with everyone present by default; class teacher takes and edits today's register for their arm; admin/principal back-fill or correct any date in the current term and delete mistaken registers; complete-register validation; term summary per arm and per student (late counts as present, marks across arms); `/attendance` (one-tap mobile register, sticky save), `/attendance/summary`, attendance card on the student profile, register status + "Take register" in My classes, Attendance nav; delete guards for arms/sessions with attendance; seed: 10 past JSS 1A registers at Greenfield, 2 at Sunrise; E2E setup widens the current term to include the run date.
@@ -50,7 +56,7 @@
 - Known issues / tech debt: see below
 
 ## Next up
-- Phase 6 — approve the spec, then sub-step 1 (pure helpers: cell parsing, totals, grades, subject offering)
+- Phase 7 — Results & report cards: start with its spec (`docs/features/07-*.md`) when you name it
 
 ## Known issues / tech debt
 - `typescript` pinned to 6.0.x until typescript-eslint supports TS 7.
