@@ -6,6 +6,7 @@ import type { Db } from '../utils/db'
 import { conflict, notFound } from '../utils/errors'
 import { whereSchool } from '../utils/tenant'
 import { fieldError } from '../utils/validation'
+import { armHasBills, levelHasFees } from './fees'
 import { armHasResults } from './scores'
 
 type SchoolRef = { id: string }
@@ -81,6 +82,7 @@ export async function deleteClassLevel(db: Db, school: SchoolRef, id: string) {
   await findLevel(db, school, id)
   const [arm] = await db.select({ id: classArms.id }).from(classArms).where(whereSchool(classArms, school, eq(classArms.classLevelId, id))).limit(1)
   if (arm) throw conflict('This class level has arms. Delete its arms first.')
+  if (await levelHasFees(db, school, id)) throw conflict('This class level has fees, so it can\'t be deleted.')
   await db.delete(classLevels).where(whereSchool(classLevels, school, eq(classLevels.id, id)))
 }
 
@@ -122,5 +124,6 @@ export async function deleteClassArm(db: Db, school: SchoolRef, id: string) {
     .where(whereSchool(attendanceRegisters, school, eq(attendanceRegisters.classArmId, id))).limit(1)
   if (register) throw conflict('This class arm has attendance records, so it can\'t be deleted.')
   if (await armHasResults(db, school, id)) throw conflict('This class arm has results or locked scores, so it can\'t be deleted.')
+  if (await armHasBills(db, school, id)) throw conflict('This class arm has bills, so it can\'t be deleted.')
   await db.delete(classArms).where(whereSchool(classArms, school, eq(classArms.id, id)))
 }

@@ -18,6 +18,7 @@ import { applySchoolDefaults } from '../../services/school-defaults'
 import type { Db } from '../../utils/db'
 import { DEMO_PASSWORD_HASH } from './demo-password'
 import { type DemoAttendance, seedAttendance } from './attendance'
+import { type DemoFees, seedFees } from './fees'
 import { type DemoScores, seedScores } from './scores'
 import { type DemoStudents, GREENFIELD_STUDENTS, seedStudents, SUNRISE_STUDENTS } from './students'
 
@@ -81,6 +82,16 @@ interface DemoAcademics {
   attendance?: DemoAttendance
   /** Scores, ratings and comments in the current term */
   scores?: DemoScores
+  /** Fee items, bills and payments in the current term */
+  fees?: DemoFees
+}
+
+const BASE_FEES = [{ name: 'Development Levy', naira: 10_000 }, { name: 'PTA', naira: 2_500 }]
+const GREENFIELD_FEE_ITEMS: DemoFees['items'] = {
+  nursery: [{ name: 'Tuition', naira: 60_000 }, { name: 'Development Levy', naira: 5_000 }, { name: 'PTA', naira: 2_500 }, { name: 'Bus', naira: 20_000, optional: true }],
+  primary: [{ name: 'Tuition', naira: 70_000 }, { name: 'Development Levy', naira: 7_500 }, { name: 'PTA', naira: 2_500 }, { name: 'Bus', naira: 25_000, optional: true }],
+  jss: [{ name: 'Tuition', naira: 85_000 }, ...BASE_FEES, { name: 'Books', naira: 15_000 }, { name: 'Bus', naira: 25_000, optional: true }],
+  sss: [{ name: 'Tuition', naira: 95_000 }, ...BASE_FEES, { name: 'Books', naira: 18_000 }, { name: 'Bus', naira: 25_000, optional: true }],
 }
 
 const GREENFIELD_JSS_SUBJECTS = ['English Language', 'Mathematics', 'Basic Science', 'Basic Technology', 'Business Studies', 'Civic Education', 'Social Studies', 'Christian Religious Studies', 'Computer Studies', 'French']
@@ -152,6 +163,34 @@ const demoAcademics: Record<string, DemoAcademics> = {
       ratings: { arm: 'JSS 1A', share: 1, enteredBy: 'teacher@greenfield.test', principalShare: 0.5, principal: 'principal@greenfield.test' },
       nursery: { arm: 'Nursery 1A', subject: 'Numeracy', enteredBy: 'admin@greenfield.test' },
     },
+    // JSS 1A shows every payment state: paid, partly paid, credit, unpaid, a reversal, a discount, and
+    // arrears/credit carried from last session's third term
+    fees: {
+      items: GREENFIELD_FEE_ITEMS,
+      earlier: {
+        session: '2025/2026',
+        term: 'third',
+        level: 'JSS 1',
+        arm: 'JSS 1A',
+        items: [{ name: 'Tuition', naira: 80_000 }, { name: 'PTA', naira: 2_500 }],
+        // Owes ₦32,500; overpaid by ₦7,500
+        students: [{ index: 1, paidNaira: 50_000 }, { index: 2, paidNaira: 90_000 }],
+      },
+      payments: {
+        arm: 'JSS 1A',
+        discount: { index: 0, percent: 10, reason: 'Sibling discount' },
+        plan: [
+          { index: 0, amount: 'full', method: 'transfer' },
+          { index: 3, amount: 'over', method: 'pos' },
+          { index: 4, amount: 50_000, method: 'cash' },
+          { index: 5, amount: 40_000, method: 'transfer', reversed: 'Recorded against the wrong student' },
+          { index: 5, amount: 30_000, method: 'cash' },
+          { index: 6, amount: 'full', method: 'cash' },
+          { index: 7, amount: 20_000, method: 'transfer' },
+        ],
+      },
+      bursar: 'bursar@greenfield.test',
+    },
   },
   sunrise: {
     sessions: [{ name: '2026/2027', terms: FIRST_TERM_2026 }],
@@ -161,6 +200,11 @@ const demoAcademics: Record<string, DemoAcademics> = {
     students: { ...SUNRISE_STUDENTS, phoneBase: '+234803310' },
     attendance: { arms: ['JSS 1 Gold'], days: 2, takenBy: 'admin@sunrise.test' },
     scores: { sheets: [{ arm: 'JSS 1 Gold', subject: 'Mathematics', share: 0.5, enteredBy: 'admin@sunrise.test' }] },
+    fees: {
+      items: { jss: [{ name: 'Tuition', naira: 70_000 }, { name: 'PTA', naira: 2_000 }] },
+      payments: { arm: 'JSS 1 Gold', plan: [{ index: 0, amount: 30_000, method: 'cash' }] },
+      bursar: 'admin@sunrise.test',
+    },
   },
 }
 
@@ -263,6 +307,7 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
     if (academics.students) await seedStudents(tx, schoolId, currentSessionId, academics.students, academics.students.phoneBase)
     if (academics.attendance) await seedAttendance(tx, schoolId, currentSessionId, academics.attendance)
     if (academics.scores) await seedScores(tx, schoolId, currentSessionId, academics.scores)
+    if (academics.fees) await seedFees(tx, schoolId, currentSessionId, academics.fees)
   })
 }
 

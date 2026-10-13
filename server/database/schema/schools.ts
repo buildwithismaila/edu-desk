@@ -22,6 +22,8 @@ export const schools = pgTable('schools', {
   admissionPrefix: text(),
   /** Show "position in class" on report cards (docs/domain.md). */
   showPositions: boolean().notNull().default(true),
+  /** Phase 8: show the outstanding balance on published report cards */
+  showFeesOnReportCard: boolean().notNull().default(false),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 })

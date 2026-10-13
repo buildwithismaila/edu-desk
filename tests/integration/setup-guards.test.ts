@@ -1,10 +1,11 @@
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { academicSessions, assessmentComponents, classArms, studentEnrolments, subjects } from '~~/server/database/schema'
+import { academicSessions, assessmentComponents, classArms, classLevels, studentEnrolments, subjects } from '~~/server/database/schema'
 import type { Db } from '~~/server/utils/db'
 import { createClassArm, createClassLevel, createSession, createSubject } from '../factories/academics'
 import { createSchool } from '../factories/schools'
 import { createRegister } from '../factories/attendance'
+import { createBill, createFeeItem } from '../factories/fees'
 import { setResultStatus } from '../factories/results'
 import { createAssessmentComponents, createScore, lockScores } from '../factories/scores'
 import { createStudent, enrol } from '../factories/students'
@@ -167,5 +168,36 @@ describe('deletes blocked by locks and results', () => {
     await setResultStatus(db, school, { term: terms[0]!, arm, status: 'draft' })
 
     expect((await del(school, `/api/sessions/${session.id}`, cookie)).status).toBe(409)
+  })
+})
+
+describe('deletes blocked by fees', () => {
+  it('refuses to delete a class level with fee items (409)', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { terms } = await createSession(db, school)
+    const level = await createClassLevel(db, school)
+    await createFeeItem(db, school, { term: terms[0]!, level })
+
+    const res = await del(school, `/api/class-levels/${level.id}`, cookie)
+    expect(res.status).toBe(409)
+    expect((await res.json()).message).toMatch(/fees/)
+    expect(await db.select().from(classLevels).where(eq(classLevels.id, level.id))).toHaveLength(1)
+  })
+
+  it('refuses to delete a class arm with bills, or a session with fees (409)', async () => {
+    const school = await createSchool(db)
+    const cookie = await adminOf(school)
+    const { session, terms } = await createSession(db, school)
+    const level = await createClassLevel(db, school)
+    const arm = await createClassArm(db, school, level)
+    await createBill(db, school, { term: terms[0]!, student: await createStudent(db, school), level, arm, items: [{ name: 'Tuition', amountKobo: 100 }] })
+
+    const armRes = await del(school, `/api/class-arms/${arm.id}`, cookie)
+    expect(armRes.status).toBe(409)
+    expect((await armRes.json()).message).toMatch(/bills/)
+    const sessionRes = await del(school, `/api/sessions/${session.id}`, cookie)
+    expect(sessionRes.status).toBe(409)
+    expect((await sessionRes.json()).message).toMatch(/fees/)
   })
 })

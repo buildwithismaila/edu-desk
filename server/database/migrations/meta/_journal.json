@@ -57,6 +57,13 @@
       "when": 1791892159715,
       "tag": "0007_results",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791901909546,
+      "tag": "0008_fees",
+      "breakpoints": true
     }
   ]
 }
