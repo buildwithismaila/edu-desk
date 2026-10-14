@@ -58,6 +58,9 @@ describe('users table', () => {
   })
 })
 
+// Seeding the whole demo twice takes a few seconds (more on a busy machine) as the demo grows phase by phase
+const SEED_TWICE_TIMEOUT = 30_000
+
 describe('seed', () => {
   it('is idempotent and upserts the demo schools by slug', async () => {
     await seed(db)
@@ -71,7 +74,7 @@ describe('seed', () => {
     expect(bySlug.greenfield).toMatchObject({ name: 'Greenfield Academy', status: 'active' })
     expect(bySlug.sunrise).toMatchObject({ name: 'Sunrise Schools', status: 'active' })
     expect(bySlug.hillside).toMatchObject({ name: 'Hillside College', status: 'suspended' })
-  })
+  }, SEED_TWICE_TIMEOUT)
 
   it('seeds a user per role at greenfield, more teachers, an inactive teacher and a sunrise admin, re-runnably', async () => {
     await seed(db)
@@ -102,7 +105,7 @@ describe('seed', () => {
     ])
     // Re-seeding resets flags: only Kemi is seeded with a forced password change
     expect(rows.filter(r => r.mustChangePassword).map(r => r.email)).toEqual(['kemi@greenfield.test'])
-  })
+  }, SEED_TWICE_TIMEOUT)
 
   it('stores a demo password hash that verifies against the demo password', async () => {
     expect(DEMO_PASSWORD).toBe('password123')

@@ -109,14 +109,26 @@ export async function seedScores(db: Db, schoolId: string, sessionId: string, de
       await db.insert(traitRatings).values(traitRows)
         .onConflictDoUpdate({ target: [traitRatings.schoolId, traitRatings.termId, traitRatings.studentId, traitRatings.trait], set: { rating: sql`excluded.rating` } })
     }
-    for (const [i, student] of rated.entries()) {
-      const comment = COMMENTS[i % COMMENTS.length]!
+    const commentRows = rated.map((student, i) => {
       const principalComment = ratings.principal && i < Math.ceil(list.length * (ratings.principalShare ?? 0))
         ? PRINCIPAL_COMMENTS[i % PRINCIPAL_COMMENTS.length]!
         : null
-      const comments = { classTeacherComment: comment, principalComment, principalCommentById: principalComment ? userId(ratings.principal!) : null }
-      await db.insert(termComments).values({ schoolId, termId: term.id, studentId: student.id, ...comments, enteredById: userId(ratings.enteredBy) })
-        .onConflictDoUpdate({ target: [termComments.schoolId, termComments.termId, termComments.studentId], set: comments })
+      return {
+        schoolId,
+        termId: term.id,
+        studentId: student.id,
+        classTeacherComment: COMMENTS[i % COMMENTS.length]!,
+        principalComment,
+        principalCommentById: principalComment ? userId(ratings.principal!) : null,
+        enteredById: userId(ratings.enteredBy),
+      }
+    })
+    // One statement per arm keeps re-seeding fast
+    if (commentRows.length) {
+      await db.insert(termComments).values(commentRows).onConflictDoUpdate({
+        target: [termComments.schoolId, termComments.termId, termComments.studentId],
+        set: { classTeacherComment: sql`excluded.class_teacher_comment`, principalComment: sql`excluded.principal_comment`, principalCommentById: sql`excluded.principal_comment_by_id` },
+      })
     }
   }
 

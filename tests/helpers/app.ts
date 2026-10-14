@@ -21,6 +21,10 @@ import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import myAssignmentsHandler from '~~/server/api/me/assignments.get'
 import dashboardHandler from '~~/server/api/dashboard.get'
+import promotionListHandler from '~~/server/api/promotion/index.get'
+import promotionArmGetHandler from '~~/server/api/promotion/[armId].get'
+import promotionArmPostHandler from '~~/server/api/promotion/[armId].post'
+import promotionArmDeleteHandler from '~~/server/api/promotion/[armId].delete'
 import paymentsPostHandler from '~~/server/api/fees/payments/index.post'
 import paymentReverseHandler from '~~/server/api/fees/payments/[id]/reverse.post'
 import paymentGetHandler from '~~/server/api/fees/payments/[id].get'
@@ -199,6 +203,10 @@ export function createTestApp(db: Db) {
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
     .get('/api/dashboard', dashboardHandler)
+    .get('/api/promotion', promotionListHandler)
+    .get('/api/promotion/:armId', promotionArmGetHandler)
+    .post('/api/promotion/:armId', promotionArmPostHandler)
+    .delete('/api/promotion/:armId', promotionArmDeleteHandler)
     .get('/api/me/children', myChildrenHandler)
     .get('/api/me/children/:id', myChildHandler)
     .get('/api/me/children/:id/results', myChildResultsHandler)

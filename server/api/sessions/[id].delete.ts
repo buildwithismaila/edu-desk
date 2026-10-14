@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { defineEventHandler } from 'h3'
 import { academicSessions, attendanceRegisters, studentEnrolments, terms } from '../../database/schema'
 import { sessionHasFees } from '../../services/fees'
+import { sessionHasPromotions } from '../../services/promotion'
 import { sessionHasScores } from '../../services/scores'
 import { requireRole } from '../../utils/auth'
 import { useDb } from '../../utils/db'
@@ -29,6 +30,7 @@ export default defineEventHandler(async (event) => {
   if (register) throw conflict('This session has attendance records, so it can\'t be deleted.')
   if (await sessionHasScores(db, school, id)) throw conflict('This session has scores, so it can\'t be deleted.')
   if (await sessionHasFees(db, school, id)) throw conflict('This session has fees, so it can\'t be deleted.')
+  if (await sessionHasPromotions(db, school, id)) throw conflict('This session has promotion records, so it can\'t be deleted.')
 
   await db.delete(academicSessions).where(byId)
   return { deleted: true }
