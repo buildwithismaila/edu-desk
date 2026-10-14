@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 10 complete — the MVP phases (1–10) are done. Phases 11–13 (SaaS) start only after a pilot school completes a full term (docs/roadmap.md).
+- **Current phase:** Phase 10a — Pilot readiness (spec approved; in progress)
 - **Last updated:** 2026-10-14
 
 ## Completed phases

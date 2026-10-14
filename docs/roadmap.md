@@ -61,6 +61,13 @@ Each phase lists scope, acceptance criteria and the **minimum** tests required. 
 
 ---
 
+## Phase 10a — Pilot readiness
+**Scope:** create a school from the command line; Docker production stack (app, PostgreSQL, Caddy with on-demand TLS per school subdomain); migrations on deploy; health check; nightly encrypted off-site backups with a rehearsed restore; error logs and uptime monitoring; bulk parent logins with printable slips; printable fee invoices with the school's bank accounts (staff and parents); privacy, terms and DPA drafts.
+**Acceptance:** a new school can be created and served over HTTPS on its subdomain; backups restore; parents can be given logins in bulk; invoices print with bank details.
+**Tests:** unit for slug rules, TLS allow-list, invoice totals; integration for school creation (transactional), parent logins (one-time passwords, forced change, isolation), invoices (staff and parent IDOR); E2E parent logins and invoices; Docker image built in CI.
+
+---
+
 # SaaS phases (start only after a pilot school completes a full term)
 See `docs/multi-tenancy.md` for the full design.
 
