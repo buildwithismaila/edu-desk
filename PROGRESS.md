@@ -1,8 +1,8 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 9 — Parent portal (spec approved; in progress)
-- **Last updated:** 2026-10-12
+- **Current phase:** Phase 9 — Parent portal complete; next: Phase 10 (awaiting go-ahead)
+- **Last updated:** 2026-10-14
 
 ## Completed phases
 <!-- For each finished phase:
@@ -12,6 +12,13 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 9 — Parent portal (2026-10-14)
+- Built: `requireOwnChild` (404 unless the parent's own, non-removed child in this school) at the start of every parent route; `/api/me/children` cards with this term's attendance, fee balance and latest published report card; child overview, published results list, attendance for any term, the term's bill (reversed payments flagged, no reasons, no ledger) and receipts under `/api/me/children/[id]/…`; dashboard child cards, `/my-children/[id]` with Results · Attendance · Fees tabs (tab kept in the URL), parent receipt page, shared `Receipt` component, read-only `BillSummary` for parents, report card "Back to my child"; seed: Primary 3A complete and published (Somto Eze's report card), Primary 3A registers.
+- Tests (totals): 1277 unit + integration (PGlite) / 85 Nuxt component / 54 E2E tests × desktop + mobile (viewport-specific and desktop-only skips), plus the school-state project. New: the parent IDOR suite (every parent route × another family, removed child, another school, foreign payment, no session, staff roles).
+- Decisions: see docs/decisions.md #039
+- Spec change: parents' nav stays "Dashboard" only (the dashboard is the children list).
+- Found while building: nothing in the app; a first E2E run had 4 unrelated failures from the machine sleeping mid-run (`ERR_NETWORK_IO_SUSPENDED`), all green on re-run.
 
 ### Phase 8 — Fees & payments (2026-10-13)
 - Built: integer-kobo money helpers (`parseNaira`, `formatNaira`); fee items per class level per term (replace, copy between terms, optional items); idempotent bill generation with carry-forward of arrears/credit from the previous term; refresh (items on bills without payments, carry-forward on all); optional items and fixed/percent discounts (capped at the items); append-only payments with per-year receipt numbers (concurrency-safe), reversal with a reason, no edit/delete routes; receipts (printable A4, REVERSED stamp); student ledger across terms; debtors list (printable) and term collections (by level, method, day) that reconcile; bursar still kept out of academics (tested); optional outstanding-fees line on report cards (school setting, frozen on publish); pages: Fee items, Bills, student Fees, Receipt, Debtors, Collections; Fees nav group; seed: items for every level, bills for every student, payments in every state (full, part, credit, reversal, discount) and carried-forward arrears/credit.

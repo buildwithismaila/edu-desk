@@ -1,6 +1,6 @@
 # Phase 9 — Parent portal
 
-**Status:** Approved (2026-10-13), in progress
+**Status:** Done (2026-10-14)
 **Roadmap ref:** `docs/roadmap.md` → Phase 9
 
 ## Goal
@@ -125,11 +125,11 @@ The fixture: two families in school A (parent 1 with two children; parent 2 with
 4. **E2E + docs.**
 
 ## Acceptance checklist
-- [ ] A parent sees each child's published report cards, attendance summary, fee balance and payment history, read-only
-- [ ] A parent sees only their own children's data: IDOR tests on every parent route (another family, another school, removed child, foreign payment)
-- [ ] Unpublished results are never visible to parents
-- [ ] Mobile-first: every parent page works at 375px
-- [ ] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] A parent sees each child's published report cards, attendance summary, fee balance and payment history, read-only
+- [x] A parent sees only their own children's data: IDOR tests on every parent route (another family, another school, removed child, foreign payment)
+- [x] Unpublished results are never visible to parents
+- [x] Mobile-first: every parent page works at 375px
+- [x] Seed updated; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Open questions (resolved 2026-10-13: all approved as proposed)
 1. Parents see reversed payments marked "Reversed", without the staff's reason.

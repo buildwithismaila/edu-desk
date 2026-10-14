@@ -250,3 +250,12 @@ Record significant technical or product decisions here (newest at the bottom). K
   - **Receipt numbers:** `RCT/YEAR/NNNNNN`, from `receipt_counters`, incremented in the payment's transaction, so concurrent payments get unique numbers.
   - **Online payments later:** `channel` (`manual`) and `gatewayReference` are ready for them.
 - **Consequences:** A wrong payment shows twice in the ledger (payment and reversal). Receipts show REVERSED with the reason.
+
+### 039 — Parent portal: one own-child guard, parent-shaped responses (2026-10-13)
+- **Context:** Parents may only ever see their own children, and some staff data (reversal reasons, who took the money, the ledger, optional-item choices) isn't for them.
+- **Decision:**
+  - **Routes:** parent views live under `/api/me/children/[id]/…` (overview, results, attendance, fees, a payment's receipt), parent role only. Each handler calls `requireOwnChild` first: 404 unless an active guardian link to a non-removed child exists in the host school, so a child's existence is never revealed.
+  - **Shapes:** the services return parent-shaped data built from the staff services (`billDetails`, `getPayment`, `studentAttendanceSummary`, published snapshots), dropping staff-only fields rather than reusing the staff routes.
+  - **Receipts:** a payment is found by id and then must belong to the child in the path, else 404.
+  - **Tests:** one IDOR suite runs every parent route against another family's child, a removed child, another school's child and payment, a sibling's payment, no session and every staff role.
+- **Consequences:** Staff routes stay unchanged. A new parent view means a new route under `/api/me/children/[id]/` with `requireOwnChild` and an entry in the IDOR suite.

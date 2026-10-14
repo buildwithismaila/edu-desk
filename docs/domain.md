@@ -99,7 +99,7 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
   - **Discounts:** fixed (₦) or percent (on the items, not arrears, half-up to the kobo), together capped at the items. They can be removed, because they aren't money received.
   - **Payments:** each gets `RCT/YEAR/NNNNNN` from a per-school, per-year counter. A payment is never edited or deleted, only reversed once with a reason; a reversed payment doesn't count as paid.
   - **Reports:** expected (billed − discounts) − collected = outstanding − credit, for the term.
-  - **Access:** admin and bursar manage fees; the principal can read them; teachers can't see fees; parents see them in Phase 9.
+  - **Access:** admin and bursar manage fees; the principal can read them; teachers can't see fees; parents see their own children's bills, payments and receipts (Phase 9).
   - **Report cards:** a school setting adds the term's fee balance to the card, frozen when the results are published.
 
 ## Roles & permissions
@@ -111,6 +111,8 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
 | Bursar | Fees, bills, payments, receipts, debtors — nothing academic |
 | Teacher | **Class teacher:** attendance, affective/psychomotor ratings, comments for their arm. **Subject teacher:** score entry only for assigned subject + class arm pairs |
 | Parent / Guardian | Read-only: own children's published results, attendance, fee balance & payments |
+
+- **Parent portal (Phase 9):** a card per child on the dashboard (class, this term's attendance and fee balance, latest published report card) and a page per child with Results (published report cards only, newest first), Attendance (any term of the child's sessions) and Fees (a term's bill and payments, with receipts). Reversed payments show as "Reversed" without the staff's reason; the full ledger, optional-item choices and who took the money stay staff-only. Another family's, another school's or a removed child is "not found".
 
 - A parent can have many children; a child can have many guardians.
 - Students do not log in in the MVP.
