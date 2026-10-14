@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 9 — Parent portal complete; next: Phase 10 (awaiting go-ahead)
+- **Current phase:** Phase 10 — Dashboards & promotion (spec approved; in progress)
 - **Last updated:** 2026-10-14
 
 ## Completed phases
