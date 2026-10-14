@@ -91,7 +91,8 @@ jobs:
         run: docker compose up -d --wait --wait-timeout 180 app
       - name: Health check answers ok
         working-directory: deploy
-        run: docker compose exec -T app node -e "fetch('http://127.0.0.1:3000/api/_health').then(async r => { console.log(r.status, await r.text()); process.exit(r.ok ? 0 : 1) })"
+        run: |
+          docker compose exec -T app node -e "fetch('http://127.0.0.1:3000/api/_health').then(async r => { console.log(r.status, await r.text()); process.exit(r.ok ? 0 : 1) })"
       - name: Logs on failure
         if: failure()
         working-directory: deploy
