@@ -1,0 +1,93 @@
+# Edu Desk production stack (docs/deploy.md). Run from the deploy/ folder:
+#   docker compose up -d --build
+# Services: postgres (data), migrate (applies migrations, then exits), app (Nuxt), caddy (HTTPS),
+# and tools (one-off commands, e.g. `docker compose run --rm tools school:create ...`).
+
+name: edudesk
+
+x-database-url: &database-url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Applies new migrations on every deploy, then exits; the app waits for it
+  migrate:
+    build:
+      context: ..
+      target: build
+    command: ["pnpm", "db:migrate"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: *database-url
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: ..
+      target: runtime
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: *database-url
+      NUXT_APP_DOMAIN: ${APP_DOMAIN}
+      NUXT_DEFAULT_SCHOOL_SLUG: ${DEFAULT_SCHOOL_SLUG:-}
+      NUXT_SESSION_PASSWORD: ${SESSION_PASSWORD}
+      # Behind Caddy: the login limit uses the forwarded visitor address
+      NUXT_TRUST_PROXY: "true"
+    volumes:
+      - uploads:/app/.data
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  # One-off commands only (never started by `up`): docker compose run --rm tools <pnpm script> [args]
+  tools:
+    build:
+      context: ..
+      target: build
+    entrypoint: ["pnpm"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: *database-url
+      NUXT_APP_DOMAIN: ${APP_DOMAIN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: ["tools"]
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:

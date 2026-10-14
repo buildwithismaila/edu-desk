@@ -21,6 +21,8 @@ import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import myAssignmentsHandler from '~~/server/api/me/assignments.get'
 import dashboardHandler from '~~/server/api/dashboard.get'
+import healthHandler from '~~/server/api/_health.get'
+import tlsAllowedHandler from '~~/server/api/_tls/allowed.get'
 import promotionListHandler from '~~/server/api/promotion/index.get'
 import promotionArmGetHandler from '~~/server/api/promotion/[armId].get'
 import promotionArmPostHandler from '~~/server/api/promotion/[armId].post'
@@ -203,6 +205,8 @@ export function createTestApp(db: Db) {
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
     .get('/api/dashboard', dashboardHandler)
+    .get('/api/_health', healthHandler)
+    .get('/api/_tls/allowed', tlsAllowedHandler)
     .get('/api/promotion', promotionListHandler)
     .get('/api/promotion/:armId', promotionArmGetHandler)
     .post('/api/promotion/:armId', promotionArmPostHandler)

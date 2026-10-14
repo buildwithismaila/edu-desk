@@ -15,7 +15,7 @@ export { hashPassword, verifyPassword } from '../../node_modules/nuxt-auth-utils
 /** Fixed test secret; only used to seal cookies inside tests. */
 export const TEST_SESSION_PASSWORD = 'test-session-password-at-least-32-chars'
 
-const defaults = { appDomain: 'lvh.me', defaultSchoolSlug: '' }
+const defaults = { appDomain: 'lvh.me', defaultSchoolSlug: '', trustProxy: false }
 
 /** Mutable runtime config for tests; call resetTestRuntimeConfig() in afterEach. */
 export const testRuntimeConfig = {

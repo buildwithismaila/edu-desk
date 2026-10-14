@@ -1,0 +1,25 @@
+# HTTPS for the bare domain, www and every school's subdomain (docs/deploy.md).
+# Certificates are issued on demand, the first time a hostname is visited, but only after the app says the
+# hostname is ours (/api/_tls/allowed): the bare domain, www, or an existing school. One DNS record
+# (*.<domain> → this server) is all it needs.
+{
+	email {$ACME_EMAIL}
+	on_demand_tls {
+		ask http://app:3000/api/_tls/allowed
+	}
+}
+
+https:// {
+	tls {
+		on_demand
+	}
+
+	# Only Caddy uses the certificate check
+	@internal path /api/_tls/*
+	respond @internal 404
+
+	encode zstd gzip
+	# Caddy keeps the visitor's Host header (the app picks the school from it) and sets X-Forwarded-For
+	# itself, ignoring any value the visitor sent
+	reverse_proxy app:3000
+}

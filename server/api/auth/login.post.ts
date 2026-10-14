@@ -1,5 +1,6 @@
 import { eq, isNull } from 'drizzle-orm'
 import { createError, defineEventHandler, getRequestIP, setResponseHeader } from 'h3'
+import { useRuntimeConfig } from '#imports'
 import { loginSchema } from '../../../shared/schemas/auth'
 import { users } from '../../database/schema'
 import { toSessionUser } from '../../utils/auth'
@@ -16,7 +17,10 @@ export default defineEventHandler(async (event) => {
   const { login, password } = await validateBody(event, loginSchema)
   const identifier = 'email' in login ? login.email : login.phone
 
-  const keys = { account: `${school.id}:${identifier}`, ip: getRequestIP(event) ?? 'unknown' }
+  // Behind Caddy every request comes from the proxy: use the visitor's address it forwards (Caddy replaces
+  // any X-Forwarded-For a client sends), but only when NUXT_TRUST_PROXY says there is such a proxy
+  const ip = getRequestIP(event, { xForwardedFor: useRuntimeConfig(event).trustProxy }) ?? 'unknown'
+  const keys = { account: `${school.id}:${identifier}`, ip }
   const throttle = checkLoginThrottle(keys)
   if (!throttle.allowed) {
     setResponseHeader(event, 'Retry-After', throttle.retryAfterSeconds)

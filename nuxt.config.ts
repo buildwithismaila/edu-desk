@@ -10,6 +10,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     appDomain: 'lvh.me',
     defaultSchoolSlug: '',
+    // NUXT_TRUST_PROXY=true behind Caddy (deploy/): the login limit then uses the forwarded client IP
+    trustProxy: false,
     // nuxt-auth-utils session (password from NUXT_SESSION_PASSWORD). Host-only cookie: no `domain`,
     // so each school subdomain has its own session. Chrome drops Secure cookies on http://*.lvh.me,
     // so Secure is off under `nuxt dev`; E2E (http prod build) sets NUXT_SESSION_COOKIE_SECURE=false.

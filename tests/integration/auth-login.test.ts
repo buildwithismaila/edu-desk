@@ -1,12 +1,13 @@
 import { eq } from 'drizzle-orm'
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { users } from '~~/server/database/schema'
-import { LOGIN_THROTTLE } from '~~/server/utils/login-throttle'
+import { LOGIN_THROTTLE, resetLoginThrottle } from '~~/server/utils/login-throttle'
 import type { Db } from '~~/server/utils/db'
 import { createTwoSchools } from '../factories/schools'
 import { createUser, DEFAULT_TEST_PASSWORD } from '../factories/users'
 import { createTestApp, sessionCookie } from '../helpers/app'
 import { createTestDb } from '../helpers/db'
+import { resetTestRuntimeConfig, testRuntimeConfig } from '../helpers/nitro-imports'
 
 let db: Db
 let app: ReturnType<typeof createTestApp>
@@ -167,5 +168,38 @@ describe('POST /api/auth/login', () => {
   it('returns 404 on an unknown school', async () => {
     const res = await loginAt('no-such-school', 'a@example.test')
     expect(res.status).toBe(404)
+  })
+})
+
+describe('the per-IP login limit behind a proxy (Caddy in production)', () => {
+  const maxPerIp = LOGIN_THROTTLE.maxPerIp
+  const failFrom = (ip: string, email: string) =>
+    app.postJson('/api/auth/login', { login: email, password: 'wrong-password' }, { host: hostOf(schoolA.slug), headers: { 'x-forwarded-for': ip } })
+
+  beforeEach(() => {
+    resetLoginThrottle()
+    LOGIN_THROTTLE.maxPerIp = 2
+  })
+  afterEach(() => {
+    LOGIN_THROTTLE.maxPerIp = maxPerIp
+    resetTestRuntimeConfig()
+    resetLoginThrottle()
+  })
+
+  it('counts each visitor separately when the proxy is trusted', async () => {
+    testRuntimeConfig.trustProxy = true
+    // Different accounts, so only the IP limit applies
+    expect((await failFrom('203.0.113.1', 'a1@example.test')).status).toBe(401)
+    expect((await failFrom('203.0.113.1', 'a2@example.test')).status).toBe(401)
+    expect((await failFrom('203.0.113.1', 'a3@example.test')).status).toBe(429)
+    // Another visitor isn't blocked by the first one's failures
+    expect((await failFrom('198.51.100.7', 'a4@example.test')).status).toBe(401)
+  })
+
+  it('ignores X-Forwarded-For when not behind a trusted proxy (a client could fake it)', async () => {
+    expect((await failFrom('203.0.113.1', 'b1@example.test')).status).toBe(401)
+    expect((await failFrom('203.0.113.2', 'b2@example.test')).status).toBe(401)
+    // Same real connection, so the made-up header doesn't help
+    expect((await failFrom('203.0.113.3', 'b3@example.test')).status).toBe(429)
   })
 })

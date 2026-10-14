@@ -32,3 +32,20 @@ export function resolveTenantSlug(host: string | undefined, { appDomain, default
 function fallback(defaultSlug: string): TenantSlugResult {
   return defaultSlug ? { kind: 'school', slug: defaultSlug } : NONE
 }
+
+export type TlsDomainResult = { kind: 'apex' } | { kind: 'school', slug: string } | null
+
+/**
+ * Which hostnames may get an HTTPS certificate (Caddy's on-demand TLS asks first): the bare domain, `www`,
+ * and well-formed, non-reserved school subdomains. Whether the school exists is checked by the caller.
+ */
+export function resolveTlsDomain(domain: string, appDomain: string): TlsDomainResult {
+  const hostname = domain.toLowerCase().replace(/\.$/, '')
+  const base = appDomain.toLowerCase()
+  if (!hostname || !base) return null
+  if (hostname === base || hostname === `www.${base}`) return { kind: 'apex' }
+  if (!hostname.endsWith(`.${base}`)) return null
+  const subdomain = hostname.slice(0, -(base.length + 1))
+  if (!SLUG_PATTERN.test(subdomain) || (RESERVED_SLUGS as readonly string[]).includes(subdomain)) return null
+  return { kind: 'school', slug: subdomain }
+}
