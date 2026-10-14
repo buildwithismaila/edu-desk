@@ -1,6 +1,6 @@
 # Phase 10 — Dashboards & promotion
 
-**Status:** Approved (2026-10-14), in progress
+**Status:** Done (2026-10-14)
 **Roadmap ref:** `docs/roadmap.md` → Phase 10
 
 ## Goal
@@ -170,11 +170,11 @@ Every route:
 5. E2E + docs, push, CI.
 
 ## Acceptance checklist
-- [ ] Dashboard numbers match the underlying data (tested against the detail services)
-- [ ] Role-based dashboards: admin/principal full; bursar fees only; teacher/parent unchanged
-- [ ] Promotion with per-student repeat / withdraw / graduate; SSS 3 graduates by default
-- [ ] Promotion is transactional and can't run twice for the same arm and session (DB-enforced)
-- [ ] Works at 375px; seed updated; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] Dashboard numbers match the underlying data (tested against the detail services)
+- [x] Role-based dashboards: admin/principal full; bursar fees only; teacher/parent unchanged
+- [x] Promotion with per-student repeat / withdraw / graduate; SSS 3 graduates by default
+- [x] Promotion is transactional and can't run twice for the same arm and session (DB-enforced)
+- [x] Works at 375px; seed updated; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Open questions (resolved 2026-10-14: all approved as recommended)
 1. **Promote per class arm** (one confirm per arm, each with its own exceptions), not the whole school in one go? I recommend per arm: it's easier to review, and "can't run twice" applies per arm and session.

@@ -259,3 +259,23 @@ Record significant technical or product decisions here (newest at the bottom). K
   - **Receipts:** a payment is found by id and then must belong to the child in the path, else 404.
   - **Tests:** one IDOR suite runs every parent route against another family's child, a removed child, another school's child and payment, a sibling's payment, no session and every staff role.
 - **Consequences:** Staff routes stay unchanged. A new parent view means a new route under `/api/me/children/[id]/` with `requireOwnChild` and an entry in the IDOR suite.
+
+### 040 — Promotion per class arm, DB-enforced once per session, undo until the new session starts (2026-10-14)
+- **Context:** End-of-session promotion must be transactional and must not run twice for the same session, yet mistakes need fixing before the new session begins.
+- **Decision:**
+  - **Tables:** `promotion_runs`, unique per (school, from-session, arm), and `student_promotions`, unique per (school, from-session, student), with outcome and target arm.
+  - **One transaction:** promoting inserts the run (`ON CONFLICT DO NOTHING`, so a concurrent second run gets 409), the next-session enrolments for promoted and repeating students, and the outcomes.
+  - **Undo:** deletes the enrolments the run created and the run (its outcomes cascade), allowed only while the next session isn't current.
+  - **Target session:** the next session by name.
+  - **Status:** graduated or withdrawn status comes from the latest outcome, with no new column on `students`.
+  - **Rules:** placement and validation are pure (`shared/utils/promotion.ts`) and shared by the UI and the API.
+- **Alternatives considered:**
+  - whole-school promotion in one go (harder to review, and one bad class blocks all);
+  - a `students.status` column (duplicates what the outcomes record);
+  - final promotion without undo (fixing mistakes student by student).
+- **Consequences:** A session with promotion records can't be deleted. After the switch, promotions are final; individual moves use "Change class".
+
+### 041 — Dashboard numbers come from the detail services (2026-10-14)
+- **Context:** Dashboard figures must match the pages they summarise.
+- **Decision:** `getDashboard` calls `collections`, `debtors`, `listScoreSheets` and `listResultArms` rather than re-aggregating. Only students and today's attendance are counted directly, with `todayAttendance` (late = present, as in the term summary). Integration tests compare the dashboard with the detail endpoints.
+- **Consequences:** One extra query or so per block; numbers can't drift from the detail pages.

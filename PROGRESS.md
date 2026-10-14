@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 10 — Dashboards & promotion (spec approved; in progress)
+- **Current phase:** Phase 10 complete — the MVP phases (1–10) are done. Phases 11–13 (SaaS) start only after a pilot school completes a full term (docs/roadmap.md).
 - **Last updated:** 2026-10-14
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 10 — Dashboards & promotion (2026-10-14)
+- Built: staff dashboard (`/api/dashboard`, `DashboardStats`): students by section and gender, today's attendance (taken / not taken, rate), term fees (expected, collected, outstanding, %, today, debtors) and result-entry progress (sheets complete, arms by status), from the detail services; bursar gets students and fees only. End-of-session promotion per class arm: `promotion_runs` (unique per arm and session) and `student_promotions`; default placement (next level's same-name arm, across sections; last level graduates); repeat / withdraw / graduate exceptions; one transaction; already-enrolled students skipped; undo until the next session is current; session delete guard; `/promotion` and `/promotion/[armId]` (outcome and class per student, set all, summary, confirm, undo), profile outcome badge, Promotion in the School setup nav; seed: SSS 3A (3 students) and the 2027/2028 session.
+- Tests (totals): 1330 unit + integration (PGlite) / 94 Nuxt component / 59 E2E tests × desktop + mobile (viewport-specific and desktop-only skips), plus the school-state project.
+- Decisions: see docs/decisions.md #040–#041
+- Found while building: deleting a session that only has graduation records would have hit a foreign-key error (now a 409 guard, tested); the seed-twice tests in `db.test.ts` hit the 5s default as the demo grew (comment upserts batched, and those two tests now have an explicit 30s budget).
 
 ### Phase 9 — Parent portal (2026-10-14)
 - Built: `requireOwnChild` (404 unless the parent's own, non-removed child in this school) at the start of every parent route; `/api/me/children` cards with this term's attendance, fee balance and latest published report card; child overview, published results list, attendance for any term, the term's bill (reversed payments flagged, no reasons, no ledger) and receipts under `/api/me/children/[id]/…`; dashboard child cards, `/my-children/[id]` with Results · Attendance · Fees tabs (tab kept in the URL), parent receipt page, shared `Receipt` component, read-only `BillSummary` for parents, report card "Back to my child"; seed: Primary 3A complete and published (Somto Eze's report card), Primary 3A registers.

@@ -102,6 +102,31 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
   - **Access:** admin and bursar manage fees; the principal can read them; teachers can't see fees; parents see their own children's bills, payments and receipts (Phase 9).
   - **Report cards:** a school setting adds the term's fee balance to the card, frozen when the results are published.
 
+## End-of-session promotion (Phase 10)
+- The admin promotes **one class arm at a time** from the current session into the **next session** (the next one by name, e.g. 2026/2027 → 2027/2028), which must already exist in Calendar.
+- **Outcomes per student:** Promote, Repeat, Withdraw, Graduate. Defaults (`shared/utils/promotion.ts`):
+  - promote to the next class level in school order (by section, Nursery → SSS, then the school's order), into the arm with the **same name**, or no target if there's none;
+  - the **last class level** (SSS 3) graduates.
+- **Rules:**
+  - Repeat stays in the same level (any arm).
+  - Promote goes to a later level.
+  - Graduated and withdrawn students get no class.
+  - Every active student of the arm is listed exactly once.
+  - Students already enrolled next session are skipped.
+- **One transaction:** promoting writes the next-session enrolments, an outcome per student and the run, and an arm can be promoted **once per session** (DB-unique).
+- **Undo** is allowed until the next session becomes current; then promotion is final.
+- **Withdrawn ≠ removed:** withdrawn and graduated students keep their records and their parents keep access to past results; they simply have no class in the new session. The third-term average is shown for information only; there's no automatic repeat by pass mark.
+
+## Dashboards (Phase 10)
+- **Admin and principal:**
+  - students this session (by section and gender);
+  - today's attendance (registers taken, rate with late counted as present, classes not taken);
+  - this term's fees (expected, collected, outstanding, % collected, today's collections, debtors);
+  - result-entry progress (score sheets complete, arms by results status).
+- **Bursar:** students and fees only.
+- **Teachers and parents** keep My classes / My children.
+- Every number comes from the services behind the detail pages (Collections, Debtors, Scores, Results).
+
 ## Roles & permissions
 | Role | Can do |
 |---|---|
@@ -117,7 +142,7 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
 - A parent can have many children; a child can have many guardians.
 - Students do not log in in the MVP.
 - **Guardians are parent accounts:** phone required (unique per school among active accounts), email optional; they log in with their phone or email. Brothers and sisters share one guardian; a student has 1–4 guardians and always keeps at least one.
-- **Enrolment is per session:** a student is in one class arm per session (Phase 9 promotion adds the next session's). A department is only for SSS students; moving out of SSS clears it.
+- **Enrolment is per session:** a student is in one class arm per session (end-of-session promotion adds the next session's, Phase 10). A department is only for SSS students; moving out of SSS clears it.
 - **Who sees which students:** admin and principal see all; the bursar sees all but not personal details (date of birth, state of origin, LGA, address); a teacher sees only the students in arms they are class teacher of or teach a subject in (current session); a parent sees only their own children. Anyone else gets "not found". Only the admin admits, edits, imports and manages guardians.
 - **Removing a student** (left the school) is a soft delete: gone from lists and parents' accounts; admission number and history kept.
 - **Student photos are private:** only people who may see the student can load them.
