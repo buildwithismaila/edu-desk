@@ -235,6 +235,19 @@ async function removeLogo() {
     </UCard>
 
     <UCard>
+      <template #header>
+        <h2 class="font-semibold">
+          Bank accounts
+        </h2>
+      </template>
+      <SettingsBankAccountsEditor
+        v-if="profile"
+        :accounts="profile.bankAccounts"
+        @saved="afterChange('Bank accounts saved')"
+      />
+    </UCard>
+
+    <UCard>
       <USwitch
         data-testid="show-positions"
         :model-value="profile?.showPositions ?? true"

@@ -29,6 +29,15 @@ const openReceipt = (paymentId: string) => navigateTo(`/my-children/${props.chil
     >
       No bill for {{ fees.term.label }} yet.
     </p>
+    <UButton
+      v-if="fees?.bill"
+      data-testid="child-invoice-link"
+      :to="`/my-children/${childId}/invoice?term=${fees.term.id}`"
+      label="Invoice (how to pay)"
+      icon="i-lucide-file-text"
+      color="neutral"
+      variant="outline"
+    />
     <FeesBillSummary
       v-if="fees?.bill"
       :bill="fees.bill"

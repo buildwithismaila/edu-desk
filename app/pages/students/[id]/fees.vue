@@ -135,16 +135,26 @@ const openReceipt = (paymentId: string) => navigateTo(`/fees/payments/${paymentI
               {{ fees.term.label }}
             </h2>
             <div
-              v-if="canEdit && fees.bill"
+              v-if="fees.bill"
               class="flex flex-wrap gap-2"
             >
               <UButton
+                data-testid="invoice-link"
+                :to="`/fees/bills/${fees.bill.id}/invoice`"
+                label="Invoice"
+                icon="i-lucide-file-text"
+                color="neutral"
+                variant="outline"
+              />
+              <UButton
+                v-if="canEdit"
                 data-testid="record-payment"
                 label="Record payment"
                 icon="i-lucide-banknote"
                 @click="recordPayment"
               />
               <UButton
+                v-if="canEdit"
                 label="Add discount"
                 icon="i-lucide-percent"
                 color="neutral"

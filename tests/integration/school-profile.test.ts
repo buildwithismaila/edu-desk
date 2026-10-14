@@ -30,7 +30,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   app = createTestApp(db)
   resetTestStorage()
-  await db.update(schools).set({ logoKey: null, logoUpdatedAt: null, address: null, motto: null, phone: null, email: null, showPositions: true, showFeesOnReportCard: false, admissionPrefix: null })
+  await db.update(schools).set({ logoKey: null, logoUpdatedAt: null, address: null, motto: null, phone: null, email: null, showPositions: true, showFeesOnReportCard: false, admissionPrefix: null, bankAccounts: [] })
 })
 
 async function loginAs(role: typeof ROLES[number], school = schoolA) {
@@ -81,7 +81,7 @@ describe('school profile', () => {
     const res = await app.request('/api/school/profile', onA(await loginAs('teacher')))
 
     expect(await res.json()).toEqual({
-      name: schoolA.name, address: null, motto: null, phone: null, email: null, logoUrl: null, showPositions: true, showFeesOnReportCard: false,
+      name: schoolA.name, address: null, motto: null, phone: null, email: null, logoUrl: null, showPositions: true, showFeesOnReportCard: false, bankAccounts: [],
       admissionPrefix: defaultAdmissionPrefix(schoolA.name),
     })
   })

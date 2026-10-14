@@ -1,0 +1,1 @@
+ALTER TABLE "schools" ADD COLUMN "bank_accounts" jsonb DEFAULT '[]'::jsonb NOT NULL;

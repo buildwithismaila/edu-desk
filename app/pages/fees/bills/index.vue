@@ -104,6 +104,15 @@ async function act(action: 'generate' | 'refresh') {
 
     <div class="grid gap-2 sm:flex sm:flex-wrap">
       <FeesTermSelect v-model="termId" />
+      <UButton
+        v-if="query.classArmId"
+        data-testid="class-invoices-link"
+        :to="{ path: '/fees/invoices', query: { arm: query.classArmId, term: query.termId } }"
+        label="Print class invoices"
+        icon="i-lucide-printer"
+        color="neutral"
+        variant="outline"
+      />
       <USelect
         v-model="armFilter"
         :items="[{ label: 'All classes', value: 'all' }, ...armItems]"

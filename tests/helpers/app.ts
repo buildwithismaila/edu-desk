@@ -21,6 +21,9 @@ import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import myAssignmentsHandler from '~~/server/api/me/assignments.get'
 import dashboardHandler from '~~/server/api/dashboard.get'
+import billInvoiceHandler from '~~/server/api/fees/bills/[id]/invoice.get'
+import classInvoicesHandler from '~~/server/api/fees/invoices.get'
+import myChildInvoiceHandler from '~~/server/api/me/children/[id]/invoice.get'
 import parentLoginsGetHandler from '~~/server/api/parent-logins/index.get'
 import parentLoginsPostHandler from '~~/server/api/parent-logins/index.post'
 import healthHandler from '~~/server/api/_health.get'
@@ -207,6 +210,9 @@ export function createTestApp(db: Db) {
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
     .get('/api/dashboard', dashboardHandler)
+    .get('/api/fees/bills/:id/invoice', billInvoiceHandler)
+    .get('/api/fees/invoices', classInvoicesHandler)
+    .get('/api/me/children/:id/invoice', myChildInvoiceHandler)
     .get('/api/parent-logins', parentLoginsGetHandler)
     .post('/api/parent-logins', parentLoginsPostHandler)
     .get('/api/_health', healthHandler)

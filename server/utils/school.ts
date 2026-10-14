@@ -26,6 +26,7 @@ export function toSchoolProfile(school: School) {
     logoUrl: schoolLogoUrl(school),
     showPositions: school.showPositions,
     showFeesOnReportCard: school.showFeesOnReportCard,
+    bankAccounts: school.bankAccounts,
     // Until the first admission saves it, the prefix that admission would use
     admissionPrefix: school.admissionPrefix ?? defaultAdmissionPrefix(school.name),
   }

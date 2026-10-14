@@ -1,4 +1,5 @@
-import { boolean, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, jsonb, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import type { BankAccount } from '../../../shared/schemas/school'
 
 export const schoolStatus = pgEnum('school_status', ['active', 'suspended'])
 
@@ -24,6 +25,8 @@ export const schools = pgTable('schools', {
   showPositions: boolean().notNull().default(true),
   /** Phase 8: show the outstanding balance on published report cards */
   showFeesOnReportCard: boolean().notNull().default(false),
+  /** Phase 10a: up to two accounts printed on fee invoices */
+  bankAccounts: jsonb().$type<BankAccount[]>().notNull().default([]),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 })
