@@ -93,6 +93,16 @@ jobs:
         working-directory: deploy
         run: |
           docker compose exec -T app node -e "fetch('http://127.0.0.1:3000/api/_health').then(async r => { console.log(r.status, await r.text()); process.exit(r.ok ? 0 : 1) })"
+      - name: Backup, then restore into a drill database
+        working-directory: deploy
+        run: |
+          sed -i 's/^BACKUP_S3_BUCKET=.*/BACKUP_S3_BUCKET=/' .env
+          docker compose build backup
+          docker compose run --rm backup backup.sh
+          docker compose run --rm backup restore.sh latest --into-database drill
+          migrations=$(docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d drill -tAc "select count(*) from drizzle.__drizzle_migrations"')
+          echo "migrations restored: $migrations"
+          test "$migrations" -gt 0
       - name: Logs on failure
         if: failure()
         working-directory: deploy

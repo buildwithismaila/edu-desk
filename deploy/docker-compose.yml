@@ -71,6 +71,34 @@ services:
     depends_on:
       - app
 
+  # Nightly encrypted backups of the database and uploads, copied off-site (deploy/backup/, docs/deploy.md)
+  backup:
+    build: ./backup
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Africa/Lagos}
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      BACKUP_HOUR: ${BACKUP_HOUR:-2}
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}
+      BACKUP_HEARTBEAT_URL: ${BACKUP_HEARTBEAT_URL:-}
+      RCLONE_CONFIG_OFFSITE_TYPE: s3
+      RCLONE_CONFIG_OFFSITE_PROVIDER: ${BACKUP_S3_PROVIDER:-Cloudflare}
+      RCLONE_CONFIG_OFFSITE_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
+      RCLONE_CONFIG_OFFSITE_ACCESS_KEY_ID: ${BACKUP_S3_ACCESS_KEY_ID:-}
+      RCLONE_CONFIG_OFFSITE_SECRET_ACCESS_KEY: ${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      # R2 tokens are usually scoped to one bucket, so don't try to create or list buckets
+      RCLONE_CONFIG_OFFSITE_NO_CHECK_BUCKET: "true"
+    volumes:
+      - uploads:/uploads
+      - backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   # One-off commands only (never started by `up`): docker compose run --rm tools <pnpm script> [args]
   tools:
     build:
@@ -88,6 +116,7 @@ services:
 
 volumes:
   pgdata:
+  backups:
   uploads:
   caddy_data:
   caddy_config:

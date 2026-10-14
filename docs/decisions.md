@@ -279,3 +279,21 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** Dashboard figures must match the pages they summarise.
 - **Decision:** `getDashboard` calls `collections`, `debtors`, `listScoreSheets` and `listResultArms` rather than re-aggregating. Only students and today's attendance are counted directly, with `todayAttendance` (late = present, as in the term summary). Integration tests compare the dashboard with the detail endpoints.
 - **Consequences:** One extra query or so per block; numbers can't drift from the detail pages.
+
+### 042 — Production: one VPS with Docker Compose, Caddy on-demand TLS, nightly encrypted off-site backups (2026-10-14)
+- **Context:** A pilot school needs Edu Desk live over HTTPS on its own subdomain, with data that survives the server, run by one person with modest Linux skills and budget.
+- **Decision:**
+  - **One VPS running Docker Compose** (`deploy/`): postgres, a one-shot `migrate` (drizzle-kit, from the build stage of the `Dockerfile`), the app (runtime stage, non-root), Caddy, a `backup` service and a `tools` profile for `pnpm school:create`.
+  - **HTTPS:** Caddy's on-demand TLS issues a certificate on the first visit to a hostname, after asking `/api/_tls/allowed`. That allows the bare domain, www and existing schools (any status), so one wildcard DNS record suffices and nobody can make us request certificates for made-up names.
+  - **Backups:** nightly `pg_dump` + uploads tar, encrypted with gpg (AES-256) and copied with rclone to S3-compatible storage (Cloudflare R2): 14 daily and 8 weekly copies, plus a heartbeat ping. `restore.sh` has a drill mode (into a separate database) that CI runs on every push.
+  - **Monitoring:** server faults are logged as JSON lines (route and school, no query strings or bodies), and `/api/_health` is watched by an external uptime monitor.
+- **Alternatives considered:**
+  - managed hosting with Supabase for the database: less upkeep, but about $25 a month more, and it doesn't host the app (the move is a backup, a restore and a new `DATABASE_URL`);
+  - wildcard certificates by DNS challenge (needs a DNS-provider plugin and API keys);
+  - Sentry (a new package; revisit when there are several schools).
+- **Consequences:** We run the server: monthly updates, a restore drill each term (docs/deploy.md). One instance only, so the in-memory login limiter stays valid.
+
+### 043 — Trust X-Forwarded-For only behind our proxy (2026-10-14)
+- **Context:** Behind Caddy every request comes from the proxy's address, so the per-IP login limit would lock out everyone after 50 failures anywhere.
+- **Decision:** `NUXT_TRUST_PROXY=true` (set in the production compose file) makes the login limit use the first `X-Forwarded-For` address. Caddy replaces any value a visitor sends. Without the setting the header is ignored, since a client could fake it. Tested both ways.
+- **Consequences:** Never set it when the app is reachable without the proxy in front.
