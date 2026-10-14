@@ -5,9 +5,9 @@ describe('navigationFor', () => {
   it('gives the admin Students, Attendance, Scores, Results, Fees, Staff, Assignments and the School setup group', () => {
     const items = navigationFor('admin')
 
-    expect(items.map(i => i.label)).toEqual(['Dashboard', 'Students', 'Attendance', 'Scores', 'Results', 'Fees', 'Staff', 'Assignments', 'School setup'])
-    expect(items[5]!.children!.map(i => i.to)).toEqual(['/fees/bills', '/fees/debtors', '/fees/collections', '/fees'])
-    expect(items[8]!.children!.map(i => i.to)).toEqual([
+    expect(items.map(i => i.label)).toEqual(['Dashboard', 'Students', 'Parent logins', 'Attendance', 'Scores', 'Results', 'Fees', 'Staff', 'Assignments', 'School setup'])
+    expect(items[6]!.children!.map(i => i.to)).toEqual(['/fees/bills', '/fees/debtors', '/fees/collections', '/fees'])
+    expect(items[9]!.children!.map(i => i.to)).toEqual([
       '/settings/school', '/settings/calendar', '/settings/classes', '/settings/subjects', '/settings/grading', '/promotion',
     ])
   })

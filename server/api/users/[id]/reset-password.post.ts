@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const temporaryPassword = generateTemporaryPassword()
   const [updated] = await useDb()
     .update(users)
-    .set({ passwordHash: await hashPassword(temporaryPassword), mustChangePassword: true })
+    .set({ passwordHash: await hashPassword(temporaryPassword), mustChangePassword: true, temporaryPasswordAt: new Date() })
     .where(whereSchool(users, school, eq(users.id, id), isNull(users.deletedAt)))
     .returning({ id: users.id })
 

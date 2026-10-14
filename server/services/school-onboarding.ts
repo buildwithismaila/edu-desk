@@ -50,6 +50,7 @@ export async function createSchoolWithAdmin(db: Db, raw: CreateSchoolInput, hash
         phone,
         passwordHash: await hash(temporaryPassword),
         mustChangePassword: true,
+        temporaryPasswordAt: new Date(),
       }).returning({ id: users.id, name: users.name, email: users.email })
       return { school: school!, admin: user!, temporaryPassword }
     })

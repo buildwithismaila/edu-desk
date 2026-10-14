@@ -46,6 +46,7 @@ export async function createGuardianAccount(db: Db, school: SchoolRef, input: { 
     role: 'parent',
     passwordHash: await hashPassword(temporaryPassword),
     mustChangePassword: true,
+    temporaryPasswordAt: new Date(),
   }).returning(guardianColumns)
   return { guardian: guardian!, temporaryPassword }
 }

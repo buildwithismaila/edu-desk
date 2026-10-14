@@ -7,6 +7,7 @@ type NavItem = Omit<NavigationMenuItem, 'children'> & { roles?: readonly Role[],
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
   { label: 'Students', icon: 'i-lucide-graduation-cap', to: '/students', roles: ['admin', 'principal', 'bursar', 'teacher'] },
+  { label: 'Parent logins', icon: 'i-lucide-key-round', to: '/parent-logins', roles: ['admin'] },
   { label: 'Attendance', icon: 'i-lucide-clipboard-check', to: '/attendance', roles: ['admin', 'principal', 'teacher'] },
   { label: 'Scores', icon: 'i-lucide-notebook-pen', to: '/scores', roles: ['admin', 'principal', 'teacher'] },
   { label: 'Results', icon: 'i-lucide-award', to: '/results', roles: ['admin', 'principal', 'teacher'] },

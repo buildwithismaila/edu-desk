@@ -19,6 +19,8 @@ export const users = pgTable('users', {
   /** Set by an admin password reset; the user must change it at next login. */
   mustChangePassword: boolean().notNull().default(false),
   lastLoginAt: timestamp({ withTimezone: true }),
+  /** When a temporary password was last shown to someone (reset, new account, login slip); null = never */
+  temporaryPasswordAt: timestamp({ withTimezone: true }),
   /** Normalised `+234…` (shared/utils/phone.ts); unique per school among active accounts; required for guardians. */
   phone: text(),
   /** Soft delete for staff who left (Phase 3): can't log in, hidden from lists; email stays reserved. */

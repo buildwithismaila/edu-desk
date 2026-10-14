@@ -63,7 +63,7 @@ export async function createStaff(db: Db, school: SchoolRef, input: StaffInput) 
   const temporaryPassword = generateTemporaryPassword()
   try {
     const [staff] = await db.insert(users)
-      .values({ ...input, schoolId: school.id, passwordHash: await hashPassword(temporaryPassword), mustChangePassword: true })
+      .values({ ...input, schoolId: school.id, passwordHash: await hashPassword(temporaryPassword), mustChangePassword: true, temporaryPasswordAt: new Date() })
       .returning(staffColumns)
     return { staff: staff!, temporaryPassword }
   }

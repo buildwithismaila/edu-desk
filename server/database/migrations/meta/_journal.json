@@ -71,6 +71,13 @@
       "when": 1791939604732,
       "tag": "0009_premium_inertia",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791994495221,
+      "tag": "0010_naive_stick",
+      "breakpoints": true
     }
   ]
 }
