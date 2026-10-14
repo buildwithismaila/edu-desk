@@ -21,6 +21,10 @@ const { user } = useUserSession()
       </p>
     </div>
 
+    <DashboardStats
+      v-if="user && ['admin', 'principal', 'bursar'].includes(user.role)"
+      class="max-w-4xl"
+    />
     <DashboardMyClasses
       v-if="user && isAssignableRole(user.role)"
       class="max-w-xl"

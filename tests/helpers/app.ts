@@ -20,6 +20,7 @@ import levelsGetHandler from '~~/server/api/class-levels/index.get'
 import levelsPostHandler from '~~/server/api/class-levels/index.post'
 import levelsOrderHandler from '~~/server/api/class-levels/order.put'
 import myAssignmentsHandler from '~~/server/api/me/assignments.get'
+import dashboardHandler from '~~/server/api/dashboard.get'
 import paymentsPostHandler from '~~/server/api/fees/payments/index.post'
 import paymentReverseHandler from '~~/server/api/fees/payments/[id]/reverse.post'
 import paymentGetHandler from '~~/server/api/fees/payments/[id].get'
@@ -197,6 +198,7 @@ export function createTestApp(db: Db) {
     .patch('/api/guardians/:id', guardianPatchHandler)
     .post('/api/students/:id/guardians', studentGuardiansPostHandler)
     .delete('/api/students/:id/guardians/:guardianId', studentGuardianDeleteHandler)
+    .get('/api/dashboard', dashboardHandler)
     .get('/api/me/children', myChildrenHandler)
     .get('/api/me/children/:id', myChildHandler)
     .get('/api/me/children/:id/results', myChildResultsHandler)

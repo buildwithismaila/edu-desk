@@ -4,6 +4,7 @@ import IndexPage from '~/pages/index.vue'
 
 registerEndpoint('/api/school', () => ({ slug: 'sunrise', name: 'Sunrise Schools' }))
 registerEndpoint('/api/_auth/session', () => ({}))
+registerEndpoint('/api/dashboard', () => ({ term: null, students: null, attendance: null, fees: null, results: null }))
 registerEndpoint('/api/me/assignments', () => ({ session: null, classTeacherOf: [], subjects: [] }))
 
 afterEach(() => {
