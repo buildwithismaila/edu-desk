@@ -34,14 +34,14 @@ const count = async () => ({
 })
 
 describe('demo seed: students and guardians', () => {
-  it('admits about 40 Greenfield students across sections with GFA numbers', async () => {
-    expect(await enrolledIn(ids.greenfield!)).toEqual({ 'JSS 1A': 10, 'JSS 1B': 8, 'Primary 3A': 8, 'SSS 1A': 8, 'Nursery 1A': 6 })
+  it('admits 43 Greenfield students across sections with GFA numbers', async () => {
+    expect(await enrolledIn(ids.greenfield!)).toEqual({ 'JSS 1A': 10, 'JSS 1B': 8, 'Primary 3A': 8, 'SSS 1A': 8, 'Nursery 1A': 6, 'SSS 3A': 3 })
 
     const greenfield = await db.select().from(students).where(eq(students.schoolId, ids.greenfield!))
     expect(greenfield.map(s => s.admissionNumber).sort()[0]).toBe('GFA/2026/0001')
     expect(greenfield.every(s => /^GFA\/2026\/\d{4}$/.test(s.admissionNumber))).toBe(true)
     const [counter] = await db.select().from(admissionCounters).where(and(eq(admissionCounters.schoolId, ids.greenfield!), eq(admissionCounters.year, 2026)))
-    expect(counter!.lastNumber).toBe(40)
+    expect(counter!.lastNumber).toBe(43)
   })
 
   it('gives SSS students departments and nobody else', async () => {

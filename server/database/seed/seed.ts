@@ -114,6 +114,8 @@ const demoAcademics: Record<string, DemoAcademics> = {
         },
       },
       { name: '2026/2027', terms: FIRST_TERM_2026 },
+      // Not current: the session promotion moves classes into (Phase 10)
+      { name: '2027/2028', terms: {} },
     ],
     current: { session: '2026/2027', term: 'first' },
     arms: {

@@ -269,6 +269,17 @@ describe('POST /api/promotion/[armId]', () => {
     expect((await res.json()).message).toBe('This session has promotion records, so it can\'t be deleted.')
   })
 
+  it('shows each student\'s outcome on their profile', async () => {
+    const f = await promotionFixture()
+    const profile = async (id: string) => (await (await f.send('GET', f.cookies.admin, `/api/students/${id}`)).json()).promotion
+    expect(await profile(f.s.ada.id)).toBeNull()
+
+    await f.send('POST', f.cookies.admin, `/api/promotion/${f.arms.jss1a.id}`, jss1aBody(f))
+    expect(await profile(f.s.ada.id)).toEqual({ outcome: 'promoted', sessionName: f.from.name, toClassLabel: 'JSS 2A' })
+    expect(await profile(f.s.bola.id)).toEqual({ outcome: 'repeated', sessionName: f.from.name, toClassLabel: 'JSS 1B' })
+    expect(await profile(f.s.chidi.id)).toEqual({ outcome: 'withdrawn', sessionName: f.from.name, toClassLabel: null })
+  })
+
   it('keeps a withdrawn child on their parent\'s account', async () => {
     const f = await promotionFixture()
     await f.send('POST', f.cookies.admin, `/api/promotion/${f.arms.jss1a.id}`, jss1aBody(f))

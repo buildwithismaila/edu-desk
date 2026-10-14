@@ -1,4 +1,5 @@
-import { and, asc, eq, gt, inArray, isNull, or } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, inArray, isNull, or } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { createError } from 'h3'
 import { SECTIONS } from '../../shared/constants/academics'
 import type { Role } from '../../shared/constants/roles'
@@ -238,4 +239,20 @@ export async function undoArmPromotion(db: Db, school: SchoolRef, armId: string)
     await tx.delete(promotionRuns).where(whereSchool(promotionRuns, school, eq(promotionRuns.id, run.id)))
   })
   return getArmPromotion(db, school, arm.id)
+}
+
+const toArm = alias(classArms, 'to_arm')
+const toLevel = alias(classLevels, 'to_level')
+
+/** The student's latest promotion outcome (for the profile): e.g. graduated in 2026/2027, or promoted to JSS 2A. */
+export async function latestPromotion(db: Db, school: SchoolRef, studentId: string) {
+  const [row] = await db.select({ outcome: studentPromotions.outcome, sessionName: academicSessions.name, arm: toArm.name, level: toLevel.name })
+    .from(studentPromotions)
+    .innerJoin(academicSessions, eq(studentPromotions.fromSessionId, academicSessions.id))
+    .leftJoin(toArm, eq(studentPromotions.toClassArmId, toArm.id))
+    .leftJoin(toLevel, eq(toArm.classLevelId, toLevel.id))
+    .where(whereSchool(studentPromotions, school, eq(studentPromotions.studentId, studentId)))
+    .orderBy(desc(academicSessions.name))
+    .limit(1)
+  return row ? { outcome: row.outcome, sessionName: row.sessionName, toClassLabel: row.arm && row.level ? classArmLabel(row.level, row.arm) : null } : null
 }

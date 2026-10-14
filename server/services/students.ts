@@ -21,6 +21,7 @@ import { whereSchool } from '../utils/tenant'
 import { fieldError } from '../utils/validation'
 import { requireSession, resolveSession } from './assignments'
 import { type GuardianInput, resolveGuardian, studentPhotoUrl } from './guardians'
+import { latestPromotion } from './promotion'
 
 type SchoolRef = { id: string }
 export type Viewer = { id: string, role: Role }
@@ -276,6 +277,8 @@ export async function getStudent(db: Db, school: SchoolRef, id: string, role: Ro
       : null,
     guardians,
     photoUrl: studentPhotoUrl(student),
+    // End-of-session outcome (Phase 10): graduated / withdrawn, or the class for next session
+    promotion: await latestPromotion(db, school, id),
   }
   if (role !== 'bursar') return profile
   // The bursar doesn't see personal details (NDPA: restrict personal data by role)

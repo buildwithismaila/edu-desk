@@ -33,6 +33,18 @@ const { data: student, refresh } = await useFetch<Student>(() => `/api/students/
 type Guardian = Student['guardians'][number]
 
 const fullName = computed(() => student.value ? [student.value.firstName, student.value.middleName, student.value.lastName].filter(Boolean).join(' ') : '')
+// End-of-session outcome (Phase 10)
+const promotionBadge = computed(() => {
+  const p = student.value?.promotion
+  if (!p) return null
+  const label = {
+    graduated: `Graduated (${p.sessionName})`,
+    withdrawn: `Withdrawn (${p.sessionName})`,
+    promoted: `Promoted to ${p.toClassLabel} (after ${p.sessionName})`,
+    repeated: `Repeating in ${p.toClassLabel} (after ${p.sessionName})`,
+  }[p.outcome]
+  return { label, color: p.outcome === 'withdrawn' ? 'warning' as const : p.outcome === 'graduated' ? 'success' as const : 'neutral' as const }
+})
 useHead({ title: () => fullName.value || 'Student' })
 
 const RELATIONSHIP_LABELS: Record<string, string> = { father: 'Father', mother: 'Mother', guardian: 'Guardian', other: 'Other' }
@@ -175,6 +187,14 @@ function guardianActions(s: Student, guardian: Guardian): DropdownMenuItem[][] {
               · Not in a class this session
             </template>
           </p>
+          <UBadge
+            v-if="promotionBadge"
+            data-testid="student-promotion"
+            :label="promotionBadge.label"
+            :color="promotionBadge.color"
+            variant="subtle"
+            class="mt-1"
+          />
         </div>
         <UButton
           v-if="seesFees"

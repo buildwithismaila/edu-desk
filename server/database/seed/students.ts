@@ -98,6 +98,10 @@ export const GREENFIELD_STUDENTS: DemoStudents = {
     s('Joy', 'Edet', 'female', 'Cross River', 'Nursery 1A'),
     s('Ahmed', 'Shehu', 'male', 'Katsina', 'Nursery 1A'),
     s('Mary', 'Ojo', 'female', 'Kogi', 'Nursery 1A'),
+    // SSS 3A (3): the last class, so promotion graduates them by default (Phase 10)
+    s('Chinedu', 'Okafor', 'male', 'Anambra', 'SSS 3A', { department: 'Science' }),
+    s('Zainab', 'Lawal', 'female', 'Kwara', 'SSS 3A', { department: 'Arts' }),
+    s('Segun', 'Oladipo', 'male', 'Osun', 'SSS 3A', { department: 'Commercial' }),
   ],
 }
 
@@ -112,7 +116,7 @@ export const SUNRISE_STUDENTS: DemoStudents = {
 }
 
 /** Birth year by class, so ages look right on the demo. */
-const BIRTH_YEAR: Record<string, number> = { 'Nursery 1A': 2022, 'Primary 3A': 2018, 'JSS 1A': 2014, 'JSS 1B': 2014, 'SSS 1A': 2011, 'JSS 1 Gold': 2014 }
+const BIRTH_YEAR: Record<string, number> = { 'Nursery 1A': 2022, 'Primary 3A': 2018, 'JSS 1A': 2014, 'JSS 1B': 2014, 'SSS 1A': 2011, 'SSS 3A': 2009, 'JSS 1 Gold': 2014 }
 
 /** Default guardian from the surname: alternating mother/father, phone sequential, every third phone-only. */
 function defaultGuardian(student: DemoStudent, n: number, phoneBase: string): DemoGuardian {

@@ -35,6 +35,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Classes', icon: 'i-lucide-layers', to: '/settings/classes' },
       { label: 'Subjects', icon: 'i-lucide-book-open', to: '/settings/subjects' },
       { label: 'Assessment & grading', icon: 'i-lucide-percent', to: '/settings/grading' },
+      { label: 'Promotion', icon: 'i-lucide-circle-arrow-up', to: '/promotion' },
     ],
   },
 ]

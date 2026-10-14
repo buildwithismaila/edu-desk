@@ -93,4 +93,10 @@ describe('demo seed: school setup', () => {
     const { sessions } = await current(ids.greenfield!)
     expect(sessions.map(s => s.name)).toEqual(['2026/2027'])
   })
+
+  it('creates Greenfield\'s next session, 2027/2028, with three terms but not current (for promotion)', async () => {
+    const [next] = await db.select().from(academicSessions).where(and(eq(academicSessions.schoolId, ids.greenfield!), eq(academicSessions.name, '2027/2028')))
+    expect(next).toMatchObject({ isCurrent: false })
+    expect(await db.select().from(terms).where(eq(terms.sessionId, next!.id))).toHaveLength(3)
+  })
 })

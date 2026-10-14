@@ -44,8 +44,8 @@ const counts = async () => ({
 describe('demo seed: fees', () => {
   it('bills every enrolled Greenfield student this term from their level\'s compulsory items', async () => {
     const greenfieldBills = await db.select().from(bills).where(eq(bills.schoolId, ids.greenfield!))
-    // 40 this term + 2 from last session's third term
-    expect(greenfieldBills).toHaveLength(42)
+    // 43 this term + 2 from last session's third term
+    expect(greenfieldBills).toHaveLength(45)
     // JSS: Tuition 85,000 + Levy 10,000 + PTA 2,500 + Books 15,000 (Bus is optional) = ₦112,500
     expect((await balanceOf('GFA/2026/0010')).itemsTotal).toBe(11_250_000)
   })
