@@ -99,8 +99,8 @@ export const GREENFIELD_STUDENTS: DemoStudents = {
     s('Ahmed', 'Shehu', 'male', 'Katsina', 'Nursery 1A'),
     s('Mary', 'Ojo', 'female', 'Kogi', 'Nursery 1A'),
     // SSS 3A (3): the last class, so promotion graduates them by default (Phase 10)
-    s('Chinedu', 'Okafor', 'male', 'Anambra', 'SSS 3A', { department: 'Science' }),
-    s('Zainab', 'Lawal', 'female', 'Kwara', 'SSS 3A', { department: 'Arts' }),
+    s('Chinedu', 'Ekwueme', 'male', 'Anambra', 'SSS 3A', { department: 'Science' }),
+    s('Hadiza', 'Umar', 'female', 'Kano', 'SSS 3A', { department: 'Arts' }),
     s('Segun', 'Oladipo', 'male', 'Osun', 'SSS 3A', { department: 'Commercial' }),
   ],
 }

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 960" width="800" height="960">
+  <!-- Greenfield Academy full crest (demo school): emblem, name and motto ribbon -->
+  <defs>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1F6B52"/>
+      <stop offset="1" stop-color="#123B2F"/>
+    </linearGradient>
+    <clipPath id="shield-clip">
+      <path d="M256 40 L436 92 V236 C436 352 360 432 256 472 C152 432 76 352 76 236 V92 Z"/>
+    </clipPath>
+    <path id="arc" d="M120 330 A280 280 0 0 1 680 330"/>
+  </defs>
+
+  <rect width="800" height="960" fill="#F7F5EF"/>
+
+  <!-- Name arched over the shield -->
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="700" fill="#123B2F" letter-spacing="6">
+    <textPath href="#arc" startOffset="50%" text-anchor="middle">GREENFIELD</textPath>
+  </text>
+
+  <!-- Emblem, centred -->
+  <g transform="translate(144 150)">
+    <path d="M256 24 L452 80 V236 C452 362 370 450 256 492 C142 450 60 362 60 236 V80 Z" fill="#E3A72F"/>
+    <path d="M256 40 L436 92 V236 C436 352 360 432 256 472 C152 432 76 352 76 236 V92 Z" fill="url(#field)"/>
+    <g clip-path="url(#shield-clip)">
+      <circle cx="256" cy="250" r="78" fill="#E3A72F"/>
+      <g stroke="#E3A72F" stroke-width="10" stroke-linecap="round">
+        <line x1="256" y1="140" x2="256" y2="112"/>
+        <line x1="178" y1="172" x2="160" y2="150"/>
+        <line x1="334" y1="172" x2="352" y2="150"/>
+        <line x1="140" y1="236" x2="112" y2="230"/>
+        <line x1="372" y1="236" x2="400" y2="230"/>
+      </g>
+      <path d="M60 300 C150 262 220 270 256 286 C292 270 362 262 452 300 V500 H60 Z" fill="#2E8B63"/>
+      <path d="M60 336 C150 300 220 308 256 322 C292 308 362 300 452 336 V500 H60 Z" fill="#1F6B52"/>
+    </g>
+    <path d="M256 330 V232" stroke="#F7F5EF" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M256 268 C220 268 196 244 192 206 C230 206 254 228 256 268 Z" fill="#F7F5EF"/>
+    <path d="M256 246 C292 246 318 220 322 180 C282 180 258 204 256 246 Z" fill="#F7F5EF"/>
+    <path d="M136 338 C180 322 226 326 256 346 C286 326 332 322 376 338 V408 C332 394 286 396 256 414 C226 396 180 394 136 408 Z" fill="#F7F5EF"/>
+    <path d="M256 346 V414" stroke="#123B2F" stroke-width="6"/>
+    <g stroke="#9DB8AB" stroke-width="5" stroke-linecap="round" fill="none">
+      <path d="M162 356 C190 348 214 350 236 360"/>
+      <path d="M162 376 C190 368 214 370 236 380"/>
+      <path d="M350 356 C322 348 298 350 276 360"/>
+      <path d="M350 376 C322 368 298 370 276 380"/>
+    </g>
+  </g>
+
+  <!-- Motto ribbon -->
+  <path d="M90 700 L150 680 L150 760 L90 780 L116 740 Z" fill="#B9841F"/>
+  <path d="M710 700 L650 680 L650 760 L710 780 L684 740 Z" fill="#B9841F"/>
+  <path d="M140 664 C300 694 500 694 660 664 V744 C500 774 300 774 140 744 Z" fill="#E3A72F"/>
+  <text x="400" y="728" font-family="Georgia, 'Times New Roman', serif" font-size="36" font-style="italic" font-weight="700" fill="#123B2F" text-anchor="middle">Knowledge and Character</text>
+
+  <!-- ACADEMY -->
+  <text x="400" y="870" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700" fill="#123B2F" text-anchor="middle" letter-spacing="18">ACADEMY</text>
+</svg>

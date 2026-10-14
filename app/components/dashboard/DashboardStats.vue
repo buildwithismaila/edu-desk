@@ -75,7 +75,7 @@ const sectionName = (section: keyof typeof SECTION_LABELS) => SECTION_LABELS[sec
             <span
               v-for="arm in stats.attendance.notTaken"
               :key="arm.id"
-              class="after:content-[','] last:after:content-none"
+              class="after:content-[',_'] last:after:content-none"
             >
               <ULink
                 :to="`/attendance?arm=${arm.id}`"
