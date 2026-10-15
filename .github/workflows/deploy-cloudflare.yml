@@ -1,0 +1,106 @@
+# Deploys Edu Desk to Cloudflare Workers + Supabase (docs/deploy-cloudflare.md).
+# - main: after CI passes, migrate the database, build, deploy, check /api/_health
+# - pull requests: deploy a preview Worker (edu-desk-preview) that uses READ-ONLY database credentials
+# Does nothing until the repository variable CLOUDFLARE_DEPLOY is "true" (set once the accounts exist).
+name: Deploy to Cloudflare
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-cloudflare-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  production:
+    name: Deploy production
+    if: >-
+      vars.CLOUDFLARE_DEPLOY == 'true' && (
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The commit CI just checked
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.0
+          cache: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile
+      - name: Apply database migrations (Supabase, session connection)
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+      - name: Point wrangler.jsonc at this account's resources
+        run: |
+          sed -i \
+            -e 's|<hyperdrive-config-id>|${{ vars.HYPERDRIVE_ID }}|' \
+            -e 's|"NUXT_APP_DOMAIN": "[^"]*"|"NUXT_APP_DOMAIN": "${{ vars.APP_DOMAIN }}"|' \
+            -e 's|"NUXT_DEFAULT_SCHOOL_SLUG": "[^"]*"|"NUXT_DEFAULT_SCHOOL_SLUG": "${{ vars.DEFAULT_SCHOOL_SLUG }}"|' \
+            wrangler.jsonc
+      - name: Build with the Cloudflare preset
+        run: pnpm build
+        env:
+          NITRO_PRESET: cloudflare_module
+      - name: Deploy
+        run: pnpm exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Health check
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -fsS -m 20 "${{ vars.APP_URL }}/api/_health"; then exit 0; fi
+            sleep 10
+          done
+          echo "Health check failed: ${{ vars.APP_URL }}/api/_health"
+          exit 1
+
+  preview:
+    name: Deploy preview (read-only database)
+    if: vars.CLOUDFLARE_DEPLOY == 'true' && vars.HYPERDRIVE_PREVIEW_ID != '' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.0
+          cache: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile
+      - name: Preview settings (its own Worker, read-only database credentials)
+        run: |
+          sed -i \
+            -e 's|"name": "edu-desk"|"name": "edu-desk-preview"|' \
+            -e 's|<hyperdrive-config-id>|${{ vars.HYPERDRIVE_PREVIEW_ID }}|' \
+            -e 's|"NUXT_APP_DOMAIN": "[^"]*"|"NUXT_APP_DOMAIN": "${{ vars.PREVIEW_APP_DOMAIN }}"|' \
+            -e 's|"NUXT_DEFAULT_SCHOOL_SLUG": "[^"]*"|"NUXT_DEFAULT_SCHOOL_SLUG": "${{ vars.DEFAULT_SCHOOL_SLUG }}"|' \
+            wrangler.jsonc
+      - name: Build with the Cloudflare preset
+        run: pnpm build
+        env:
+          NITRO_PRESET: cloudflare_module
+      - name: Deploy the preview Worker
+        run: pnpm exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

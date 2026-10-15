@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 10b — Serverless deployment (spec approved; in progress)
+- **Current phase:** Phase 10b — Serverless deployment: code, CI and runbook done (docs/deploy-cloudflare.md); waiting on the first real deploy with the owner (accounts, then the free-plan CPU check).
 - **Last updated:** 2026-10-15
 
 ## Completed phases

@@ -1,0 +1,104 @@
+# Nightly encrypted backup of the Supabase database to R2, plus a mirror of the uploads bucket, with the same
+# retention as the VPS backups (decision 042): daily/ 14 days, weekly/ (Sundays) 8 weeks.
+# The manual "restore drill" restores the newest backup into a scratch Postgres and checks it.
+# Does nothing until the repository variable CLOUDFLARE_DEPLOY is "true". A failed run emails you (GitHub).
+name: Backup (Cloudflare + Supabase)
+
+on:
+  schedule:
+    - cron: '0 1 * * *' # 02:00 Lagos time
+  workflow_dispatch:
+    inputs:
+      drill:
+        description: Restore drill instead of a backup
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  RCLONE_CONFIG_R2_TYPE: s3
+  RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+  RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  RCLONE_CONFIG_R2_NO_CHECK_BUCKET: 'true'
+
+jobs:
+  backup:
+    name: Back up the database and uploads
+    if: vars.CLOUDFLARE_DEPLOY == 'true' && !inputs.drill
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Install rclone
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rclone
+      - name: Dump, encrypt, upload
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          BUCKET: ${{ vars.BACKUP_BUCKET }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y-%m-%dT%H%MZ)
+          name="edudesk-${stamp}.dump.gpg"
+          # pg_dump from the same major version as the server, via the official image
+          docker run --rm -e SUPABASE_DB_URL postgres:18 sh -c 'pg_dump --format=custom --no-owner --no-privileges --schema=public --schema=drizzle "$SUPABASE_DB_URL"' > database.dump
+          printf '%s' "$BACKUP_PASSPHRASE" > passfile
+          gpg --batch --yes --pinentry-mode loopback --passphrase-file passfile --symmetric --cipher-algo AES256 --output "$name" database.dump
+          rm -f passfile database.dump
+          rclone copy "$name" "r2:${BUCKET}/daily/"
+          if [ "$(date -u +%u)" = "7" ]; then rclone copy "$name" "r2:${BUCKET}/weekly/"; fi
+          rclone delete --min-age 15d "r2:${BUCKET}/daily/"
+          rclone delete --min-age 57d "r2:${BUCKET}/weekly/"
+          echo "Backup ok: $name ($(du -h "$name" | cut -f1))"
+      - name: Mirror the uploads bucket (logos, photos)
+        env:
+          BUCKET: ${{ vars.BACKUP_BUCKET }}
+          UPLOADS_BUCKET: ${{ vars.UPLOADS_BUCKET }}
+        # Copy, never delete: a photo removed by mistake can still be recovered from the mirror
+        run: rclone copy "r2:${UPLOADS_BUCKET}" "r2:${BUCKET}/uploads-mirror/"
+
+  restore-drill:
+    name: Restore drill (scratch database)
+    if: vars.CLOUDFLARE_DEPLOY == 'true' && inputs.drill
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: drill
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Install rclone
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rclone
+      - name: Fetch and decrypt the newest backup
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          BUCKET: ${{ vars.BACKUP_BUCKET }}
+        run: |
+          set -euo pipefail
+          latest=$(rclone lsf "r2:${BUCKET}/daily/" | sort | tail -n 1)
+          [ -n "$latest" ] || { echo "No backups in daily/"; exit 1; }
+          echo "Restoring $latest"
+          rclone copy "r2:${BUCKET}/daily/${latest}" .
+          printf '%s' "$BACKUP_PASSPHRASE" > passfile
+          gpg --batch --yes --pinentry-mode loopback --passphrase-file passfile --decrypt "$latest" > database.dump
+          rm -f passfile
+      - name: Restore into the scratch database and check it
+        run: |
+          set -euo pipefail
+          docker run --rm --network host -v "$PWD:/work" postgres:18 \
+            pg_restore --no-owner --no-privileges --dbname=postgres://postgres:postgres@localhost:5432/drill /work/database.dump
+          docker run --rm --network host postgres:18 psql postgres://postgres:postgres@localhost:5432/drill -tAc \
+            "select (select count(*) from drizzle.__drizzle_migrations) as migrations, (select count(*) from public.schools) as schools"

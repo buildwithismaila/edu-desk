@@ -312,3 +312,25 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** Schools send parents a bill with bank details at the start of term.
 - **Decision:** An invoice is rendered from the bill at print time (the same `billDetails`/`billBalance` as the fees pages), with the school's bank accounts (`schools.bankAccounts`, at most two) and the admission number as the payment reference. No invoice table, no numbers, nothing stored.
 - **Consequences:** Reprinting later shows the current balance. If schools need numbered, frozen invoices (e.g. for accounting), that's a later change.
+
+### 046 — Login limiter in the database; a database client per request on Cloudflare (2026-10-15)
+- **Context:** Cloudflare Workers runs many short-lived instances that don't share memory, and a Worker can't reuse one request's database connection in another request.
+- **Decision:**
+  - **Limiter:** the failed-login counters move from memory into a `login_failures` table (not a tenant table: the school is part of each key), with the same rules and tests as decision 012.
+  - **Database client:** `useDb()` asks a provider (`server/plugins/request-db.ts`, using Nitro's async context) for the current request's client. On Cloudflare, that's a client per request from the Hyperdrive binding `DB`, closed after the response with `waitUntil`; elsewhere it falls back to the shared pool as before.
+  - **Uploads:** stored on disk on Node and in the R2 binding `UPLOADS` on Cloudflare, chosen at build time from `NITRO_PRESET`. `readUpload()` normalises Buffer and ArrayBuffer.
+  - **Visitor IP:** `NUXT_TRUST_PROXY=cloudflare` reads `CF-Connecting-IP`.
+- **Consequences:** Every login now does one or two small writes. The limiter would also be correct with several VPS instances. Route code is unchanged.
+
+### 047 — Serverless start: Cloudflare Workers (free) + Supabase (free) + R2, VPS path kept (2026-10-15)
+- **Context:** No budget for a server before the first paying schools; the owner prefers not to manage one.
+- **Decision:**
+  - **Hosting:** the app on Workers rather than Pages, because Workers supports wildcard routes for school subdomains and Smart Placement next to the database.
+  - **Data:** Supabase Postgres through Hyperdrive, with uploads and encrypted nightly backups (GitHub Actions) in R2.
+  - **Deploys:** after CI passes, migrations first, then deploy, then a health check.
+  - **Previews:** a separate Worker whose database role can read everything but write only `users.last_login_at` and `login_failures`.
+  - **Supabase pausing:** an uptime monitor on `/api/_health` doubles as the keep-alive.
+  - **Free plan CPU:** the 10 ms CPU limit is measured on the first deploy; exceeding it means choosing Workers Paid (~$5/month) or lighter hashing, together, never silently.
+  - **The VPS path stays:** the Docker setup is still built and booted in CI.
+- **Alternatives considered:** Cloudflare Pages (no wildcard custom domains); Vercel (the Hobby plan isn't for commercial use); a VPS (preferred later, with decision 042).
+- **Consequences:** Two deploy targets to keep working; CI builds both. Moving to a VPS later is a backup, a restore and DNS (docs/deploy-cloudflare.md section 10).
