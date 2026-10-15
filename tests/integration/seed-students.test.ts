@@ -87,3 +87,26 @@ describe('demo seed: students and guardians', () => {
     expect(await count()).toEqual(before)
   })
 })
+
+describe('demo seed: parent logins and invoices (Phase 10a)', () => {
+  it('leaves the Primary 3A parents without a login, except the demo parent', async () => {
+    const parents = await db.selectDistinct({ id: users.id, email: users.email, mustChangePassword: users.mustChangePassword, temporaryPasswordAt: users.temporaryPasswordAt })
+      .from(studentGuardians)
+      .innerJoin(users, eq(studentGuardians.guardianId, users.id))
+      .innerJoin(studentEnrolments, eq(studentEnrolments.studentId, studentGuardians.studentId))
+      .innerJoin(classArms, eq(studentEnrolments.classArmId, classArms.id))
+      .innerJoin(classLevels, eq(classArms.classLevelId, classLevels.id))
+      .where(and(eq(studentGuardians.schoolId, ids.greenfield!), eq(classLevels.name, 'Primary 3'), eq(classArms.name, 'A')))
+    const demo = parents.filter(p => p.email === 'parent@greenfield.test')
+    const others = parents.filter(p => p.email !== 'parent@greenfield.test')
+    expect(demo).toEqual([{ id: expect.any(String), email: 'parent@greenfield.test', mustChangePassword: false, temporaryPasswordAt: null }])
+    expect(others.length).toBe(7)
+    expect(others.every(p => p.mustChangePassword && p.temporaryPasswordAt === null)).toBe(true)
+  })
+
+  it('gives Greenfield two bank accounts for its invoices', async () => {
+    const [greenfield] = await db.select({ bankAccounts: schools.bankAccounts }).from(schools).where(eq(schools.id, ids.greenfield!))
+    expect(greenfield!.bankAccounts).toHaveLength(2)
+    expect(greenfield!.bankAccounts.every(a => /^\d{10}$/.test(a.accountNumber))).toBe(true)
+  })
+})

@@ -39,6 +39,10 @@ test('the bursar records a part payment, prints the receipt, reverses it, and se
   await receipt.emulateMedia({ media: 'print' })
   await expect(receipt.getByTestId('print')).toBeHidden()
   await receipt.close()
+  // The receipt tab opened while the payment dialog was closing; in a background tab its fade-out can stall
+  // and leave the overlay over the page, so come back to the front and let it finish
+  await page.bringToFront()
+  await expect(page.locator('[data-slot="overlay"]')).toHaveCount(0)
 
   await expect(balance).toHaveText(new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format((before - 1_000_000) / 100))
 

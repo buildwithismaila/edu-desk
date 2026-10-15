@@ -1,6 +1,6 @@
 # Phase 10a — Pilot readiness
 
-**Status:** Approved (2026-10-14), in progress
+**Status:** Done (2026-10-14)
 **Roadmap ref:** `docs/roadmap.md` → Phase 10a
 
 ## Goal
@@ -168,15 +168,23 @@ A CI job also builds the Docker image, so a broken Dockerfile is caught early.
 6. **Legal pages, seed, E2E and docs;** then push and CI.
 
 ## Acceptance checklist
-- [ ] `pnpm school:create` creates a working school with an admin, refusing reserved or taken slugs
-- [ ] The Docker stack serves `<slug>.<domain>` over HTTPS with certificates only for existing schools
-- [ ] Migrations run on deploy; the seed still refuses to run in production
-- [ ] Nightly encrypted off-site backups; a restore rehearsed and documented
-- [ ] `/api/_health` and the uptime monitor are documented; server errors are logged
-- [ ] The admin can generate parent logins in bulk and print the slips; temporary passwords force a change
-- [ ] Printable fee invoices with bank details, for staff (single or whole class) and parents
-- [ ] Privacy, terms and DPA drafts in place (marked for legal review)
-- [ ] Every new route has role, validation and tenant tests; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] `pnpm school:create` creates a working school with an admin, refusing reserved or taken slugs
+- [x] The Docker stack serves `<slug>.<domain>` over HTTPS with certificates only for existing schools
+- [x] Migrations run on deploy; the seed still refuses to run in production
+- [x] Nightly encrypted off-site backups; a restore rehearsed and documented
+- [x] `/api/_health` and the uptime monitor are documented; server errors are logged
+- [x] The admin can generate parent logins in bulk and print the slips; temporary passwords force a change
+- [x] Printable fee invoices with bank details, for staff (single or whole class) and parents
+- [x] Privacy, terms and DPA drafts in place (marked for legal review)
+- [x] Every new route has role, validation and tenant tests; `pnpm check`, `pnpm test:e2e` and CI green
+
+## Changes while building
+- **Login rate limit:** behind Caddy, the per-IP login limit would have counted every visitor as one address (decision 043). `NUXT_TRUST_PROXY` fixes it, with tests.
+- **Login status:** shown as *No login yet* / *Slip given, not used yet* / *Active*, using a new `users.temporaryPasswordAt` column (`lastLoginAt` already existed).
+- **Migrations:** run with drizzle-kit in a one-shot `migrate` container (the build stage), not a separate script.
+- **Legal pages:** `/privacy` and `/terms` are served on each school's address (linked from its login page); the bare domain has no site yet.
+- **Forgot password:** the login page already said "Ask your school admin to reset it".
+- **CI:** builds the image, boots postgres + migrations + app to a healthy state, takes a backup and restores it into a drill database on every push.
 
 ## Open questions (resolved 2026-10-14: all recommendations approved)
 1. **Hosting:** one VPS with Docker Compose (app, PostgreSQL, Caddy, backups). Moving the database to a managed service (e.g. Supabase) later is a backup, a restore and a new `DATABASE_URL`.

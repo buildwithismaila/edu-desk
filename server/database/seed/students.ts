@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { formatAdmissionNumber } from '../../../shared/utils/admission-number'
 import {
   admissionCounters,
@@ -202,4 +202,23 @@ export async function seedStudents(db: Db, schoolId: string, sessionId: string, 
       target: [admissionCounters.schoolId, admissionCounters.year],
       set: { lastNumber: sql`greatest(${admissionCounters.lastNumber}, excluded.last_number)` },
     })
+}
+
+/**
+ * Parents of the arms' students go back to "no login yet" (never issued a password), except the demo login
+ * accounts, so the Parent logins page has logins to generate after every re-seed.
+ */
+export async function resetParentLogins(db: Db, schoolId: string, sessionId: string, armLabels: string[]) {
+  const arms = await db.select({ id: classArms.id, arm: classArms.name, level: classLevels.name })
+    .from(classArms).innerJoin(classLevels, eq(classArms.classLevelId, classLevels.id)).where(eq(classArms.schoolId, schoolId))
+  const armIds = arms.filter(a => armLabels.includes(`${a.level}${a.arm}`)).map(a => a.id)
+  if (!armIds.length) return
+  const parents = await db.selectDistinct({ id: studentGuardians.guardianId, email: users.email })
+    .from(studentGuardians)
+    .innerJoin(studentEnrolments, and(eq(studentEnrolments.studentId, studentGuardians.studentId), eq(studentEnrolments.sessionId, sessionId)))
+    .innerJoin(users, eq(studentGuardians.guardianId, users.id))
+    .where(and(eq(studentGuardians.schoolId, schoolId), inArray(studentEnrolments.classArmId, armIds)))
+  // Generated parents only (defaultGuardian: @mail.test or no email); demo logins like parent@greenfield.test keep theirs
+  const ids = parents.filter(p => !p.email || p.email.endsWith('@mail.test')).map(p => p.id)
+  if (ids.length) await db.update(users).set({ mustChangePassword: true, temporaryPasswordAt: null }).where(inArray(users.id, ids))
 }

@@ -297,3 +297,18 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Context:** Behind Caddy every request comes from the proxy's address, so the per-IP login limit would lock out everyone after 50 failures anywhere.
 - **Decision:** `NUXT_TRUST_PROXY=true` (set in the production compose file) makes the login limit use the first `X-Forwarded-For` address. Caddy replaces any value a visitor sends. Without the setting the header is ignored, since a client could fake it. Tested both ways.
 - **Consequences:** Never set it when the app is reachable without the proxy in front.
+
+### 044 — Parent logins in bulk, as printed one-time slips (2026-10-14)
+- **Context:** Decision 025 kept the CSV import from creating usable parent passwords, which was right for the import but meant 300 one-by-one resets before a pilot. Parents need a way in.
+- **Decision:**
+  - **A separate, explicit admin action:** the Parent logins page generates one-time passwords for every parent without a login, one class's, or chosen parents, and returns them once for printing (8 slips per A4).
+  - **Status:** `users.temporaryPasswordAt` records when a temporary password was shown (resets, new accounts, slips), so the page tells "no login yet" from "slip given, not used yet".
+  - **Slips at home stay valid:** "all" and "class" skip parents with a slip already, so slips sent home aren't invalidated; chosen parents are regenerated, and active parents only with `includeActive`.
+  - **Hashing:** done 8 at a time.
+- **Alternatives considered:** SMS or email delivery (no provider yet; next with messaging); passwords at import (decision 025's reasons still hold).
+- **Consequences:** The slips page holds the passwords only in memory. Leaving it before printing means generating again for those parents.
+
+### 045 — Fee invoices are prints of the live bill (2026-10-14)
+- **Context:** Schools send parents a bill with bank details at the start of term.
+- **Decision:** An invoice is rendered from the bill at print time (the same `billDetails`/`billBalance` as the fees pages), with the school's bank accounts (`schools.bankAccounts`, at most two) and the admission number as the payment reference. No invoice table, no numbers, nothing stored.
+- **Consequences:** Reprinting later shows the current balance. If schools need numbered, frozen invoices (e.g. for accounting), that's a later change.

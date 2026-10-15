@@ -21,7 +21,7 @@ import { type DemoAttendance, seedAttendance } from './attendance'
 import { type DemoFees, seedFees } from './fees'
 import { type DemoResults, seedResults } from './results'
 import { type DemoScores, seedScores } from './scores'
-import { type DemoStudents, GREENFIELD_STUDENTS, seedStudents, SUNRISE_STUDENTS } from './students'
+import { type DemoStudents, GREENFIELD_STUDENTS, resetParentLogins, seedStudents, SUNRISE_STUDENTS } from './students'
 
 const demoSchools: NewSchool[] = [
   {
@@ -32,6 +32,11 @@ const demoSchools: NewSchool[] = [
     motto: 'Knowledge and Character',
     phone: '+2348031234567',
     email: 'info@greenfield.test',
+    // Printed on fee invoices (Phase 10a); demo numbers
+    bankAccounts: [
+      { bankName: 'Zenith Bank', accountName: 'Greenfield Academy School Fees', accountNumber: '1012345678' },
+      { bankName: 'Guaranty Trust Bank', accountName: 'Greenfield Academy', accountNumber: '0123456789' },
+    ],
   },
   {
     slug: 'sunrise',
@@ -86,6 +91,8 @@ interface DemoAcademics {
   /** Fee items, bills and payments in the current term */
   fees?: DemoFees
   results?: DemoResults
+  /** Arms whose parents start with no login (except the demo login accounts), for the Parent logins demo */
+  parentsWithoutLogin?: string[]
 }
 
 const BASE_FEES = [{ name: 'Development Levy', naira: 10_000 }, { name: 'PTA', naira: 2_500 }]
@@ -204,6 +211,8 @@ const demoAcademics: Record<string, DemoAcademics> = {
     },
     // JSS 1A stays Draft for the Phase 7 demo
     results: { publish: ['Primary 3A'], by: 'principal@greenfield.test' },
+    // Somto's classmates' parents: the Parent logins page has logins to generate (Ngozi keeps hers)
+    parentsWithoutLogin: ['Primary 3A'],
   },
   sunrise: {
     sessions: [{ name: '2026/2027', terms: FIRST_TERM_2026 }],
@@ -237,6 +246,7 @@ export async function seed(db: Db) {
         motto: sql`excluded.motto`,
         phone: sql`excluded.phone`,
         email: sql`excluded.email`,
+        bankAccounts: sql`excluded.bank_accounts`,
         updatedAt: sql`now()`,
       },
     })
@@ -323,6 +333,7 @@ async function seedAcademics(db: Db, schoolId: string, academics: DemoAcademics)
     if (academics.fees) await seedFees(tx, schoolId, currentSessionId, academics.fees)
     // Last: the snapshots include attendance and the fees line
     if (academics.results) await seedResults(tx, schoolId, academics.results)
+    if (academics.parentsWithoutLogin) await resetParentLogins(tx, schoolId, currentSessionId, academics.parentsWithoutLogin)
   })
 }
 

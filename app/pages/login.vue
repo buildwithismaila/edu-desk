@@ -117,5 +117,17 @@ async function onSubmit() {
     <p class="text-center text-xs text-muted">
       Forgot your password? Ask your school admin to reset it.
     </p>
+    <p
+      data-testid="legal-links"
+      class="text-center text-xs text-muted"
+    >
+      <NuxtLink
+        to="/privacy"
+        class="underline"
+      >Privacy</NuxtLink> · <NuxtLink
+        to="/terms"
+        class="underline"
+      >Terms</NuxtLink>
+    </p>
   </div>
 </template>

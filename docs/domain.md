@@ -102,6 +102,18 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
   - **Access:** admin and bursar manage fees; the principal can read them; teachers can't see fees; parents see their own children's bills, payments and receipts (Phase 9).
   - **Report cards:** a school setting adds the term's fee balance to the card, frozen when the results are published.
 
+## Pilot readiness (Phase 10a)
+- **Parent logins:** each parent's status is *No login yet* (never issued a password, e.g. imported), *Slip given, not used yet* (a temporary password was shown) or *Active* (they set their own).
+  - **Generating:** the admin generates one-time passwords for every parent without a login, for one class's, or for chosen parents. Chosen parents get a new slip, replacing the old one; active parents only when explicitly included.
+  - **The slips:** passwords are shown once, on printable slips (8 per A4), and must be changed at first login.
+  - **Forgot password:** "Ask your school admin to reset it" (no SMS or email yet).
+- **Fee invoices:** a print of the live bill for one student, or a whole class, for any term.
+  - **Contents:** items, arrears/credit, discounts, total, paid so far and balance due.
+  - **Payment details:** the school's bank accounts (at most two, 10-digit NUBAN), with "use the admission number as the payment reference".
+  - **Parents** can open their own child's invoice.
+  - **Nothing is stored** and there are no invoice numbers.
+- **New schools** are created by the operator with `pnpm school:create` (school, defaults and an admin with a one-time password).
+
 ## End-of-session promotion (Phase 10)
 - The admin promotes **one class arm at a time** from the current session into the **next session** (the next one by name, e.g. 2026/2027 → 2027/2028), which must already exist in Calendar.
 - **Outcomes per student:** Promote, Repeat, Withdraw, Graduate. Defaults (`shared/utils/promotion.ts`):

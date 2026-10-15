@@ -115,6 +115,7 @@ async function act(action: 'generate' | 'refresh') {
       />
       <USelect
         v-model="armFilter"
+        data-testid="bills-arm"
         :items="[{ label: 'All classes', value: 'all' }, ...armItems]"
         class="w-full sm:w-48"
       />

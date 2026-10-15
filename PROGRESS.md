@@ -1,8 +1,8 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 10a — Pilot readiness (spec approved; in progress)
-- **Last updated:** 2026-10-14
+- **Current phase:** Phase 10a — Pilot readiness complete. Next: deploy to a server and start a pilot school (docs/deploy.md); the SaaS phases (11–13) wait for the pilot (docs/roadmap.md).
+- **Last updated:** 2026-10-15
 
 ## Completed phases
 <!-- For each finished phase:
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 10a — Pilot readiness (2026-10-15)
+- Built: `pnpm school:create` (school + defaults + admin with a one-time password, one transaction, reserved/taken slugs refused); production Docker stack (`Dockerfile`, `deploy/docker-compose.yml`: postgres, one-shot migrations, app, Caddy with on-demand TLS gated by `/api/_tls/allowed`, nightly encrypted off-site backups with restore and drill, `tools`); `/api/_health`; JSON error logs; trusted-proxy login limit; runbook `docs/deploy.md`; Parent logins page (status per parent, one-time passwords for all / a class / chosen parents, printable slips 8 per A4); school bank accounts and printable fee invoices (one bill, a whole class, parents); `/privacy` and `/terms` drafts linked from login, and a DPA template (`docs/legal/`), all marked for legal review; seed: Greenfield bank accounts, logo (CLI seed), Primary 3A parents without a login.
+- Tests (totals): 1383 unit + integration (PGlite) / 102 Nuxt component / 63 E2E tests × desktop + mobile (viewport-specific and desktop-only skips), plus the school-state project. CI also builds the image, boots the stack to healthy, and backs up and restores into a drill database.
+- Decisions: see docs/decisions.md #042–#045
+- Found while building: behind a proxy the per-IP login limit would have treated every visitor as one address (decision 043, fixed and tested); a page beside a same-named folder (`fees/bills.vue` + `fees/bills/`) would have become a parent route (moved to `bills/index.vue`); the CI workflow didn't parse (a `: ` inside a plain YAML value); integration tests that log in several users timed out at 5s on a busy machine (unit project `testTimeout` now 20s); the fees E2E could stall when the receipt tab opened while a dialog was closing (the page is brought back to the front first).
 
 ### Phase 10 — Dashboards & promotion (2026-10-14)
 - Built: staff dashboard (`/api/dashboard`, `DashboardStats`): students by section and gender, today's attendance (taken / not taken, rate), term fees (expected, collected, outstanding, %, today, debtors) and result-entry progress (sheets complete, arms by status), from the detail services; bursar gets students and fees only. End-of-session promotion per class arm: `promotion_runs` (unique per arm and session) and `student_promotions`; default placement (next level's same-name arm, across sections; last level graduates); repeat / withdraw / graduate exceptions; one transaction; already-enrolled students skipped; undo until the next session is current; session delete guard; `/promotion` and `/promotion/[armId]` (outcome and class per student, set all, summary, confirm, undo), profile outcome badge, Promotion in the School setup nav; seed: SSS 3A (3 students) and the 2027/2028 session.

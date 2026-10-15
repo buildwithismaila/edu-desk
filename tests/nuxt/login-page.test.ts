@@ -57,4 +57,10 @@ describe('login page', () => {
 
     await vi.waitFor(() => expect(sentBody).toEqual({ login: ' 0803 111 0001 ', password: 'password123' }))
   })
+
+  it('links to the privacy notice and terms, and says who resets a forgotten password', async () => {
+    const wrapper = await mountSuspended(LoginPage)
+    expect(wrapper.text()).toContain('Forgot your password? Ask your school admin to reset it.')
+    expect(wrapper.get('[data-testid=legal-links]').findAll('a').map(a => [a.text(), a.attributes('href')])).toEqual([['Privacy', '/privacy'], ['Terms', '/terms']])
+  })
 })
