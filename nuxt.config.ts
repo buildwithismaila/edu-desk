@@ -38,9 +38,6 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2026-10-01',
 
-  // No <NuxtImg> is used; on Cloudflare skip the IPX image server (sharp can't run on Workers)
-  image: onCloudflare ? { provider: 'none' } : {},
-
   nitro: {
     // useEvent() for server/plugins/request-db.ts (a database client per request on Cloudflare)
     experimental: { asyncContext: true },
@@ -66,4 +63,7 @@ export default defineNuxtConfig({
       stylistic: true,
     },
   },
+
+  // No <NuxtImg> is used; on Cloudflare skip the IPX image server (sharp can't run on Workers)
+  image: onCloudflare ? { provider: 'none' } : {},
 })
