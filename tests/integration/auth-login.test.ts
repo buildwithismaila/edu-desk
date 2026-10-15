@@ -176,14 +176,14 @@ describe('the per-IP login limit behind a proxy (Caddy in production)', () => {
   const failFrom = (ip: string, email: string) =>
     app.postJson('/api/auth/login', { login: email, password: 'wrong-password' }, { host: hostOf(schoolA.slug), headers: { 'x-forwarded-for': ip } })
 
-  beforeEach(() => {
-    resetLoginThrottle()
+  beforeEach(async () => {
+    await resetLoginThrottle(db)
     LOGIN_THROTTLE.maxPerIp = 2
   })
-  afterEach(() => {
+  afterEach(async () => {
     LOGIN_THROTTLE.maxPerIp = maxPerIp
     resetTestRuntimeConfig()
-    resetLoginThrottle()
+    await resetLoginThrottle(db)
   })
 
   it('counts each visitor separately when the proxy is trusted', async () => {
@@ -194,6 +194,25 @@ describe('the per-IP login limit behind a proxy (Caddy in production)', () => {
     expect((await failFrom('203.0.113.1', 'a3@example.test')).status).toBe(429)
     // Another visitor isn't blocked by the first one's failures
     expect((await failFrom('198.51.100.7', 'a4@example.test')).status).toBe(401)
+  })
+
+  it('uses CF-Connecting-IP on Cloudflare, and ignores X-Forwarded-For there', async () => {
+    testRuntimeConfig.trustProxy = 'cloudflare'
+    const failOnCloudflare = (cfIp: string, forwarded: string, email: string) =>
+      app.postJson('/api/auth/login', { login: email, password: 'wrong-password' }, { host: hostOf(schoolA.slug), headers: { 'cf-connecting-ip': cfIp, 'x-forwarded-for': forwarded } })
+    expect((await failOnCloudflare('203.0.113.9', '1.1.1.1', 'c1@example.test')).status).toBe(401)
+    expect((await failOnCloudflare('203.0.113.9', '2.2.2.2', 'c2@example.test')).status).toBe(401)
+    // Same visitor (Cloudflare's header), whatever X-Forwarded-For says
+    expect((await failOnCloudflare('203.0.113.9', '3.3.3.3', 'c3@example.test')).status).toBe(429)
+    expect((await failOnCloudflare('198.51.100.8', '3.3.3.3', 'c4@example.test')).status).toBe(401)
+  })
+
+  it('ignores CF-Connecting-IP when not on Cloudflare (a client could fake it)', async () => {
+    const failWithCf = (cfIp: string, email: string) =>
+      app.postJson('/api/auth/login', { login: email, password: 'wrong-password' }, { host: hostOf(schoolA.slug), headers: { 'cf-connecting-ip': cfIp } })
+    expect((await failWithCf('203.0.113.1', 'd1@example.test')).status).toBe(401)
+    expect((await failWithCf('203.0.113.2', 'd2@example.test')).status).toBe(401)
+    expect((await failWithCf('203.0.113.3', 'd3@example.test')).status).toBe(429)
   })
 
   it('ignores X-Forwarded-For when not behind a trusted proxy (a client could fake it)', async () => {

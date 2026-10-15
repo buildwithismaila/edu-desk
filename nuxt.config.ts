@@ -1,3 +1,5 @@
+import { uploadsStorageConfig } from './server/utils/storage-config'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui', '@vueuse/nuxt', '@nuxt/image', 'nuxt-auth-utils'],
@@ -10,8 +12,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     appDomain: 'lvh.me',
     defaultSchoolSlug: '',
-    // NUXT_TRUST_PROXY=true behind Caddy (deploy/): the login limit then uses the forwarded client IP
-    trustProxy: false,
+    // NUXT_TRUST_PROXY: `true` behind Caddy (deploy/), `cloudflare` on Cloudflare Workers (server/utils/client-ip.ts)
+    trustProxy: false as boolean | 'cloudflare',
     // nuxt-auth-utils session (password from NUXT_SESSION_PASSWORD). Host-only cookie: no `domain`,
     // so each school subdomain has its own session. Chrome drops Secure cookies on http://*.lvh.me,
     // so Secure is off under `nuxt dev`; E2E (http prod build) sets NUXT_SESSION_COOKIE_SECURE=false.
@@ -35,9 +37,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
 
   nitro: {
-    // School uploads (logos for now), keyed schools/<schoolId>/…; production needs .data on a persistent volume
+    // useEvent() for server/plugins/request-db.ts (a database client per request on Cloudflare)
+    experimental: { asyncContext: true },
+    // School uploads (logos, photos), keyed schools/<schoolId>/…: on disk for Node (a persistent volume in
+    // production), in R2 on Cloudflare (server/utils/storage-config.ts)
     storage: {
-      uploads: { driver: 'fs', base: './.data/uploads' },
+      uploads: uploadsStorageConfig(process.env.NITRO_PRESET),
     },
   },
 

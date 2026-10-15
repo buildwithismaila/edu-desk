@@ -144,7 +144,8 @@ interface RequestOptions extends RequestInit {
 export function createTestApp(db: Db) {
   setDb(db)
   clearTenantCache()
-  resetLoginThrottle()
+  // Fresh login-limiter counts for each test app (they live in the database now); requests wait for it
+  const ready = resetLoginThrottle(db)
 
   const app = createApp({
     // Nitro's JSON error body includes `message` for handled errors; plain h3 leaves it out
@@ -293,7 +294,8 @@ export function createTestApp(db: Db) {
 
   const handler = toWebHandler(app)
 
-  function request(path: string, { host, cookie, headers, ...init }: RequestOptions) {
+  async function request(path: string, { host, cookie, headers, ...init }: RequestOptions) {
+    await ready
     return handler(new Request(`http://${host}${path}`, {
       ...init,
       headers: { ...headers, host, ...(cookie ? { cookie } : {}) },

@@ -3,7 +3,7 @@ import { createError, defineEventHandler, setResponseHeaders } from 'h3'
 import { schools } from '../../database/schema'
 import { useDb } from '../../utils/db'
 import { IMAGE_CONTENT_TYPES, type ImageType } from '../../utils/image'
-import { uploadsStorage } from '../../utils/school'
+import { readUpload } from '../../utils/school'
 import { requireTenant } from '../../utils/tenant'
 
 const notFound = () => createError({ statusCode: 404, statusMessage: 'Not Found', message: 'No logo' })
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   const [row] = await useDb().select({ logoKey: schools.logoKey }).from(schools).where(eq(schools.id, school.id))
   if (!row?.logoKey) throw notFound()
 
-  const data = await uploadsStorage().getItemRaw<Uint8Array>(row.logoKey)
+  const data = await readUpload(row.logoKey)
   if (!data) throw notFound()
 
   const type = row.logoKey.split('.').pop() as ImageType

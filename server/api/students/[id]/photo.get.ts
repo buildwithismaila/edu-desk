@@ -6,7 +6,7 @@ import { requireUser } from '../../../utils/auth'
 import { useDb } from '../../../utils/db'
 import { notFound } from '../../../utils/errors'
 import { IMAGE_CONTENT_TYPES, type ImageType } from '../../../utils/image'
-import { uploadsStorage } from '../../../utils/school'
+import { readUpload } from '../../../utils/school'
 import { requireTenant, whereSchool } from '../../../utils/tenant'
 import { idParamsSchema, validateParams } from '../../../utils/validation'
 
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const db = useDb()
   await assertCanSeeStudent(db, school, viewer, id)
   const [row] = await db.select({ photoKey: students.photoKey }).from(students).where(whereSchool(students, school, eq(students.id, id)))
-  const data = row?.photoKey ? await uploadsStorage().getItemRaw<Uint8Array>(row.photoKey) : null
+  const data = row?.photoKey ? await readUpload(row.photoKey) : null
   if (!row?.photoKey || !data) throw notFound('No photo')
 
   setResponseHeaders(event, {
