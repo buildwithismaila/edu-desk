@@ -28,3 +28,8 @@ test-results/
 playwright-report/
 blob-report/
 coverage/
+
+# Cloudflare (wrangler dev/deploy state)
+.wrangler
+.dev.vars
+dist-worker

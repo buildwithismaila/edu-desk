@@ -1,4 +1,6 @@
 allowBuilds:
   esbuild: true
+  # Cloudflare's local Workers runtime (wrangler dev): its script links the platform binary
+  workerd: true
   unrs-resolver: false
   vue-demi: false

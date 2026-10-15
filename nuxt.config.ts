@@ -1,5 +1,7 @@
 import { uploadsStorageConfig } from './server/utils/storage-config'
 
+const onCloudflare = !!process.env.NITRO_PRESET?.startsWith('cloudflare')
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui', '@vueuse/nuxt', '@nuxt/image', 'nuxt-auth-utils'],
@@ -35,6 +37,9 @@ export default defineNuxtConfig({
   devServer: { host: '127.0.0.1' },
 
   compatibilityDate: '2026-10-01',
+
+  // No <NuxtImg> is used; on Cloudflare skip the IPX image server (sharp can't run on Workers)
+  image: onCloudflare ? { provider: 'none' } : {},
 
   nitro: {
     // useEvent() for server/plugins/request-db.ts (a database client per request on Cloudflare)

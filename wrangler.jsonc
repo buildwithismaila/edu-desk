@@ -1,0 +1,33 @@
+// Cloudflare Workers deployment (docs/deploy-cloudflare.md). Build first with:
+//   NITRO_PRESET=cloudflare_module pnpm build
+// then `wrangler deploy` (CI does both). IDs below are placeholders until the resources exist.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "edu-desk",
+  "main": "./.output/server/index.mjs",
+  "compatibility_date": "2026-10-01",
+  // postgres.js (Cloudflare sockets), AsyncLocalStorage for the per-request database client, node:crypto scrypt
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./.output/public/", "binding": "ASSETS" },
+  // Run near the database (Supabase in the EU) rather than near each visitor: fewer slow round trips per page
+  "placement": { "mode": "smart" },
+  "observability": { "enabled": true },
+  "vars": {
+    // Your domain once you have one; until then the workers.dev address with one school (DEFAULT_SCHOOL_SLUG)
+    "NUXT_APP_DOMAIN": "edu-desk.example.workers.dev",
+    "NUXT_DEFAULT_SCHOOL_SLUG": "",
+    "NUXT_TRUST_PROXY": "cloudflare"
+  },
+  // Secrets (set with `wrangler secret put`, never committed): NUXT_SESSION_PASSWORD
+  "hyperdrive": [
+    {
+      "binding": "DB",
+      // `wrangler dev` uses your local Postgres instead: set CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_DB
+      "id": "<hyperdrive-config-id>"
+    }
+  ],
+  "r2_buckets": [
+    { "binding": "UPLOADS", "bucket_name": "edudesk-uploads" }
+  ]
+  // With a domain: add "routes": [{ "pattern": "*.yourdomain/*", "zone_name": "yourdomain" }, { "pattern": "yourdomain/*", "zone_name": "yourdomain" }]
+}
