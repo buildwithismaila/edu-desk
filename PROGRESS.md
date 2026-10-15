@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 10a — Pilot readiness complete. Next: deploy to a server and start a pilot school (docs/deploy.md); the SaaS phases (11–13) wait for the pilot (docs/roadmap.md).
+- **Current phase:** Phase 10b — Serverless deployment (spec approved; in progress)
 - **Last updated:** 2026-10-15
 
 ## Completed phases

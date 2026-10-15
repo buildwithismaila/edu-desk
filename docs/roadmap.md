@@ -68,6 +68,13 @@ Each phase lists scope, acceptance criteria and the **minimum** tests required. 
 
 ---
 
+## Phase 10b — Serverless deployment
+**Scope:** run Edu Desk on Cloudflare Workers (free plan) + Supabase (free plan) + R2, with no server to manage; per-request database clients through Hyperdrive, database-backed login rate limit, uploads in R2, Cloudflare visitor IP; GitHub Actions deploys (migrations first), read-only previews, nightly encrypted backups to R2 and a restore drill; the VPS path keeps working.
+**Acceptance:** the deployed site works end to end; CPU per request measured against the free 10 ms limit; backups restore; the Docker job stays green.
+**Tests:** unit for the database limiter and trust-proxy modes; integration for per-request database scoping and storage selection; a Cloudflare-preset build in CI.
+
+---
+
 # SaaS phases (start only after a pilot school completes a full term)
 See `docs/multi-tenancy.md` for the full design.
 
