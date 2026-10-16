@@ -13,6 +13,8 @@ export const saveRegisterSchema = z.object({
     status: z.enum(ATTENDANCE_STATUSES, 'Use present, absent or late'),
   })).min(1, 'Mark at least one student').max(300)
     .refine(marks => new Set(marks.map(m => m.studentId)).size === marks.length, 'Each student can only be marked once'),
+  /** Taken offline on a phone (Phase 10c): the version of the school's register it saw, or null if none */
+  offline: z.strictObject({ baseVersion: z.number().int().min(1).nullable() }).optional(),
 })
 
 /** GET /api/attendance/register: the date defaults to today (Africa/Lagos). */

@@ -104,6 +104,9 @@ Alongside that, Edu Desk becomes an **installable app** (Add to Home screen), an
 - [ ] No API data is cached by the service worker; logout wipes the offline store
 - [ ] Works at 375px; Cloudflare and Docker builds still pass; `pnpm check`, `pnpm test:e2e` and CI green
 
+## Changes while building
+- **A `version` counter instead of comparing `updatedAt`:** the database keeps microseconds but JSON timestamps only milliseconds, so an exact match would misfire. Every save adds 1; an offline copy sends `offline: { baseVersion }`. The check runs inside the save itself (insert-if-none / update-where-version), so two arrivals at once can't both win.
+
 ## Open questions (resolved 2026-10-16: all recommendations approved)
 1. **Late window:** 3 days (recommended)? Longer helps very remote schools; shorter is stricter.
 2. **New package `@vite-pwa/nuxt`** (the standard Nuxt offline/installable-app module; Workbox underneath). OK to add?

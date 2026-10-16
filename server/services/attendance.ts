@@ -80,7 +80,7 @@ async function roster(db: Db, school: SchoolRef, sessionId: string, armId: strin
 }
 
 async function findRegister(db: Db, school: SchoolRef, armId: string, date: string) {
-  const [register] = await db.select({ id: attendanceRegisters.id, takenBy: users.name, updatedAt: attendanceRegisters.updatedAt })
+  const [register] = await db.select({ id: attendanceRegisters.id, takenBy: users.name, updatedAt: attendanceRegisters.updatedAt, version: attendanceRegisters.version, sentLateAt: attendanceRegisters.sentLateAt })
     .from(attendanceRegisters)
     .leftJoin(users, eq(attendanceRegisters.takenById, users.id))
     .where(whereSchool(attendanceRegisters, school, eq(attendanceRegisters.classArmId, armId), eq(attendanceRegisters.date, date)))
@@ -154,11 +154,12 @@ export async function saveRegister(
   db: Db,
   school: SchoolRef,
   viewer: Viewer,
-  input: { classArmId: string, date: string, marks: { studentId: string, status: AttendanceStatus }[] },
+  input: { classArmId: string, date: string, marks: { studentId: string, status: AttendanceStatus }[], offline?: { baseVersion: number | null } },
   today: string,
 ) {
   const { arm, session, term, canBackfill } = await authoriseRegister(db, school, viewer, input.classArmId)
-  const dateError = registerDateError({ date: input.date, today, term, canBackfill })
+  const offline = input.offline
+  const dateError = registerDateError({ date: input.date, today, term, canBackfill, offline: !!offline })
   if (dateError) throw fieldError('date', dateError)
 
   const students = await roster(db, school, session.id, arm.id)
@@ -168,17 +169,29 @@ export async function saveRegister(
   const missing = students.filter(s => !marked.has(s.id)).map(s => s.name)
   if (missing.length) throw fieldError('marks', `Mark every student: ${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} missing`)
 
-  const created = await db.transaction(async (tx) => {
-    const [inserted] = await tx.insert(attendanceRegisters)
-      .values({ schoolId: school.id, termId: term.id, classArmId: arm.id, date: input.date, takenById: viewer.id })
-      .onConflictDoNothing()
-      .returning({ id: attendanceRegisters.id })
+  // Taken offline and arriving after its day: labelled "Sent late (offline)"
+  const sentLateAt = offline && input.date < today ? new Date() : null
+  const result = await db.transaction(async (tx) => {
+    // An offline copy is only written if the school's register is still the version the phone saw (none,
+    // or the same version); checked in the same statements as the write, so two arrivals can't both win
+    const [inserted] = !offline || offline.baseVersion === null
+      ? await tx.insert(attendanceRegisters)
+          .values({ schoolId: school.id, termId: term.id, classArmId: arm.id, date: input.date, takenById: viewer.id, sentLateAt })
+          .onConflictDoNothing()
+          .returning({ id: attendanceRegisters.id })
+      : []
     let registerId = inserted?.id
     if (!registerId) {
-      const [existing] = await tx.update(attendanceRegisters).set({ takenById: viewer.id })
-        .where(whereSchool(attendanceRegisters, school, eq(attendanceRegisters.classArmId, arm.id), eq(attendanceRegisters.date, input.date)))
+      if (offline && offline.baseVersion === null) return 'conflict' as const
+      const [existing] = await tx.update(attendanceRegisters)
+        .set({ takenById: viewer.id, version: sql`${attendanceRegisters.version} + 1`, ...(offline ? { sentLateAt } : {}) })
+        .where(whereSchool(attendanceRegisters, school,
+          eq(attendanceRegisters.classArmId, arm.id),
+          eq(attendanceRegisters.date, input.date),
+          offline ? eq(attendanceRegisters.version, offline.baseVersion!) : undefined))
         .returning({ id: attendanceRegisters.id })
-      registerId = existing!.id
+      if (!existing) return 'conflict' as const
+      registerId = existing.id
     }
     await tx.insert(attendanceMarks)
       .values(input.marks.map(m => ({ schoolId: school.id, registerId: registerId!, studentId: m.studentId, status: m.status })))
@@ -186,10 +199,19 @@ export async function saveRegister(
         target: [attendanceMarks.schoolId, attendanceMarks.registerId, attendanceMarks.studentId],
         set: { status: sql`excluded.status`, updatedAt: new Date() },
       })
-    return !!inserted
+    return inserted ? 'created' as const : 'updated' as const
   })
 
-  return { created, register: await getRegister(db, school, viewer, arm.id, input.date, today) }
+  if (result === 'conflict') {
+    // The school's copy wins: the phone gets it back to show the teacher both
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'Conflict',
+      message: 'This register was changed at school after your phone saved it',
+      data: { register: await getRegister(db, school, viewer, arm.id, input.date, today) },
+    })
+  }
+  return { created: result === 'created', register: await getRegister(db, school, viewer, arm.id, input.date, today) }
 }
 
 /** Admin/principal: delete a register taken by mistake (its marks go with it). */

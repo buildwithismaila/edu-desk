@@ -1,4 +1,4 @@
-import { date, index, pgEnum, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
+import { date, index, integer, pgEnum, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
 import { ATTENDANCE_STATUSES } from '../../../shared/schemas/attendance'
 import { classArms, terms } from './academics'
 import { schools } from './schools'
@@ -23,6 +23,10 @@ export const attendanceRegisters = pgTable('attendance_registers', {
   classArmId: uuid().notNull().references(() => classArms.id, { onDelete: 'restrict' }),
   date: date({ mode: 'string' }).notNull(),
   takenById: uuid().references(() => users.id, { onDelete: 'set null' }),
+  /** Goes up on every save; a register taken offline says which version it saw (Phase 10c conflict check) */
+  version: integer().notNull().default(1),
+  /** When a register taken offline arrived after its day ("Sent late (offline)"); null otherwise */
+  sentLateAt: timestamp({ withTimezone: true }),
   ...timestamps,
 }, t => [
   unique('attendance_registers_one_per_day').on(t.schoolId, t.classArmId, t.date),

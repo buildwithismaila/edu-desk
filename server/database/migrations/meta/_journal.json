@@ -92,6 +92,13 @@
       "when": 1792065925450,
       "tag": "0012_redundant_luckman",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792148835746,
+      "tag": "0013_spicy_stellaris",
+      "breakpoints": true
     }
   ]
 }

@@ -88,3 +88,36 @@ describe('query schemas', () => {
     expect(summaryQuerySchema.safeParse({}).success).toBe(false)
   })
 })
+
+describe('registerDateError: registers taken offline (Phase 10c)', () => {
+  const today = '2026-10-12'
+  const term = { startsOn: '2026-09-14', endsOn: '2026-12-18' }
+  const offline = (date: string, extra: Partial<{ canBackfill: boolean, term: { startsOn: string | null, endsOn: string | null } }> = {}) =>
+    registerDateError({ date, today, term: extra.term ?? term, canBackfill: extra.canBackfill ?? false, offline: true })
+
+  it('lets a class teacher send a register taken offline up to 3 days late', () => {
+    expect(offline('2026-10-12')).toBeNull()
+    expect(offline('2026-10-11')).toBeNull()
+    expect(offline('2026-10-09')).toBeNull()
+  })
+
+  it('refuses one older than 3 days, with a way forward', () => {
+    expect(offline('2026-10-08')).toBe('This register is more than 3 days old. Ask an admin to enter it.')
+  })
+
+  it('still refuses the future, and days outside the term', () => {
+    expect(offline('2026-10-13')).toBe('That date is in the future')
+    expect(offline('2026-10-10', { term: { startsOn: '2026-10-11', endsOn: null } })).toBe('That date is before this term started')
+  })
+
+  it('leaves online saves as they were', () => {
+    expect(registerDateError({ date: '2026-10-11', today, term, canBackfill: false })).toBe('You can only take today\'s register')
+    expect(registerDateError({ date: '2026-10-11', today, term, canBackfill: false, offline: false })).toBe('You can only take today\'s register')
+  })
+
+  it('crosses month ends correctly', () => {
+    const t = { startsOn: '2026-09-14', endsOn: '2026-12-18' }
+    expect(registerDateError({ date: '2026-09-30', today: '2026-10-02', term: t, canBackfill: false, offline: true })).toBeNull()
+    expect(registerDateError({ date: '2026-09-28', today: '2026-10-02', term: t, canBackfill: false, offline: true })).toBe('This register is more than 3 days old. Ask an admin to enter it.')
+  })
+})
