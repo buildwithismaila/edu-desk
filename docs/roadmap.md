@@ -75,6 +75,13 @@ Each phase lists scope, acceptance criteria and the **minimum** tests required. 
 
 ---
 
+## Phase 10c — Offline attendance
+**Scope:** installable app (PWA) that opens without signal; class teachers take the daily register offline, saved on the phone and sent automatically when back online (up to 3 days late, labelled "sent late"); the school's copy always wins on conflict; logout wipes offline data. Score entry offline comes next.
+**Acceptance:** a register taken offline arrives intact; never overwrites a newer school register; no API data cached by the service worker.
+**Tests:** unit for the late window, outbox sync and storage; integration for late submission and version conflicts; E2E taking a register offline and syncing it.
+
+---
+
 # SaaS phases (start only after a pilot school completes a full term)
 See `docs/multi-tenancy.md` for the full design.
 
