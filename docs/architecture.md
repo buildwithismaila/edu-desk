@@ -8,6 +8,7 @@
 - **nuxt-auth-utils** — sealed cookie sessions, `hashPassword` / `verifyPassword`
 - **Zod** — shared schemas for `UForm :schema` on the client and `readValidatedBody` / `getValidatedQuery` on the server
 - **@vueuse/nuxt**, **@nuxt/eslint**, **@nuxt/image**
+- **@vite-pwa/nuxt** — installable app and service worker (Phase 10c, decision 048); offline data lives in IndexedDB via `app/utils/offline/` (no package)
 - **Vitest**, **@nuxt/test-utils**, **@vue/test-utils**, **happy-dom**, **@playwright/test**
 - **h3** (1.15.x, same version Nitro uses) — imported explicitly in server code so API routes can be integration-tested in a plain h3 app
 - **typescript** (pinned to 6.0.x until typescript-eslint supports TS 7) + **vue-tsc** for `nuxt typecheck`; **tsx** to run the seed script; **@iconify-json/lucide** (icons bundled locally)

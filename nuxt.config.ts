@@ -4,9 +4,16 @@ const onCloudflare = !!process.env.NITRO_PRESET?.startsWith('cloudflare')
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@vueuse/nuxt', '@nuxt/image', 'nuxt-auth-utils'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@vueuse/nuxt', '@nuxt/image', 'nuxt-auth-utils', '@vite-pwa/nuxt'],
 
   devtools: { enabled: true },
+
+  // iPhones use this for "Add to Home Screen" (the web manifest's icons are for Android)
+  app: {
+    head: {
+      link: [{ rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
+    },
+  },
 
   css: ['~/assets/css/main.css'],
 
@@ -66,4 +73,50 @@ export default defineNuxtConfig({
 
   // No <NuxtImg> is used; on Cloudflare skip the IPX image server (sharp can't run on Workers)
   image: onCloudflare ? { provider: 'none' } : {},
+
+  // Installable app and offline attendance (docs/features/10c-offline-attendance.md, decision 048). The service
+  // worker keeps the app's files and opened pages; it never caches API data (the attendance page keeps its own
+  // copies on the phone), except icons, which hold no school data.
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Edu Desk',
+      short_name: 'Edu Desk',
+      description: 'School management: attendance, results and fees',
+      theme_color: '#123B2F',
+      background_color: '#F7F5EF',
+      display: 'standalone',
+      start_url: '/',
+      icons: [
+        { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+    },
+    workbox: {
+      // Pages are server-rendered per school and user: no app-shell fallback, only pages actually opened
+      navigateFallback: null,
+      globPatterns: ['**/*.{js,css,png,svg,ico,woff2}'],
+      runtimeCaching: [
+        {
+          urlPattern: ({ request, url }) => request.mode === 'navigate' && !url.pathname.startsWith('/api/'),
+          handler: 'NetworkFirst',
+          options: {
+            // PAGES_CACHE in app/composables/useOfflineAttendance.ts (wiped at logout)
+            cacheName: 'pages',
+            networkTimeoutSeconds: 5,
+            matchOptions: { ignoreSearch: true },
+            expiration: { maxEntries: 20 },
+          },
+        },
+        {
+          urlPattern: ({ url }) => url.pathname.startsWith('/api/_nuxt_icon/'),
+          handler: 'CacheFirst',
+          options: { cacheName: 'icons', expiration: { maxEntries: 50 } },
+        },
+      ],
+    },
+    // The registering plugin imports a build-only virtual module that Vitest's Nuxt environment can't load
+    client: { installPrompt: false, registerPlugin: !process.env.VITEST },
+  },
 })
