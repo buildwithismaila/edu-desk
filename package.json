@@ -11,6 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx server/database/seed/index.ts",
     "school:create": "tsx scripts/create-school.ts",
+    "demo:reset": "tsx scripts/demo.ts reset",
+    "demo:start": "tsx scripts/demo.ts start",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:nuxt",
