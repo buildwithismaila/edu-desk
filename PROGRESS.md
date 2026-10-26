@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 10c done. Phase 10b waits on the first real Cloudflare deploy with the owner (and the R2 alternative, if the card is a blocker).
+- **Current phase:** Phase 10d done (results withheld until fees are paid). Phase 10c done. Phase 10b waits on the first real Cloudflare deploy with the owner (and the R2 alternative, if the card is a blocker).
 - **Last updated:** 2026-10-26
 
 ## Completed phases
@@ -12,6 +12,12 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 10d — Results withheld until fees are paid (2026-10-26)
+- Built: school setting "Withhold results until fees are paid" (off by default, on for Greenfield); per-term rule `owedByTerm` (payments clear the oldest debt first, so only the terms still owed are withheld); enforced live on the parent results list (withheld terms show what's owed, no average/position), the report card route (403) and the dashboard card; per-student, per-term release by admin or bursar (`result_releases`, migration 0014) with a holds panel on the student's Fees page; parent views ("Withheld until fees are paid. Outstanding for this term: ₦…", link to Fees); seed: Somto's Primary 3A result withheld.
+- Tests (totals): 1443 unit + integration (PGlite) / 112 Nuxt component / E2E: the parent sees Somto's result withheld; the bursar releases it and the parent opens the report card (then withheld again).
+- Decisions: see docs/decisions.md #049
+- Found while building: the fees page opened the receipt tab while the payment dialog was still fading out, and in a background tab the fade could stall and leave the page covered (now it waits for the dialog to close, at most a second).
 
 ### Phase 10c — Offline attendance (2026-10-26)
 - Built: installable app (`@vite-pwa/nuxt`: manifest "Edu Desk", icons, service worker that precaches the app's files and keeps opened pages network-first, never `/api` data except icons); attendance offline for class teachers: copies of their classes and today's lists in IndexedDB per school and user (`app/utils/offline/`), an outbox sent automatically (app open, back online, every minute while waiting, "Send now"); server: `version` and `sentLateAt` on registers, `offline: { baseVersion }` with a 3-day late window and an atomic version check (409 with the school's copy); UI: offline banner, "Saved on this phone" / "Waiting to send" / "Sent", conflict view (yours vs school's: keep school's or send mine), "Not accepted" with the reason (open and fix, or discard), "Sent late (offline)" on the register and a count in the term summary; logout warns about unsent registers, then wipes the phone's store and saved pages.

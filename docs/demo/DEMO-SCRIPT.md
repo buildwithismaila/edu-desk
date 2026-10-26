@@ -52,7 +52,8 @@ Log everyone in before the meeting starts.
 
 ### 5. What parents see (4 min) — *Parent (phone)*
 1. **My children:** Chidera (JSS 1A) and Somto (Primary 3A), with attendance this term and fees ("Fully paid" / "Owing").
-2. **Somto → Results →** the published report card. **Attendance** tab: rate and days absent. **Fees** tab: the bill, and **Invoice (how to pay)** with the bank details.
+2. **Somto → Results:** "Withheld until fees are paid", with what's owed. *Say:* "If you choose, parents see results only once fees are paid, and it's switched on per school." **Attendance** tab: rate and days absent. **Fees** tab: the bill, and **Invoice (how to pay)** with the bank details.
+   - **Optional:** in the **Bursar window**, record Somto's full balance (or tap **Release result** on Somto's Fees page). Refresh the parent's phone: the report card opens.
 3. **Chidera → Fees → Receipt** on a payment.
 4. If you published JSS 1A in step 3, **Chidera's new report card** is there too.
 - *Say:* "Fewer calls to the office. Parents only ever see their own children."

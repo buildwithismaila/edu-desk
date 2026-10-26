@@ -347,3 +347,12 @@ Record significant technical or product decisions here (newest at the bottom). K
 - **Consequences:**
   - Offline works only after one online visit, and only on https or localhost (browsers allow service workers only on secure origins). The demo's `--lan` mode (plain http on the Wi-Fi address) has no offline mode.
   - A phone's clock decides the register's date; the 3-day window and the "Sent late" label limit the risk.
+
+### 049 — Results withheld per term until its fees are paid; payments clear the oldest debt first (2026-10-26)
+- **Context:** Many schools give out results only once fees are cleared. The owner wants only the terms that are owed held back, not every result.
+- **Decision:**
+  - **The setting:** `schools.withholdResultsUntilPaid` (off by default).
+  - **The rule:** a term is owed when any of the child's outstanding debt lands on it, counting payments against the oldest debt first (`owedByTerm`, pure and unit-tested). It's checked live on every parent request, so there's no "unlock" step. The parent results list, the report card route and the dashboard card all enforce it.
+  - **Release:** per student and term (`result_releases`), by admin or bursar.
+- **Alternatives considered:** withholding every result while anything is owed (the owner preferred per term); comparing each term's own bill balance (wrong once arrears are carried forward and paid on a later bill); a stored "withheld" flag (would go stale when payments are recorded or reversed).
+- **Consequences:** Paper report cards are still the school's call (staff printing is unchanged).

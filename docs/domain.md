@@ -150,6 +150,11 @@ Results go through: **Draft → Submitted (by class teacher) → Published (by p
 | Parent / Guardian | Read-only: own children's published results, attendance, fee balance & payments |
 
 - **Parent portal (Phase 9):** a card per child on the dashboard (class, this term's attendance and fee balance, latest published report card) and a page per child with Results (published report cards only, newest first), Attendance (any term of the child's sessions) and Fees (a term's bill and payments, with receipts). Reversed payments show as "Reversed" without the staff's reason; the full ledger, optional-item choices and who took the money stay staff-only. Another family's, another school's or a removed child is "not found".
+- **Results withheld until fees are paid (Phase 10d, a school setting, off by default):** a parent can't see a term's results while fees for that term are owed. They see "Withheld until fees are paid" with the amount owed for that term and a link to the fees; the report card itself is refused (403).
+  - **Which terms are owed:** payments clear the oldest debt first. What the child still owes (the newest bill's balance, which carries earlier terms forward) is counted against the newest terms' own charges (items − discounts) first, so paying off arrears releases the earlier terms' results.
+  - **It's live:** results appear as soon as the payment is recorded, and a reversed payment withholds them again.
+  - **Release:** the admin or bursar can release one child's result for a term anyway (payment plans, scholarships), and withhold it again.
+  - **Unchanged:** staff see and print every result; parents still see attendance and fees.
 
 - A parent can have many children; a child can have many guardians.
 - Students do not log in in the MVP.
