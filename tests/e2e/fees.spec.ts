@@ -7,6 +7,8 @@ import { gotoHydrated, GREENFIELD_USERS, loginAs } from './support/auth'
 async function openDanielsFees(page: Page) {
   await gotoHydrated(page, '/fees/bills')
   await page.getByTestId('bills-search').fill('Daniel')
+  // The search reaches the URL after a pause; clicking before that, its late update would undo the navigation
+  await expect(page).toHaveURL(/search=Daniel/)
   await page.getByTestId('bills-table').getByRole('link', { name: 'Daniel Etim' }).click()
   await expect(page.getByTestId('fees-student')).toHaveText('Daniel Etim')
 }

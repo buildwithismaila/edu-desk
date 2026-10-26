@@ -32,6 +32,7 @@ Log everyone in before the meeting starts.
 - **Attendance → JSS 1A.** Everyone starts **Present**. Tap **A** for two students and **L** for one, then **Save register**.
 - Back in the **Proprietor window**, refresh the Dashboard: JSS 1A is no longer on the "not taken" list, and today's rate has updated.
 - *Say:* "No paper, no copying. The term summary goes straight onto the report card."
+- **No signal? (optional, 1 min):** in the teacher window, open DevTools → Network → **Offline**, reload Attendance, take the register and save. It shows "Saved on this phone". Switch back to **No throttling**: it sends itself and shows "Sent". *Say:* "Teachers in areas with poor network can still take the register; it sends when the signal comes back." (Works on `localhost`; not with `--lan` phones, which need https for offline.)
 
 ### 3. Scores to report card (6 min) — *Proprietor window*
 1. **Results → JSS 1A.** It shows **one score is missing**: Chidera Eze's English Exam. *Say:* "It won't let you publish incomplete results."

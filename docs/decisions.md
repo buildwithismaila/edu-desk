@@ -334,3 +334,16 @@ Record significant technical or product decisions here (newest at the bottom). K
   - **The VPS path stays:** the Docker setup is still built and booted in CI.
 - **Alternatives considered:** Cloudflare Pages (no wildcard custom domains); Vercel (the Hobby plan isn't for commercial use); a VPS (preferred later, with decision 042).
 - **Consequences:** Two deploy targets to keep working; CI builds both. Moving to a VPS later is a backup, a restore and DNS (docs/deploy-cloudflare.md section 10).
+
+### 048 — Offline attendance: an installable app, an outbox on the phone, the school's copy wins (2026-10-26)
+- **Context:** Many schools have weak or no mobile signal in the morning, when the register is taken.
+- **Decision:**
+  - **Installable app:** `@vite-pwa/nuxt` (Workbox) precaches the app's files and keeps opened pages (network first, then the saved copy). It never caches `/api` data, except the icon endpoint, which holds no school data.
+  - **Data on the phone:** the app keeps its own copies in IndexedDB (a small wrapper, no package), per school host and user: the teacher's classes, today's lists, and an outbox of registers waiting to send. They're sent when the app opens, when the phone comes back online, every minute while some are waiting, and on "Send now".
+  - **Server:** `PUT /api/attendance/register` takes `offline: { baseVersion }`, which allows a 3-day late window and runs a version check inside the save. A mismatch returns 409 with the school's register and writes nothing.
+  - **Stale pages:** a page served from the phone can be from an earlier day, so the attendance page checks the date with the server, and uses the phone's copies when offline.
+  - **Logout:** wipes the store and the saved pages, after a warning about unsent registers.
+- **Alternatives considered:** background sync in the service worker (not supported on iPhones; the page-driven retry works everywhere); comparing `updatedAt` (millisecond JSON vs microsecond database timestamps).
+- **Consequences:**
+  - Offline works only after one online visit, and only on https or localhost (browsers allow service workers only on secure origins). The demo's `--lan` mode (plain http on the Wi-Fi address) has no offline mode.
+  - A phone's clock decides the register's date; the 3-day window and the "Sent late" label limit the risk.

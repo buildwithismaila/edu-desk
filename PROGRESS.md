@@ -1,8 +1,8 @@
 # Progress
 
 ## Current status
-- **Current phase:** Phase 10c — Offline attendance (spec approved; in progress). Phase 10b waits on the first real Cloudflare deploy with the owner.
-- **Last updated:** 2026-10-15
+- **Current phase:** Phase 10c done. Phase 10b waits on the first real Cloudflare deploy with the owner (and the R2 alternative, if the card is a blocker).
+- **Last updated:** 2026-10-26
 
 ## Completed phases
 <!-- For each finished phase:
@@ -12,6 +12,13 @@
 - Decisions: see docs/decisions.md #...
 - Known issues / tech debt: ...
 -->
+
+### Phase 10c — Offline attendance (2026-10-26)
+- Built: installable app (`@vite-pwa/nuxt`: manifest "Edu Desk", icons, service worker that precaches the app's files and keeps opened pages network-first, never `/api` data except icons); attendance offline for class teachers: copies of their classes and today's lists in IndexedDB per school and user (`app/utils/offline/`), an outbox sent automatically (app open, back online, every minute while waiting, "Send now"); server: `version` and `sentLateAt` on registers, `offline: { baseVersion }` with a 3-day late window and an atomic version check (409 with the school's copy); UI: offline banner, "Saved on this phone" / "Waiting to send" / "Sent", conflict view (yours vs school's: keep school's or send mine), "Not accepted" with the reason (open and fix, or discard), "Sent late (offline)" on the register and a count in the term summary; logout warns about unsent registers, then wipes the phone's store and saved pages.
+- Tests (totals): 1422 unit + integration (PGlite) / 108 Nuxt component / E2E: 2 new offline journeys (mobile project, real service worker, `context.setOffline`).
+- Decisions: see docs/decisions.md #048
+- Found while building: comparing `updatedAt` for the version check was unreliable (ms JSON vs µs database), so a version counter instead; a cached page can be from an earlier day, so the attendance page re-checks the date with the server; `structuredClone` refuses Vue's reactive proxies (copies go through JSON); the PWA plugin's virtual module breaks Vitest's Nuxt environment (plugin off under Vitest); Chromium's headless shell ignores the flag that lets a plain-http test origin run a service worker (the offline E2E uses the full Chromium); a 401 while sending would have dropped registers as "not accepted" (now kept waiting until the teacher logs in again, tested).
+- Known limits: offline needs one online visit first, and https or localhost (the demo's `--lan` phones have no offline mode); the phone's clock sets the register's date.
 
 ### Phase 10a — Pilot readiness (2026-10-15)
 - Built: `pnpm school:create` (school + defaults + admin with a one-time password, one transaction, reserved/taken slugs refused); production Docker stack (`Dockerfile`, `deploy/docker-compose.yml`: postgres, one-shot migrations, app, Caddy with on-demand TLS gated by `/api/_tls/allowed`, nightly encrypted off-site backups with restore and drill, `tools`); `/api/_health`; JSON error logs; trusted-proxy login limit; runbook `docs/deploy.md`; Parent logins page (status per parent, one-time passwords for all / a class / chosen parents, printable slips 8 per A4); school bank accounts and printable fee invoices (one bill, a whole class, parents); `/privacy` and `/terms` drafts linked from login, and a DPA template (`docs/legal/`), all marked for legal review; seed: Greenfield bank accounts, logo (CLI seed), Primary 3A parents without a login.

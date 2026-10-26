@@ -126,6 +126,11 @@ If it does pause: Supabase dashboard → project → **Restore**.
 3. In `wrangler.jsonc`, add `"routes": [{ "pattern": "*.yourdomain/*", "zone_name": "yourdomain" }, { "pattern": "yourdomain/*", "zone_name": "yourdomain" }]` and commit.
 4. GitHub variables: `APP_DOMAIN=yourdomain`, `DEFAULT_SCHOOL_SLUG=` (empty), `APP_URL=https://<first-school>.yourdomain`. Every school then lives at `<slug>.yourdomain` automatically.
 
+## Offline attendance (installable app)
+- Works only over **https** (the workers.dev address and your domain both are). A teacher must open Attendance **once while online** on their phone; after that it opens and saves registers with no signal.
+- After a deploy, phones pick up the new version the next time they open the app online.
+- If a teacher says registers are stuck "Waiting to send", check that they're still logged in; an expired session keeps them waiting until they log in again (they're never lost by expiry, only by logging out).
+
 ## 9. Free-plan limits to watch
 - **Requests:** Workers 100,000 a day. A school of 500 is far below this; check Workers → Metrics now and then.
 - **CPU:** 10 ms per request (section 5).

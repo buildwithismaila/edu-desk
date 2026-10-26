@@ -25,7 +25,8 @@ export default defineConfig({
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: 'current-term.spec.ts',
+      // Offline attendance is a phone journey (and both projects would write the same register)
+      testIgnore: ['current-term.spec.ts', 'attendance-offline.spec.ts'],
     },
     {
       name: 'mobile',

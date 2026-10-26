@@ -1,6 +1,6 @@
 # Phase 10c — Offline attendance
 
-**Status:** Approved (2026-10-16), in progress
+**Status:** Done (2026-10-26)
 **Roadmap ref:** `docs/roadmap.md` → Phase 10c (part of "offline/PWA", brought forward from Post-MVP)
 
 ## Goal
@@ -97,15 +97,21 @@ Alongside that, Edu Desk becomes an **installable app** (Add to Home screen), an
 5. **E2E offline journeys, docs** (domain rules, decision, runbooks: a note that offline needs one online visit first), push, CI.
 
 ## Acceptance checklist
-- [ ] A class teacher can open Attendance, take and save a register with no connection, and it sends automatically later
-- [ ] Late offline registers (up to 3 days) are accepted and labelled "Sent late (offline)"; older ones are refused
-- [ ] An offline register never overwrites a newer school register; the teacher sees both and chooses
-- [ ] Edu Desk installs to the home screen and opens without signal after one online visit
-- [ ] No API data is cached by the service worker; logout wipes the offline store
-- [ ] Works at 375px; Cloudflare and Docker builds still pass; `pnpm check`, `pnpm test:e2e` and CI green
+- [x] A class teacher can open Attendance, take and save a register with no connection, and it sends automatically later
+- [x] Late offline registers (up to 3 days) are accepted and labelled "Sent late (offline)"; older ones are refused
+- [x] An offline register never overwrites a newer school register; the teacher sees both and chooses
+- [x] Edu Desk installs to the home screen and opens without signal after one online visit
+- [x] No API data is cached by the service worker; logout wipes the offline store
+- [x] Works at 375px; Cloudflare and Docker builds still pass; `pnpm check`, `pnpm test:e2e` and CI green
 
 ## Changes while building
 - **A `version` counter instead of comparing `updatedAt`:** the database keeps microseconds but JSON timestamps only milliseconds, so an exact match would misfire. Every save adds 1; an offline copy sends `offline: { baseVersion }`. The check runs inside the save itself (insert-if-none / update-where-version), so two arrivals at once can't both win.
+
+- **Where things live:** the offline store is `app/utils/offline/` (storage + outbox) with one composable, `useOfflineAttendance()`, and a client plugin that sends; the page itself switches between the server's data and the phone's copies.
+- **A 401 while sending** keeps registers waiting (the session ended), instead of marking them refused.
+- **Pages saved on the phone** are server-rendered, so they can be from an earlier day: the attendance page checks the date with the server and uses the phone's copies offline.
+- **Icons** (`/api/_nuxt_icon/`) are cached by the service worker: they hold no school data and the app needs them offline.
+- **The class summary** shows a count of registers sent late, rather than a per-day label (the summary has no per-day list).
 
 ## Open questions (resolved 2026-10-16: all recommendations approved)
 1. **Late window:** 3 days (recommended)? Longer helps very remote schools; shorter is stricter.
