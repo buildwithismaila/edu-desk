@@ -23,6 +23,7 @@ export const schoolProfileSchema = z.object({
   email: z.union([z.literal(''), z.email('Enter a valid email address')]).nullable().transform(v => v || null),
   showPositions: z.boolean(),
   showFeesOnReportCard: z.boolean(),
+  withholdResultsUntilPaid: z.boolean(),
   admissionPrefix: admissionPrefixSchema,
   bankAccounts: z.array(bankAccountSchema).max(MAX_BANK_ACCOUNTS, `At most ${MAX_BANK_ACCOUNTS} bank accounts`),
 }).partial()

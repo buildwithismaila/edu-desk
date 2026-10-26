@@ -48,6 +48,21 @@ describe('a parent\'s child page', () => {
     expect(card.text()).toContain('Average 72.4 · Position 3 of 8')
   })
 
+  it('shows a term withheld until its fees are paid, with what is owed and the way to the fees (Phase 10d)', async () => {
+    results = [
+      { termId: 't2', term: 'Second Term 2026/2027', publishedAt: '2027-04-01T10:00:00Z', withheld: true, owedKobo: 4_500_000, average: null, position: null, numberInClass: null },
+      { termId: 't1', term: 'First Term 2026/2027', publishedAt: '2026-12-10T10:00:00Z', withheld: false, owedKobo: null, average: 72.4, position: 3, numberInClass: 8 },
+    ]
+    const wrapper = await mountSuspended(ChildPage, { route: '/my-children/c1' })
+
+    const withheld = wrapper.get('[data-testid=child-result-withheld-t2]')
+    expect(withheld.text()).toContain('Withheld until fees are paid. Outstanding for this term: ₦45,000.00.')
+    expect(withheld.find('a').attributes('href')).toBe('/my-children/c1?tab=fees')
+    // No report card link for the withheld term; the paid term opens as usual
+    expect(wrapper.find('[data-testid=child-result-t2]').exists()).toBe(false)
+    expect(wrapper.get('[data-testid=child-result-t1]').attributes('href')).toBe('/students/c1/report-card?term=t1')
+  })
+
   it('says when no report card is published yet', async () => {
     const wrapper = await mountSuspended(ChildPage, { route: '/my-children/c1' })
     expect(wrapper.get('[data-testid=child-results-empty]').text()).toBe('No published report cards yet.')

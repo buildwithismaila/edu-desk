@@ -54,6 +54,16 @@ async function setShowFees(showFeesOnReportCard: boolean) {
   }
 }
 
+async function setWithholdResults(withholdResultsUntilPaid: boolean) {
+  try {
+    await $fetch('/api/school/profile', { method: 'PATCH', body: { withholdResultsUntilPaid } })
+    await afterChange(withholdResultsUntilPaid ? 'Parents will see a term\'s results once its fees are paid' : 'Parents will see results whether or not fees are paid')
+  }
+  catch (e) {
+    toast.add({ title: apiErrorMessage(e), color: 'error' })
+  }
+}
+
 async function setShowPositions(showPositions: boolean) {
   try {
     await $fetch('/api/school/profile', { method: 'PATCH', body: { showPositions } })
@@ -262,6 +272,14 @@ async function removeLogo() {
         description="The balance when results are published. Off by default."
         class="mt-4"
         @update:model-value="setShowFees"
+      />
+      <USwitch
+        data-testid="withhold-results"
+        :model-value="profile?.withholdResultsUntilPaid ?? false"
+        label="Withhold results until fees are paid"
+        description="Parents can't see a term's results while fees for that term are owed. Staff can release a child's results from their Fees page."
+        class="mt-4"
+        @update:model-value="setWithholdResults"
       />
     </UCard>
   </div>

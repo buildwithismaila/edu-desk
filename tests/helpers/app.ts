@@ -99,6 +99,9 @@ import staffPostHandler from '~~/server/api/staff/index.post'
 import studentDeleteHandler from '~~/server/api/students/[id].delete'
 import studentAttendanceHandler from '~~/server/api/students/[id]/attendance.get'
 import studentReportCardHandler from '~~/server/api/students/[id]/report-card.get'
+import studentResultHoldsHandler from '~~/server/api/students/[id]/result-holds.get'
+import studentResultReleaseDeleteHandler from '~~/server/api/students/[id]/result-release.delete'
+import studentResultReleasePutHandler from '~~/server/api/students/[id]/result-release.put'
 import studentGetHandler from '~~/server/api/students/[id].get'
 import studentPatchHandler from '~~/server/api/students/[id].patch'
 import studentEnrolmentHandler from '~~/server/api/students/[id]/enrolment.put'
@@ -265,6 +268,9 @@ export function createTestApp(db: Db) {
     .get('/api/results/report-cards', resultsReportCardsHandler)
     .get('/api/results/broadsheet', resultsBroadsheetHandler)
     .get('/api/students/:id/report-card', studentReportCardHandler)
+    .get('/api/students/:id/result-holds', studentResultHoldsHandler)
+    .put('/api/students/:id/result-release', studentResultReleasePutHandler)
+    .delete('/api/students/:id/result-release', studentResultReleaseDeleteHandler)
     .get('/api/students/:id/attendance', studentAttendanceHandler)
     .post('/api/students/import', studentsImportHandler)
     .get('/api/students/import/template', studentsImportTemplateHandler)

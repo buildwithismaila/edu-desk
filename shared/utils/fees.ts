@@ -36,6 +36,25 @@ export function billBalance({ lines, discounts, payments }: {
   return { itemsTotal, carryForward, discountTotal, billed, paid, reversed, balance: billed - discountTotal - paid }
 }
 
+/**
+ * What is still owed for each term (Phase 10d), from a child's bills oldest → newest and the newest bill's balance
+ * (which carries every earlier term forward). Payments clear the oldest debt first, so what's owed sits on the
+ * newest terms: walking back, each term takes up to its own charges (items − discounts, not arrears). Debt left
+ * over after the oldest bill (a break in the carry-forward chain) stays on the oldest. Terms owing nothing are absent.
+ */
+export function owedByTerm(bills: readonly { termId: string, ownChargesKobo: number }[], outstandingKobo: number) {
+  const owed = new Map<string, number>()
+  let remaining = Math.max(outstandingKobo, 0)
+  for (const bill of [...bills].reverse()) {
+    const share = Math.min(remaining, Math.max(bill.ownChargesKobo, 0))
+    if (share > 0) owed.set(bill.termId, share)
+    remaining -= share
+  }
+  const oldest = bills[0]
+  if (remaining > 0 && oldest) owed.set(oldest.termId, (owed.get(oldest.termId) ?? 0) + remaining)
+  return owed
+}
+
 /** The line that brings the previous term's balance onto a new bill, or null when it was settled exactly. */
 export function carryForwardLine(previousBalance: number, termLabel: string) {
   if (previousBalance === 0) return null

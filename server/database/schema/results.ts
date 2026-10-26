@@ -48,3 +48,18 @@ export const publishedResults = pgTable('published_results', {
   unique('published_results_one_per_student').on(t.schoolId, t.termId, t.studentId),
   index('published_results_arm_idx').on(t.schoolId, t.termId, t.classArmId),
 ])
+
+/**
+ * A term's result shown to the student's parents although fees for it are owed (Phase 10d: a payment plan, a
+ * scholarship). Only matters while the school withholds results until paid.
+ */
+export const resultReleases = pgTable('result_releases', {
+  id: uuid().primaryKey().defaultRandom(),
+  schoolId: schoolId(),
+  termId: uuid().notNull().references(() => terms.id, { onDelete: 'restrict' }),
+  studentId: uuid().notNull().references(() => students.id, { onDelete: 'restrict' }),
+  releasedById: userRef(),
+  ...timestamps,
+}, t => [
+  unique('result_releases_one_per_student').on(t.schoolId, t.termId, t.studentId),
+])

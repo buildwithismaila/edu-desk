@@ -181,6 +181,8 @@ describe('results', () => {
       termId: f.first.id,
       term: `First Term ${f.session.name}`,
       publishedAt: expect.any(String),
+      withheld: false,
+      owedKobo: null,
       average: 68.5,
       position: 2,
       numberInClass: 3,
@@ -287,7 +289,7 @@ describe('GET /api/me/children (dashboard cards)', () => {
 
     await publish(f)
     const [ada] = await (await http.get(f, f.cookies.parent, '/api/me/children')).json()
-    expect(ada.latestReportCard).toEqual({ termId: f.first.id, term: `First Term ${f.session.name}` })
+    expect(ada.latestReportCard).toEqual({ termId: f.first.id, term: `First Term ${f.session.name}`, withheld: false, owedKobo: null })
 
     // The second guardian sees Ada too
     const theirs = await (await http.get(f, f.cookies.coGuardian, '/api/me/children')).json()

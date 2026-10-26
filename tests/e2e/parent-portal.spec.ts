@@ -2,7 +2,8 @@ import { expect, type Page, test } from '@playwright/test'
 import { gotoHydrated, GREENFIELD_USERS, loginAs, logout, submitLogin } from './support/auth'
 
 // Ngozi Eze (parent@greenfield.test, phone 08031110001) has Chidera (JSS 1A, fees paid) and Somto
-// (Primary 3A, published by the seed, fees unpaid). Read-only, so it runs on desktop and mobile.
+// (Primary 3A, published by the seed, fees unpaid, so the result is withheld: Phase 10d). Read-only, so it runs
+// on desktop and mobile, except the release journey (desktop only), which withholds the result again after.
 
 const overflow = (page: Page) => page.evaluate<number>('document.documentElement.scrollWidth - document.documentElement.clientWidth')
 
@@ -12,7 +13,7 @@ async function loginByPhone(page: Page) {
   await expect(page.getByTestId('my-children')).toBeVisible()
 }
 
-test('a parent sees both children, then Somto\'s report card, attendance and fees', async ({ page }) => {
+test('a parent sees both children, then Somto\'s withheld result, attendance and fees', async ({ page }) => {
   await loginByPhone(page)
 
   const children = page.getByTestId('my-children')
@@ -24,18 +25,16 @@ test('a parent sees both children, then Somto\'s report card, attendance and fee
   const somto = children.locator('[data-testid^="my-child-"]').filter({ hasText: 'Somto Eze' }).first()
   await expect(somto.locator('[data-testid^="my-child-attendance-"]')).toHaveText(/^\d+% · absent \d+ days?$/)
   await expect(somto.locator('[data-testid^="my-child-fees-"]')).toHaveText(/^Owing ₦/)
+  await expect(somto.locator('[data-testid^="my-child-report-withheld-"]')).toContainText('withheld until fees are paid')
 
   await children.getByRole('link', { name: /Somto Eze/ }).click()
   await expect(page.getByTestId('child-name')).toHaveText('Somto Eze')
 
-  // Results → the published report card
-  const card = page.locator('[data-testid^="child-result-"]').first()
+  // Results: the published term is withheld until its fees are paid, with what's owed
+  const card = page.locator('[data-testid^="child-result-withheld-"]').first()
   await expect(card).toContainText(/First Term \d{4}\/\d{4}/)
+  await expect(card).toContainText(/Withheld until fees are paid\. Outstanding for this term: ₦[\d,]+\.\d\d/)
   expect(await overflow(page)).toBeLessThanOrEqual(0)
-  await card.click()
-  await expect(page.getByTestId('report-card-name')).toHaveText('Somto Eze')
-  await page.getByRole('link', { name: 'Back to my child' }).click()
-  await expect(page.getByTestId('child-name')).toHaveText('Somto Eze')
 
   // Attendance
   await page.getByRole('tab', { name: 'Attendance' }).click()
@@ -83,4 +82,36 @@ test('a parent can\'t open another family\'s child', async ({ page, isMobile }) 
   await gotoHydrated(page, `/my-children/${danielId}`)
   await expect(page.getByTestId('child-not-found')).toHaveText('Child not found.')
   await expect(page.getByTestId('child-name')).toHaveCount(0)
+})
+
+test('the bursar releases Somto\'s withheld result; the parent can then open the report card', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'Changes the demo state (restored at the end); the mobile test checks the withheld view')
+  test.setTimeout(120_000)
+  await loginAs(page, GREENFIELD_USERS.bursar.email)
+  await gotoHydrated(page, '/fees/bills?search=Somto')
+  await page.getByTestId('bills-table').getByRole('link', { name: 'Somto Eze' }).click()
+  await expect(page.getByTestId('fees-student')).toHaveText('Somto Eze')
+  const toggle = page.locator('[data-testid^="result-hold-toggle-"]').first()
+  await expect(toggle).toHaveText('Release result')
+  await toggle.click()
+  await expect(toggle).toHaveText('Withhold again')
+  const feesUrl = page.url()
+
+  try {
+    await logout(page, isMobile)
+    await loginByPhone(page)
+    await page.getByTestId('my-children').getByRole('link', { name: /Somto Eze/ }).click()
+    await page.locator('[data-testid^="child-result-"]:not([data-testid^="child-result-withheld-"])').first().click()
+    await expect(page.getByTestId('report-card-name')).toHaveText('Somto Eze')
+  }
+  finally {
+    // Back to the demo state: withheld
+    await page.context().clearCookies()
+    await loginAs(page, GREENFIELD_USERS.bursar.email)
+    await gotoHydrated(page, feesUrl)
+    const again = page.locator('[data-testid^="result-hold-toggle-"]').first()
+    await expect(again).toHaveText('Withhold again')
+    await again.click()
+    await expect(again).toHaveText('Release result')
+  }
 })

@@ -25,3 +25,5 @@ export const principalCommentsSchema = resultsActionSchema.extend({
 export const reportCardsQuerySchema = resultsQuerySchema.extend({ studentId: id().optional() })
 
 export const studentReportCardQuerySchema = z.object({ termId: id().optional() })
+/** Phase 10d: which term's result to release to (or withhold again from) the parents */
+export const resultReleaseQuerySchema = z.object({ termId: id() })

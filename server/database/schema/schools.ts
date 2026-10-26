@@ -25,6 +25,8 @@ export const schools = pgTable('schools', {
   showPositions: boolean().notNull().default(true),
   /** Phase 8: show the outstanding balance on published report cards */
   showFeesOnReportCard: boolean().notNull().default(false),
+  /** Phase 10d: parents can't see a term's result while fees for that term are owed */
+  withholdResultsUntilPaid: boolean().notNull().default(false),
   /** Phase 10a: up to two accounts printed on fee invoices */
   bankAccounts: jsonb().$type<BankAccount[]>().notNull().default([]),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),

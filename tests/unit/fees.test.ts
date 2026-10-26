@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { discountSchema, feeItemsSchema, paymentSchema, reverseSchema } from '~~/shared/schemas/fees'
-import { billBalance, carryForwardLine, discountAmounts, formatReceiptNumber, ledger } from '~~/shared/utils/fees'
+import { billBalance, carryForwardLine, discountAmounts, formatReceiptNumber, ledger, owedByTerm } from '~~/shared/utils/fees'
 
 const ID = '11111111-1111-4111-8111-111111111111'
 const item = (amountKobo: number) => ({ kind: 'item' as const, amountKobo })
@@ -139,5 +139,41 @@ describe('schemas', () => {
     expect(paymentSchema.safeParse({ billId: ID, amount: '0', method: 'cash', paidOn: '2026-10-12' }).success).toBe(false)
     expect(paymentSchema.safeParse({ billId: ID, amount: '100', method: 'cheque', paidOn: '2026-10-12' }).success).toBe(false)
     expect(reverseSchema.safeParse({ reason: 'x' }).success).toBe(false)
+  })
+})
+
+describe('owedByTerm (results withheld until paid, Phase 10d)', () => {
+  // ₦100,000 a term, in kobo
+  const term = (termId: string, ownChargesKobo = 10_000_000) => ({ termId, ownChargesKobo })
+  const owed = (bills: ReturnType<typeof term>[], outstanding: number) => Object.fromEntries(owedByTerm(bills, outstanding))
+
+  it('owes nothing when the newest bill is paid or in credit', () => {
+    expect(owed([term('t1'), term('t2')], 0)).toEqual({})
+    expect(owed([term('t1'), term('t2')], -500_000)).toEqual({})
+  })
+
+  it('puts what is owed on the newest term first: paying clears the oldest debt', () => {
+    // First term unpaid, second term billed with ₦100,000 arrears, ₦100,000 paid: the second term is owed
+    expect(owed([term('t1'), term('t2')], 10_000_000)).toEqual({ t2: 10_000_000 })
+  })
+
+  it('reaches back to earlier terms when more than the newest term is owed', () => {
+    expect(owed([term('t1'), term('t2'), term('t3')], 25_000_000)).toEqual({ t3: 10_000_000, t2: 10_000_000, t1: 5_000_000 })
+  })
+
+  it('owes part of a term when part of it is paid', () => {
+    expect(owed([term('t1')], 4_500_000)).toEqual({ t1: 4_500_000 })
+  })
+
+  it('uses each term\'s own charges after discounts (a term with nothing to pay owes nothing)', () => {
+    expect(owed([term('t1', 8_000_000), term('t2', 0), term('t3', 6_000_000)], 9_000_000)).toEqual({ t3: 6_000_000, t1: 3_000_000 })
+  })
+
+  it('keeps debt older than the first bill on the oldest term', () => {
+    expect(owed([term('t1'), term('t2')], 23_000_000)).toEqual({ t2: 10_000_000, t1: 13_000_000 })
+  })
+
+  it('owes nothing without bills', () => {
+    expect(owed([], 1_000)).toEqual({})
   })
 })

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import ChildCard from '~/components/dashboard/ChildCard.vue'
 
-type Child = { attendanceRate: number | null, absentDays: number, balanceKobo: number | null, latestReportCard: { termId: string, term: string } | null }
+type Child = { attendanceRate: number | null, absentDays: number, balanceKobo: number | null, latestReportCard: { termId: string, term: string, withheld?: boolean, owedKobo?: number | null } | null }
 
 const base = { id: 's1', name: 'Somto Eze', admissionNumber: 'GFA/2026/0002', classLabel: 'Primary 3A', photoUrl: null, attendanceRate: null, absentDays: 0, balanceKobo: null, latestReportCard: null }
 const mount = (child: Partial<Child>) => mountSuspended(ChildCard, { props: { child: { ...base, ...child } as never } })
@@ -34,5 +34,11 @@ describe('ChildCard', () => {
     const link = wrapper.get('[data-testid="my-child-report-GFA/2026/0002"]')
     expect(link.attributes('href')).toBe('/students/s1/report-card?term=t1')
     expect(link.text()).toBe('Report card · First Term 2026/2027')
+  })
+
+  it('says the latest report card is withheld until fees are paid, without a link (Phase 10d)', async () => {
+    const wrapper = await mount({ latestReportCard: { termId: 't1', term: 'First Term 2026/2027', withheld: true, owedKobo: 3_650_000 } })
+    expect(wrapper.find('[data-testid="my-child-report-GFA/2026/0002"]').exists()).toBe(false)
+    expect(text(wrapper, 'my-child-report-withheld')).toBe('Report card · First Term 2026/2027: withheld until fees are paid')
   })
 })

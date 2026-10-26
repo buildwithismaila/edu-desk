@@ -9,6 +9,7 @@ import { studentAttendanceSummary } from './attendance'
 import { billDetails, termLabel } from './fees'
 import { listMyChildren, studentPhotoUrl } from './guardians'
 import { getPayment, termBalanceOf } from './payments'
+import { withheldTerms } from './result-holds'
 import type { ReportCard } from './results'
 import { resolveTerm } from './terms'
 
@@ -60,12 +61,14 @@ export async function myChildren(db: Db, school: SchoolRef, parent: Parent) {
   return Promise.all(children.map(async (child) => {
     const attendance = currentTerm ? await studentAttendanceSummary(db, school, child.id, currentTerm.id) : null
     const [latest] = published.filter(p => p.studentId === child.id).sort(newestFirst)
+    const owed = latest ? (await withheldTerms(db, school, child.id)).get(latest.id) : undefined
     return {
       ...child,
       attendanceRate: attendance?.rate ?? null,
       absentDays: attendance?.absent ?? 0,
       balanceKobo: balances.get(child.id) ?? null,
-      latestReportCard: latest ? { termId: latest.id, term: termLabel(latest) } : null,
+      // Withheld until that term's fees are paid (Phase 10d): the parent sees what's owed instead
+      latestReportCard: latest ? { termId: latest.id, term: termLabel(latest), withheld: owed !== undefined, owedKobo: owed ?? null } : null,
     }
   }))
 }
@@ -105,8 +108,12 @@ export async function childOverview(db: Db, school: SchoolRef, child: Child) {
   }
 }
 
-/** The child's published report cards, newest first (positions only where the card shows them). */
+/**
+ * The child's published report cards, newest first (positions only where the card shows them). A term withheld
+ * until its fees are paid (Phase 10d) shows what's owed instead of the results.
+ */
 export async function childResults(db: Db, school: SchoolRef, child: Child) {
+  const withheld = await withheldTerms(db, school, child.id)
   const rows = await db.select({ id: terms.id, number: terms.number, sessionName: academicSessions.name, report: publishedResults.report, publishedAt: publishedResults.createdAt })
     .from(publishedResults)
     .innerJoin(terms, eq(publishedResults.termId, terms.id))
@@ -114,13 +121,17 @@ export async function childResults(db: Db, school: SchoolRef, child: Child) {
     .where(whereSchool(publishedResults, school, eq(publishedResults.studentId, child.id)))
   return rows.sort(newestFirst).map(({ report, ...row }) => {
     const { summary } = report as ReportCard
+    const owedKobo = withheld.get(row.id) ?? null
+    const shown = owedKobo === null
     return {
       termId: row.id,
       term: termLabel(row),
       publishedAt: row.publishedAt,
-      average: summary.average,
-      position: summary.showPositions ? summary.position : null,
-      numberInClass: summary.showPositions ? summary.numberInClass : null,
+      withheld: !shown,
+      owedKobo,
+      average: shown ? summary.average : null,
+      position: shown && summary.showPositions ? summary.position : null,
+      numberInClass: shown && summary.showPositions ? summary.numberInClass : null,
     }
   })
 }

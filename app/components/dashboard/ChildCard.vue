@@ -66,8 +66,16 @@ const absent = computed(() => `absent ${props.child.absentDays} ${props.child.ab
         </dd>
       </div>
     </dl>
+    <!-- Withheld until that term's fees are paid (Phase 10d) -->
+    <p
+      v-if="child.latestReportCard?.withheld"
+      :data-testid="`my-child-report-withheld-${child.admissionNumber}`"
+      class="mt-2 flex items-center gap-1 text-sm text-warning"
+    >
+      <UIcon name="i-lucide-lock" />Report card · {{ child.latestReportCard.term }}: withheld until fees are paid
+    </p>
     <ULink
-      v-if="child.latestReportCard"
+      v-else-if="child.latestReportCard"
       :to="`/students/${child.id}/report-card?term=${child.latestReportCard.termId}`"
       :data-testid="`my-child-report-${child.admissionNumber}`"
       class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary"

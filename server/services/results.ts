@@ -43,6 +43,7 @@ import { listAssessmentComponents, listBands } from './grading'
 import { studentPhotoUrl } from './guardians'
 import { armRoster, findArm } from './scores'
 import { resolveTerm } from './terms'
+import { withheldError, withheldTerms } from './result-holds'
 
 type SchoolRef = { id: string }
 type Viewer = { id: string, role: Role }
@@ -266,6 +267,8 @@ export async function getStudentReportCard(db: Db, school: SchoolRef, viewer: Vi
     .where(whereSchool(publishedResults, school, eq(publishedResults.termId, term.id), eq(publishedResults.studentId, studentId)))
   if (viewer.role === 'parent') {
     if (!published) throw notFound('Report card not found')
+    // Fees for the term still owed while the school withholds results (Phase 10d)
+    if ((await withheldTerms(db, school, studentId)).has(term.id)) throw withheldError()
     return published.report as ReportCard
   }
   const [enrolment] = await db.select({ armId: studentEnrolments.classArmId }).from(studentEnrolments)

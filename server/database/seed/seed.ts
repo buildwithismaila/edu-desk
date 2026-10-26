@@ -37,6 +37,8 @@ const demoSchools: NewSchool[] = [
       { bankName: 'Zenith Bank', accountName: 'Greenfield Academy School Fees', accountNumber: '1012345678' },
       { bankName: 'Guaranty Trust Bank', accountName: 'Greenfield Academy', accountNumber: '0123456789' },
     ],
+    // Phase 10d: Somto's Primary 3A result is withheld until the fees are paid (record the payment in a demo)
+    withholdResultsUntilPaid: true,
   },
   {
     slug: 'sunrise',
@@ -247,6 +249,7 @@ export async function seed(db: Db) {
         phone: sql`excluded.phone`,
         email: sql`excluded.email`,
         bankAccounts: sql`excluded.bank_accounts`,
+        withholdResultsUntilPaid: sql`excluded.withhold_results_until_paid`,
         updatedAt: sql`now()`,
       },
     })
