@@ -49,6 +49,9 @@ async function recordPayment() {
   if (!paymentId) return
   await refresh()
   toast.add({ title: 'Payment recorded', color: 'success', icon: 'i-lucide-circle-check' })
+  // Open the receipt tab only once the dialog has finished closing: in a background tab its fade-out can stall
+  // and leave the page covered (at most a second's wait)
+  await until(() => overlay.overlays.some(o => o.id === paymentDialog.id)).not.toBeTruthy({ timeout: 1000 })
   await navigateTo(`/fees/payments/${paymentId}/receipt`, { open: { target: '_blank' } })
 }
 
@@ -121,6 +124,12 @@ const openReceipt = (paymentId: string) => navigateTo(`/fees/payments/${paymentI
         </div>
         <FeesTermSelect v-model="termId" />
       </div>
+
+      <FeesResultHolds
+        v-if="canEdit"
+        :student-id="String(route.params.id)"
+        :revision="fees"
+      />
 
       <UTabs
         v-model="tab"
