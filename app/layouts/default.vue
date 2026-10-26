@@ -50,6 +50,10 @@ if (import.meta.client) {
             <LayoutCurrentTerm />
           </template>
         </UDashboardNavbar>
+        <!-- Client only: the server can't know whether the phone is online -->
+        <ClientOnly>
+          <LayoutOfflineBanner />
+        </ClientOnly>
       </template>
 
       <template #body>

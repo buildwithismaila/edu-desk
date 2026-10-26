@@ -95,7 +95,7 @@ const columns: TableColumn<Row>[] = [
           data-testid="summary-heading"
           class="text-sm text-muted"
         >
-          {{ summary.arm.label }} · {{ summary.term.sessionName }} {{ TERM_LABELS[summary.term.number] }} · {{ summary.registers }} {{ summary.registers === 1 ? 'register' : 'registers' }} taken
+          {{ summary.arm.label }} · {{ summary.term.sessionName }} {{ TERM_LABELS[summary.term.number] }} · {{ summary.registers }} {{ summary.registers === 1 ? 'register' : 'registers' }} taken{{ summary.sentLate ? ` (${summary.sentLate} sent late, offline)` : '' }}
         </p>
         <UTable
           data-testid="summary-table"

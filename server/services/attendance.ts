@@ -242,13 +242,15 @@ export async function armAttendanceSummary(db: Db, school: SchoolRef, viewer: Vi
 
   const students = await roster(db, school, term.sessionId, arm.id)
   const marks = await termMarks(db, school, term.id, students.map(s => s.id))
-  const [{ registers } = { registers: 0 }] = await db.select({ registers: count() }).from(attendanceRegisters)
+  // count(column) skips nulls: registers taken offline that arrived after their day
+  const [{ registers, sentLate } = { registers: 0, sentLate: 0 }] = await db.select({ registers: count(), sentLate: count(attendanceRegisters.sentLateAt) }).from(attendanceRegisters)
     .where(whereSchool(attendanceRegisters, school, eq(attendanceRegisters.termId, term.id), eq(attendanceRegisters.classArmId, arm.id)))
 
   return {
     term,
     arm,
     registers,
+    sentLate,
     students: students.map(({ photoUrl: _photo, ...s }) => ({ ...s, ...summariseAttendance(marks.filter(m => m.studentId === s.id).map(m => m.status)) })),
   }
 }

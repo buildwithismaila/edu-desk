@@ -131,6 +131,14 @@ describe('the version check (the school\'s copy wins)', () => {
     const body = await (await f.get(f.cookies.admin, '2026-10-10')).json()
     expect(body.register).toMatchObject({ version: 1, sentLateAt: expect.any(String) })
   })
+
+  it('counts registers sent late in the class\'s term summary', async () => {
+    const f = await setup()
+    await f.put(f.cookies.teacher, offlineBody(f, '2026-10-10'))
+    await f.put(f.cookies.teacher, offlineBody(f, TODAY))
+    const res = await app.request(`/api/attendance/summary?classArmId=${f.arm.id}`, { host: hostOf(f.school.slug), cookie: f.cookies.admin })
+    expect(await res.json()).toMatchObject({ registers: 2, sentLate: 1 })
+  })
 })
 
 describe('when the class changed while the phone was offline', () => {

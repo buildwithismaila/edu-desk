@@ -5,9 +5,20 @@ import { ROLE_LABELS } from '#shared/constants/roles'
 defineProps<{ collapsed?: boolean }>()
 
 const { user, fetch: refreshSession } = useUserSession()
+const confirm = useConfirmDialog()
+const offline = useOfflineAttendance()
 
+// Everything saved on the phone is wiped at logout (shared phones), so warn about registers not sent yet
 async function logout() {
+  await offline.refreshOutbox()
+  const unsent = offline.outbox.value.filter(e => e.state !== 'sent').length
+  if (unsent && !await confirm({
+    title: `${unsent} register${unsent === 1 ? '' : 's'} not sent yet`,
+    description: 'Logging out deletes everything Edu Desk saved on this phone, including registers that haven\'t been sent. Go online and send them first, or log out anyway.',
+    confirmLabel: 'Log out anyway',
+  })) return
   await $fetch('/api/auth/logout', { method: 'POST' })
+  await offline.wipe()
   await refreshSession()
   await navigateTo('/login')
 }
